@@ -2,7 +2,16 @@
 
 Simple EventStore Manager allows you to store your Domain Events and easlity retrieve them.
 
-## Use Interface
+## Drivers
+
+Avaliable drivers:
+
+* `in-memory` 
+* `mongo` (default driver) 
+* `pdo` 
+* `redis` 
+
+## Basic Usage
 
 Your Events MUST be an instance `SimpleEventStoreManager\Domain\Model\Contracts\Event`.
 
@@ -20,18 +29,7 @@ $myEvent = new Event(
 
 ```
 
-## Drivers
-
-Avaliable drivers:
-
-* `in-memory` 
-* `mongo` (default driver) 
-* `pdo` 
-* `redis` 
-
-## Basic Usage
-
-To store your events do the following:
+To use StreamManager:
 
 ```php
 use SimpleEventStoreManager\Application\StreamManager;
@@ -45,8 +43,10 @@ $myEvent = new Event(
     $body
 );
 
-// store an Event
+// instance of StreamManager
 $streamManager = new StreamManager('pdo', $params);
+
+// store an Event
 $streamManager->eventStore()->store($myEvent);
 
 // restore an Event
@@ -63,7 +63,7 @@ $streamManager->eventStore()->eventsInRangeDate();
 
 ## Simple API Example
 
-In [examples folder](#) you will find a simple example of an API implementation.
+In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tree/master/examples) you will find a simple example of an API implementation.
 
 ## Support
 
