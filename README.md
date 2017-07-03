@@ -18,23 +18,17 @@ Avaliable drivers:
 
 ## Basic Usage
 
-Your Events MUST be an instance `SimpleEventStoreManager\Domain\Model\Contracts\Event`.
-
-Example:
+To use StreamManager:
 
 ```php
-use SimpleEventStoreManager\Domain\Model\Contracts\EventId;
-use SimpleEventStoreManager\Domain\Model\Contracts\Event;
-
-$myEvent = new Event(
-    new EventId(),
-    $name,
-    $body
-);
+// $params connection array
+$streamManager = new StreamManager('pdo', $pdo_params);
 
 ```
 
-To use StreamManager:
+Please note that your events MUST be an instance `SimpleEventStoreManager\Domain\Model\Contracts\Event`.
+
+Consider this full example:
 
 ```php
 use SimpleEventStoreManager\Application\StreamManager;
@@ -47,9 +41,6 @@ $myEvent = new Event(
     $name,
     $body
 );
-
-// instance of StreamManager
-$streamManager = new StreamManager('pdo', $params);
 
 // store an Event
 $streamManager->eventStore()->store($myEvent);
