@@ -1,5 +1,10 @@
 # Simple EventStore Manager
 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/5bf086af-e45e-48f6-98dd-b7d5ea074130/mini.png)](https://insight.sensiolabs.com/projects/5bf086af-e45e-48f6-98dd-b7d5ea074130)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ad9fb8b8c1304a149a8507926a03d44b)](https://www.codacy.com/app/mauretto78/simple-event-store-manager?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mauretto78/simple-event-store-manager&amp;utm_campaign=Badge_Grade)
+[![license](https://img.shields.io/github/license/mauretto78/simple-event-store-manager.svg)]()
+[![Packagist](https://img.shields.io/packagist/v/mauretto78/simple-event-store-manager.svg)]()
+
 Simple EventStore Manager allows you to store your Domain Events and easlity retrieve them.
 
 ## Drivers
