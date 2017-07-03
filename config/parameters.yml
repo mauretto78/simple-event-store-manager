@@ -1,0 +1,23 @@
+mongo:
+  host: 'localhost'
+  username: ~
+  password: ~
+  database: 'eventstore_demo'
+  port: '27017'
+
+pdo:
+  dns: 'mysql'
+  host: '127.0.0.1'
+  username: 'root'
+  password: '@Mauretto78'
+  database: 'eventstore_demo'
+  port: '3306'
+  options: ~
+
+redis:
+  database: 15
+  scheme: 'tcp'
+  host: '127.0.0.1'
+  port: '6379'
+  options:
+    profile: '3.2'
