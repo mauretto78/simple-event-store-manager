@@ -21,6 +21,7 @@ Avaliable drivers:
 To use StreamManager:
 
 ```php
+// $driver driver
 // $params connection array
 $streamManager = new StreamManager('pdo', $pdo_params);
 
