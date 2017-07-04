@@ -27,33 +27,37 @@ $streamManager = new StreamManager('pdo', $pdo_params);
 
 ```
 
-Please note that your events MUST be an instance `SimpleEventStoreManager\Domain\Model\Contracts\Event`.
+Please note that your events MUST be an instance `SimpleEventStoreManager\Domain\Model\Event`.
 
 Consider this full example:
 
 ```php
 use SimpleEventStoreManager\Application\StreamManager;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventId;
-use SimpleEventStoreManager\Domain\Model\Contracts\Event;
+use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Domain\Model\Event;
 
 $myEventId = new EventId();
 $myEvent = new Event(
     $myEventId,
-    $name,
-    $body
+    'Fully\\Qualified\\Event\\Name',
+    [
+        'key' => 'value',
+        'key2' => 'value2',
+        'key3' => 'value3',
+    ]
 );
 
-// store an Event
+// store an event
 $streamManager->eventStore()->store($myEvent);
 
-// restore an Event
+// restore an event
 $streamManager->eventStore()->restore($myEventId);
 
-// get Events count
+// get events count
 $streamManager->eventStore()->eventsCount();
 
-// retrive Event Stream
-// you can pass a $from and $to dates
+// retrive event stream in a date range
+// if no dates are passed, all events are returned
 $streamManager->eventStore()->eventsInRangeDate();
 
 ```
