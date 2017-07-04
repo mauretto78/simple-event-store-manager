@@ -17,6 +17,7 @@ global:
 
 before_install:
   - echo "extension=mongodb.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('@Mauretto78') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
 
 before_script:
   - cp config/parameters.dist.yml config/parameters.yml
