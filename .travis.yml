@@ -18,11 +18,11 @@ global:
 before_install:
   - if [[ $TRAVIS_PHP_VERSION = "5.6" ]]; then echo yes | pecl install mongodb; fi
   - echo "extension=mongodb.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('@Mauretto78') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
-  - mysql -e 'CREATE DATABASE eventstore_demo;'
+  - echo "USE mysql;\nUPDATE user SET password=PASSWORD('travis') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
+  - mysql -e 'CREATE DATABASE travis;'
 
 before_script:
-  - cp config/parameters.dist.yml config/parameters.yml
+  - cp config/parameters.travis.yml config/parameters.yml
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
 
