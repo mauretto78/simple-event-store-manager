@@ -16,7 +16,6 @@ global:
   - REPORT_EXIT_STATUS=1
 
 before_install:
-  - pecl install mongo
   - echo "extension=mongodb.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
 
 before_script:
