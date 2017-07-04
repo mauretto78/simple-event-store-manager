@@ -48,6 +48,7 @@ class EventStoreTest extends BaseTestCase
         /** @var EventStoreInterface $eventStore */
         foreach ($this->eventStores as $eventStore) {
             $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+
             $eventId = new EventId();
             $name = 'Doman\\Model\\SomeEvent';
             $body = [
@@ -62,19 +63,32 @@ class EventStoreTest extends BaseTestCase
                 $body
             );
 
+            $eventId2 = new EventId();
+            $name2 = 'Doman\\Model\\SomeEvent2';
+            $body2 = [
+                'id' => 2,
+                'title' => 'Lorem Ipsum',
+                'text' => 'Dolor lorem ipso facto dixit'
+            ];
+
+            $event2 = new Event(
+                $eventId2,
+                $name2,
+                $body2
+            );
+
             $eventStore->store($event);
+            $eventStore->store($event2);
             $storedEvent = $eventStore->restore($eventId);
-
-            $this->assertEquals((string) $eventId, $storedEvent->id);
-            $this->assertEquals($name, $storedEvent->name);
-            $this->assertEquals($body, unserialize($storedEvent->body));
-            $this->assertEquals($now, $storedEvent->occurred_on);
-
             $events = $eventStore->eventsInRangeDate(
                 new \DateTimeImmutable('yesterday'),
                 new \DateTimeImmutable('now')
             );
 
+            $this->assertEquals((string) $eventId, $storedEvent->id);
+            $this->assertEquals($name, $storedEvent->name);
+            $this->assertEquals($body, unserialize($storedEvent->body));
+            $this->assertEquals($now, $storedEvent->occurred_on);
             $this->assertGreaterThan(0, $eventStore->eventsCount());
             $this->assertGreaterThan(0, count($events));
         }
