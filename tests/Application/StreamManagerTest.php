@@ -15,7 +15,7 @@ use SimpleEventStoreManager\Tests\BaseTestCase;
 class StreamManagerTest extends BaseTestCase
 {
     /**
-     * @expectedException SimpleEventStoreManager\Application\Exception\NotSupportedDriverException
+     * @expectedException \SimpleEventStoreManager\Application\Exception\NotSupportedDriverException
      * @expectedExceptionMessage not-allowed-driver is not a supported driver.
      * @test
      */
