@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Application\Exception;
+namespace SimpleEventStoreManager\Application\Exceptions;
 
 class NotSupportedDriverException extends \Exception
 {

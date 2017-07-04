@@ -10,7 +10,7 @@
 
 namespace SimpleEventStoreManager\Application;
 
-use SimpleEventStoreManager\Application\Exception\NotSupportedDriverException;
+use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 
 class StreamManager

@@ -16,7 +16,7 @@ class StreamManagerTest extends BaseTestCase
 {
     /**
      * @test
-     * @expectedException \SimpleEventStoreManager\Application\Exception\NotSupportedDriverException
+     * @expectedException \SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException
      * @expectedExceptionMessage not-allowed-driver is not a supported driver.
      */
     public function it_should_throw_NotSupportedDriverException_if_not_supported_driver_is_passed()
