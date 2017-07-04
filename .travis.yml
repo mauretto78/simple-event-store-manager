@@ -16,7 +16,7 @@ global:
   - REPORT_EXIT_STATUS=1
 
 before_install:
-  - echo "extension=mongodb.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
+  - echo "extension=mongo.so" >> `php --ini | grep "Loaded Configuration" | sed -e "s|.*:\s*||"`
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('@Mauretto78') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - mysql -e 'CREATE DATABASE eventstore_demo;'
 
