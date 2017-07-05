@@ -6,7 +6,7 @@ mongo:
   port: '27017'
 
 pdo:
-  dns: 'mysql'
+  driver: 'mysql'
   host: '127.0.0.1'
   username: 'root'
   password: 'travis'
