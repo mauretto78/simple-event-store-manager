@@ -54,7 +54,7 @@ class PDODriver implements DriverInterface
     {
         $allowedConfigKeys = [
             'database',
-            'dns',
+            'driver',
             'host',
             'options',
             'password',
@@ -87,7 +87,7 @@ class PDODriver implements DriverInterface
      */
     public function connect()
     {
-        $dsn = $this->config['dns'].':dbname='.$this->config['database'].';host='.$this->config['host'];
+        $dsn = $this->config['driver'].':dbname='.$this->config['database'].';host='.$this->config['host'];
         $this->instance = new \PDO($dsn, $this->config['username'], $this->config['password']);
 
         return true;

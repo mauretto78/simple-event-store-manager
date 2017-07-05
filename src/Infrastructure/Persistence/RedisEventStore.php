@@ -85,8 +85,8 @@ class RedisEventStore implements EventStoreInterface
     public function eventsInRangeDate(\DateTimeImmutable $from = null, \DateTimeImmutable $to = null)
     {
         $events = [];
+        $indexArray = ($from && $to) ? $this->client->zrangebyscore('eventsMt', $from->format('U'), $to->format('U')) : $this->client->zrange('eventsMt', 0, -1);
 
-        $indexArray = $this->client->zrangebyscore('eventsMt', $from->format('U'), $to->format('U'));
         foreach ($indexArray as $index) {
             $events[$index] = (object) $this->client->hgetall($index);
         }
@@ -94,3 +94,6 @@ class RedisEventStore implements EventStoreInterface
         return $events;
     }
 }
+
+
+

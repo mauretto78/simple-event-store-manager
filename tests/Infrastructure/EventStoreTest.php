@@ -80,9 +80,12 @@ class EventStoreTest extends BaseTestCase
             $eventStore->store($event);
             $eventStore->store($event2);
             $storedEvent = $eventStore->restore($eventId);
+
+            sleep(1);
+
             $events = $eventStore->eventsInRangeDate(
                 new \DateTimeImmutable('yesterday'),
-                new \DateTimeImmutable('now')
+                new \DateTimeImmutable()
             );
 
             $this->assertEquals((string) $eventId, $storedEvent->id);
