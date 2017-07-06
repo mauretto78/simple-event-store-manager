@@ -63,9 +63,34 @@ $streamManager->eventStore()->eventsInRangeDate();
 
 ```
 
-## Simple API Example
+## API Implementation
 
-In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tree/master/examples) you will find a simple example of an API implementation.
+In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tree/master/examples) you will find a simple example of an API implementation. Here is the code:
+
+```php
+use JMS\Serializer\SerializerBuilder;
+use SimpleEventStoreManager\Application\EventsQuery;
+use SimpleEventStoreManager\Application\StreamManager;
+use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
+
+require __DIR__.'/../app/bootstrap.php';
+
+// instantiate $eventsQuery
+$streamManager = new StreamManager('mongo', $config['mongo']);
+$eventsQuery = new EventsQuery(
+    $streamManager->eventStore(),
+    new JsonEventDataTransformer(
+        SerializerBuilder::create()->build()
+    )
+);
+
+// send Response
+$page = (isset($_GET['pag'])) ? (int) $_GET['pag'] : 1;
+$maxPerPage = 10;
+$response = $eventsQuery->query($page, $maxPerPage);
+$response->send();
+
+```
 
 ## Support
 
