@@ -14,26 +14,39 @@ use MongoDB\Client as MongoClient;
 use MongoDB\Database;
 use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
+use SimpleEventStoreManager\Domain\Model\Event;
+use SimpleEventStoreManager\Domain\Model\EventId;
 
 abstract class BaseTestCase extends TestCase
 {
     /**
      * @var null|\PDO
      */
-    static private $pdo = null;
+    private static $pdo = null;
 
     /**
      * @var null|Database
      */
-    static private $mongo = null;
+    private static $mongo = null;
 
     /**
      * @var null|Redis
      */
-    static private $redis = null;
+    private static $redis = null;
 
+    /**
+     * @var array
+     */
     protected $mongo_parameters;
+
+    /**
+     * @var array
+     */
     protected $pdo_parameters;
+
+    /**
+     * @var array
+     */
     protected $redis_parameters;
 
     /**
@@ -51,6 +64,9 @@ abstract class BaseTestCase extends TestCase
         $this->createMySQLSchema();
     }
 
+    /**
+     * createMySQLSchema
+     */
     private function createMySQLSchema()
     {
         $sql = 'CREATE TABLE IF NOT EXISTS `events` (
@@ -64,6 +80,9 @@ abstract class BaseTestCase extends TestCase
         self::$pdo->query($sql);
     }
 
+    /**
+     * createConnections
+     */
     final public function createConnections()
     {
         // PDO connection
@@ -75,7 +94,7 @@ abstract class BaseTestCase extends TestCase
 
                 self::$pdo = new \PDO($dsn, $username, $password);
             } catch (\PDOException $e) {
-                die( 'PDO Error: ' . $e->getMessage() );
+                die('PDO Error: ' . $e->getMessage());
             }
         }
 
@@ -88,7 +107,7 @@ abstract class BaseTestCase extends TestCase
 
                 self::$mongo = (new MongoClient($connectionString))->selectDatabase($this->mongo_parameters['database']);
             } catch (\Exception $e) {
-                die( 'MongoDb Error: ' . $e->getMessage() );
+                die('MongoDb Error: ' . $e->getMessage());
             }
         }
 

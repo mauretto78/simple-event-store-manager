@@ -38,4 +38,11 @@ interface EventStoreInterface
      * @return mixed
      */
     public function eventsInRangeDate(\DateTimeImmutable $from = null, \DateTimeImmutable $to = null);
+
+    /**
+     * @param int $page
+     * @param int $maxPerPage
+     * @return mixed
+     */
+    public function all($page = 1, $maxPerPage = 25);
 }

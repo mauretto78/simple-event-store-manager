@@ -16,7 +16,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Domain\Model\Event;
 
-class RedisEventStore implements EventStoreInterface
+class RedisEventStore extends AbstractEventStore
 {
     /**
      * @var Client
@@ -94,6 +94,3 @@ class RedisEventStore implements EventStoreInterface
         return $events;
     }
 }
-
-
-

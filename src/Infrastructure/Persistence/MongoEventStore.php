@@ -16,7 +16,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Domain\Model\Event;
 
-class MongoEventStore implements EventStoreInterface
+class MongoEventStore extends AbstractEventStore
 {
     /**
      * @var Database

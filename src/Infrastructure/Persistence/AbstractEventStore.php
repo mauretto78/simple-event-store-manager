@@ -13,51 +13,23 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
-use SimpleEventStoreManager\Domain\Model\Event;
 
-class InMemoryEventStore extends AbstractEventStore
+abstract class AbstractEventStore implements EventStoreInterface
 {
     /**
-     * @var array
-     */
-    private $events;
-
-    /**
-     * InMemoryEventStore constructor.
-     */
-    public function __construct()
-    {
-        $this->events = [];
-    }
-
-    /**
      * @param EventInterface $event
-     *
      * @return mixed
      */
     public function store(EventInterface $event)
     {
-        $eventId = (string) $event->id();
-        $eventName = $event->name();
-        $eventBody = $event->body();
-        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
-
-        $this->events[$eventId] = (object) [
-            'id' => $eventId,
-            'name' => $eventName,
-            'body' => $eventBody,
-            'occurred_on' => $eventOccurredOn,
-        ];
     }
 
     /**
      * @param EventId $eventId
-     *
      * @return mixed
      */
     public function restore(EventId $eventId)
     {
-        return (isset($this->events[$eventId->id()])) ? $this->events[$eventId->id()] : null;
     }
 
     /**
@@ -65,17 +37,26 @@ class InMemoryEventStore extends AbstractEventStore
      */
     public function eventsCount()
     {
-        return count($this->events);
     }
 
     /**
      * @param \DateTimeImmutable|null $from
      * @param \DateTimeImmutable|null $to
-     *
-     * @return array
+     * @return mixed
      */
     public function eventsInRangeDate(\DateTimeImmutable $from = null, \DateTimeImmutable $to = null)
     {
-        return $this->events;
+    }
+
+    /**
+     * @param int $page
+     * @param int $maxPerPage
+     * @return mixed
+     */
+    public function all($page = 1, $maxPerPage = 25)
+    {
+        $events = $this->eventsInRangeDate();
+
+        return array_slice($events, ($page - 1) * $maxPerPage, $maxPerPage);
     }
 }
