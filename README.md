@@ -1,6 +1,6 @@
 # Simple EventStore Manager
 
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/5bf086af-e45e-48f6-98dd-b7d5ea074130/mini.png)](https://insight.sensiolabs.com/projects/5bf086af-e45e-48f6-98dd-b7d5ea074130)
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/3d6db2b3-db42-4155-97ed-2c28cec1c998/mini.png)](https://insight.sensiolabs.com/projects/3d6db2b3-db42-4155-97ed-2c28cec1c998)
 [![Build Status](https://travis-ci.org/mauretto78/simple-event-store-manager.svg?branch=master)](https://travis-ci.org/mauretto78/simple-event-store-manager)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ad9fb8b8c1304a149a8507926a03d44b)](https://www.codacy.com/app/mauretto78/simple-event-store-manager?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mauretto78/simple-event-store-manager&amp;utm_campaign=Badge_Grade)
 [![license](https://img.shields.io/github/license/mauretto78/simple-event-store-manager.svg)]()
@@ -19,12 +19,14 @@ Avaliable drivers:
 
 ## Basic Usage
 
-To use StreamManager:
+To use `EventsManager`:
 
 ```php
+use SimpleEventStoreManager\Application\EventsManager;
+
 // $driver driver
 // $params connection array
-$streamManager = new StreamManager('pdo', $pdo_params);
+$eventsManager = new EventsManager('pdo', $pdo_params);
 
 ```
 
@@ -33,7 +35,7 @@ Please note that your events MUST be an instance `SimpleEventStoreManager\Domain
 Consider this full example:
 
 ```php
-use SimpleEventStoreManager\Application\StreamManager;
+use SimpleEventStoreManager\Application\EventsManager;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Domain\Model\Event;
 
@@ -49,17 +51,28 @@ $myEvent = new Event(
 );
 
 // store an event
-$streamManager->eventStore()->store($myEvent);
+$eventsManager->eventStore()->store($myEvent);
 
 // restore an event
-$streamManager->eventStore()->restore($myEventId);
+$eventsManager->eventStore()->restore($myEventId);
 
 // get events count
-$streamManager->eventStore()->eventsCount();
+$eventsManager->eventStore()->eventsCount();
 
-// retrive event stream in a date range
-// if no dates are passed, all events are returned
-$streamManager->eventStore()->eventsInRangeDate();
+```
+
+## Query Stored Events
+
+You can query events in a range of dates:
+
+```php
+
+// ..
+
+$eventsManager->eventStore()->eventsInRangeDate(
+    new \DateTimeImmutable('yesterday')
+    new \DateTimeImmutable('now')
+);
 
 ```
 
@@ -76,9 +89,9 @@ use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransfor
 require __DIR__.'/../app/bootstrap.php';
 
 // instantiate $eventsQuery
-$streamManager = new StreamManager('mongo', $config['mongo']);
+$eventManager = new StreamManager('mongo', $config['mongo']);
 $eventsQuery = new EventsQuery(
-    $streamManager->eventStore(),
+    $eventManager->eventStore(),
     new JsonEventDataTransformer(
         SerializerBuilder::create()->build()
     )

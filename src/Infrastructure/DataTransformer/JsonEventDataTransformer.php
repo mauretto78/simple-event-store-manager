@@ -10,6 +10,7 @@
 
 namespace SimpleEventStoreManager\Infrastructure\DataTransformer;
 
+use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -87,6 +88,10 @@ class JsonEventDataTransformer implements DataTransformerInterface
     private function convertEventsDataToArray($events)
     {
         return array_map(
+
+            /**
+             * @param object $event
+             */
             function ($event) {
                 return [
                     'id' => $event->id,

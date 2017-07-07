@@ -11,7 +11,7 @@
 use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventsQuery;
 
-use SimpleEventStoreManager\Application\StreamManager;
+use SimpleEventStoreManager\Application\EventsManager;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
@@ -25,7 +25,7 @@ class EventsQueryTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_json_response()
     {
-        $streamManager = new StreamManager('mongo', $this->mongo_parameters);
+        $streamManager = new EventsManager('mongo', $this->mongo_parameters);
         $eventStore = $streamManager->eventStore();
 
         // store events

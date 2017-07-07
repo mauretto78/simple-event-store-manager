@@ -10,15 +10,15 @@
 
 use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventsQuery;
-use SimpleEventStoreManager\Application\StreamManager;
+use SimpleEventStoreManager\Application\EventsManager;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
 
 require __DIR__.'/../app/bootstrap.php';
 
 // instantiate $eventsQuery
-$streamManager = new StreamManager('mongo', $config['mongo']);
+$eventsManager = new EventsManager('mongo', $config['mongo']);
 $eventsQuery = new EventsQuery(
-    $streamManager->eventStore(),
+    $eventsManager->eventStore(),
     new JsonEventDataTransformer(
         SerializerBuilder::create()->build()
     )
