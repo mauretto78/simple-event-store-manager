@@ -9,9 +9,9 @@
  */
 
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventsQuery;
+use SimpleEventStoreManager\Application\EventQuery;
 
-use SimpleEventStoreManager\Application\EventsManager;
+use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
@@ -19,14 +19,14 @@ use SimpleEventStoreManager\Tests\BaseTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EventsQueryTest extends BaseTestCase
+class EventQueryTest extends BaseTestCase
 {
     /**
      * @test
      */
     public function it_should_store_events_perform_queries_and_retrive_json_response()
     {
-        $streamManager = new EventsManager('mongo', $this->mongo_parameters);
+        $streamManager = new EventManager('mongo', $this->mongo_parameters);
         $eventStore = $streamManager->eventStore();
 
         // store events
@@ -62,7 +62,7 @@ class EventsQueryTest extends BaseTestCase
         $eventStore->store($event2);
 
         // query events
-        $eventsQuery = new EventsQuery(
+        $eventsQuery = new EventQuery(
             $streamManager->eventStore(),
             new JsonEventDataTransformer(
                 SerializerBuilder::create()->build(),

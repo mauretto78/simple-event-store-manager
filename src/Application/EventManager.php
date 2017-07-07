@@ -13,7 +13,7 @@ namespace SimpleEventStoreManager\Application;
 use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 
-class EventsManager
+class EventManager
 {
     /**
      * @var string

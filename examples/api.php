@@ -9,8 +9,8 @@
  */
 
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventsQuery;
-use SimpleEventStoreManager\Application\EventsManager;
+use SimpleEventStoreManager\Application\EventQuery;
+use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -19,8 +19,8 @@ require __DIR__.'/../app/bootstrap.php';
 $request = Request::createFromGlobals();
 
 // instantiate $eventsQuery
-$eventsManager = new EventsManager('mongo', $config['mongo']);
-$eventsQuery = new EventsQuery(
+$eventsManager = new EventManager('mongo', $config['mongo']);
+$eventsQuery = new EventQuery(
     $eventsManager->eventStore(),
     new JsonEventDataTransformer(
         SerializerBuilder::create()->build(),
