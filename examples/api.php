@@ -20,7 +20,8 @@ $eventsManager = new EventsManager('mongo', $config['mongo']);
 $eventsQuery = new EventsQuery(
     $eventsManager->eventStore(),
     new JsonEventDataTransformer(
-        SerializerBuilder::create()->build()
+        SerializerBuilder::create()->build(),
+        true
     )
 );
 

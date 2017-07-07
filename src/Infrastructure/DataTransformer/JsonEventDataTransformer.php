@@ -13,6 +13,7 @@ namespace SimpleEventStoreManager\Infrastructure\DataTransformer;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use JMS\Serializer\Serializer;
 
@@ -108,30 +109,31 @@ class JsonEventDataTransformer implements DataTransformerInterface
      */
     private function calculateLinks($currentPage, $numberOfPages)
     {
-        $root = $this->rootLink();
+        $baseUrl = $this->getBaseUrl();
         $prev = ($currentPage > 1) ? $currentPage - 1 : null;
         $next = ($currentPage < $numberOfPages) ? $currentPage + 1 : null;
 
         $separator = ($this->paginationLink) ? '/' : '?pag=';
 
         return [
-            'current' => $root.$separator.$currentPage,
-            'prev' => ($prev) ? $root.$separator.$prev : null,
-            'next' => ($next) ? $root.$separator.$next : null,
-            'last' => $root.$separator.$numberOfPages,
+            'current' => $baseUrl.$separator.$currentPage,
+            'prev' => ($prev) ? $baseUrl.$separator.$prev : null,
+            'next' => ($next) ? $baseUrl.$separator.$next : null,
+            'last' => $baseUrl.$separator.$numberOfPages,
         ];
     }
 
     /**
-     * rootLink
+     * @return string
      */
-    private function rootLink()
+    private function getBaseUrl()
     {
-        if (isset($_SERVER['HTTP_HOST'])) {
-            return (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] .parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $request = Request::createFromGlobals();
+        if ($request->getScheme()) {
+            return $request->getBaseUrl();
         }
 
-        return (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . 'localhost';
+        return 'http://localhost';
     }
 
     /**
