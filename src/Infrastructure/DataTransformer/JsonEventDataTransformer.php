@@ -88,7 +88,7 @@ class JsonEventDataTransformer implements DataTransformerInterface
     private function convertEventsDataToArray($events)
     {
         return array_map(
-            function (\stdClass $event) {
+            function ($event) {
                 return [
                     'id' => $event->id,
                     'name' => $event->name,
