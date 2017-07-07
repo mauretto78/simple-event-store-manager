@@ -66,7 +66,6 @@ $eventsManager->eventStore()->eventsCount();
 You can query events in a range of dates:
 
 ```php
-
 // ..
 
 $eventsManager->eventStore()->eventsInRangeDate(
@@ -78,7 +77,7 @@ $eventsManager->eventStore()->eventsInRangeDate(
 
 ## API Implementation
 
-In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tree/master/examples) you will find a simple example of an API implementation. Here is the code:
+In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tree/master/examples) you will find a simple example of an API implementation. Here is the full code:
 
 ```php
 use JMS\Serializer\SerializerBuilder;
@@ -88,7 +87,7 @@ use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransfor
 
 require __DIR__.'/../app/bootstrap.php';
 
-// instantiate $eventsQuery
+// instantiate EventsQuery
 $eventManager = new StreamManager('mongo', $config['mongo']);
 $eventsQuery = new EventsQuery(
     $eventManager->eventStore(),
