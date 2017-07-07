@@ -25,6 +25,11 @@ class JsonEventDataTransformer implements DataTransformerInterface
     private $serializer;
 
     /**
+     * @var Request
+     */
+    private $request;
+
+    /**
      * @var bool
      */
     private $paginationLink;
@@ -33,11 +38,13 @@ class JsonEventDataTransformer implements DataTransformerInterface
      * JsonEventDataTransformer constructor.
      *
      * @param Serializer $serializer
+     * @param Request $request
      * @param bool $paginationLink
      */
-    public function __construct(Serializer $serializer, $paginationLink = false)
+    public function __construct(Serializer $serializer, Request $request, $paginationLink = false)
     {
         $this->serializer = $serializer;
+        $this->request = $request;
         $this->paginationLink = $paginationLink;
     }
 
@@ -66,7 +73,7 @@ class JsonEventDataTransformer implements DataTransformerInterface
                     ],
                     'events' => $this->convertEventsDataToArray($events)
                 ], 'json'),
-                $this->getHttpStatusCode($pageCount),
+            $this->getHttpStatusCode($pageCount),
             [],
             true
         );
@@ -113,7 +120,7 @@ class JsonEventDataTransformer implements DataTransformerInterface
         $prev = ($currentPage > 1) ? $currentPage - 1 : null;
         $next = ($currentPage < $numberOfPages) ? $currentPage + 1 : null;
 
-        $separator = ($this->paginationLink) ? '/' : '?pag=';
+        $separator = ($this->paginationLink) ? '/' : '?page=';
 
         return [
             'current' => $baseUrl.$separator.$currentPage,
@@ -128,9 +135,10 @@ class JsonEventDataTransformer implements DataTransformerInterface
      */
     private function getBaseUrl()
     {
-        $request = Request::createFromGlobals();
-        if ($request->getScheme()) {
-            return $request->getBaseUrl();
+        if ($this->request->getScheme()) {
+            $url = (null !== $page = $this->request->attributes->get('page')) ? str_replace('/'.$page, '', $this->request->getUri()) : str_replace('/?'.$this->request->getQueryString(), '', $this->request->getUri());
+
+            return $url;
         }
 
         return 'http://localhost';

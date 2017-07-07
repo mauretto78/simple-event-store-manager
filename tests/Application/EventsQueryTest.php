@@ -16,6 +16,7 @@ use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
 use SimpleEventStoreManager\Tests\BaseTestCase;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class EventsQueryTest extends BaseTestCase
@@ -64,7 +65,8 @@ class EventsQueryTest extends BaseTestCase
         $eventsQuery = new EventsQuery(
             $streamManager->eventStore(),
             new JsonEventDataTransformer(
-                SerializerBuilder::create()->build()
+                SerializerBuilder::create()->build(),
+                Request::createFromGlobals()
             )
         );
 

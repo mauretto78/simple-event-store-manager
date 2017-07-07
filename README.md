@@ -82,22 +82,26 @@ In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tr
 ```php
 use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventsQuery;
-use SimpleEventStoreManager\Application\StreamManager;
+use SimpleEventStoreManager\Application\EventsManager;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
+use Symfony\Component\HttpFoundation\Request;
 
 require __DIR__.'/../app/bootstrap.php';
 
-// instantiate EventsQuery
-$eventManager = new StreamManager('mongo', $config['mongo']);
+$request = Request::createFromGlobals();
+
+// instantiate $eventsQuery
+$eventsManager = new EventsManager('mongo', $config['mongo']);
 $eventsQuery = new EventsQuery(
-    $eventManager->eventStore(),
+    $eventsManager->eventStore(),
     new JsonEventDataTransformer(
-        SerializerBuilder::create()->build()
+        SerializerBuilder::create()->build(),
+        $request
     )
 );
 
 // send Response
-$page = (isset($_GET['pag'])) ? (int) $_GET['pag'] : 1;
+$page = (null !== $page = $request->query->get('page')) ? $request->query->get('page') : 1;
 $maxPerPage = 10;
 $response = $eventsQuery->query($page, $maxPerPage);
 $response->send();

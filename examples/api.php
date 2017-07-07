@@ -12,8 +12,11 @@ use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventsQuery;
 use SimpleEventStoreManager\Application\EventsManager;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
+use Symfony\Component\HttpFoundation\Request;
 
 require __DIR__.'/../app/bootstrap.php';
+
+$request = Request::createFromGlobals();
 
 // instantiate $eventsQuery
 $eventsManager = new EventsManager('mongo', $config['mongo']);
@@ -21,12 +24,12 @@ $eventsQuery = new EventsQuery(
     $eventsManager->eventStore(),
     new JsonEventDataTransformer(
         SerializerBuilder::create()->build(),
-        true
+        $request
     )
 );
 
 // send Response
-$page = (isset($_GET['pag'])) ? (int) $_GET['pag'] : 1;
+$page = (null !== $page = $request->query->get('page')) ? $request->query->get('page') : 1;
 $maxPerPage = 10;
 $response = $eventsQuery->query($page, $maxPerPage);
 $response->send();
