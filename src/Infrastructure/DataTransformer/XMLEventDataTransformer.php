@@ -36,7 +36,7 @@ class XMLEventDataTransformer extends AbstractEventDataTransformer implements Da
             (int) $eventsCount,
             $this->calculateLinks($page, $numberOfPages)
         );
-        foreach ($events as $event){
+        foreach ($events as $event) {
             $eventsCollection->addEvent(new EventObjectRepresentation($event));
         }
 

@@ -36,8 +36,7 @@ class EventCollectionObjectRepresentation
         $totalPages,
         $totalCount,
         $links
-    )
-    {
+    ) {
         $this->page = $page;
         $this->recordsPerPage = $recordsPerPage;
         $this->totalPages = $totalPages;
