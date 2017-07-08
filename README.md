@@ -53,13 +53,13 @@ $myEvent = new Event(
 );
 
 // store an event
-$eventsManager->eventStore()->store($myEvent);
+$eventManager->eventStore()->store($myEvent);
 
 // restore an event
-$eventsManager->eventStore()->restore($myEventId);
+$eventManager->eventStore()->restore($myEventId);
 
 // get events count
-$eventsManager->eventStore()->eventsCount();
+$eventManager->eventStore()->eventsCount();
 
 ```
 
@@ -70,7 +70,7 @@ You can query stored events in a range of dates:
 ```php
 // ..
 
-$eventsManager->eventStore()->eventsInRangeDate(
+$eventManager->eventStore()->eventsInRangeDate(
     new \DateTimeImmutable('yesterday')
     new \DateTimeImmutable('now')
 );
