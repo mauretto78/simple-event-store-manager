@@ -8,15 +8,6 @@
 
 Simple EventStore Manager allows you to store your Domain Events and easlity retrieve them.
 
-## Drivers
-
-Avaliable drivers:
-
-* `in-memory` 
-* `mongo` (default driver) 
-* `pdo` 
-* `redis` 
-
 ## Basic Usage
 
 ### Instantiate EventManager
@@ -28,9 +19,16 @@ use SimpleEventStoreManager\Application\EventManager;
 
 // $driver driver
 // $params connection array
-$eventManager = new EventManager('pdo', $pdo_params);
+$eventManager = new EventManager('mongo', $params);
 
 ```
+
+Avaliable drivers:
+
+* `in-memory` 
+* `mongo` (default driver) 
+* `pdo` 
+* `redis` 
 
 ### Collecting Events
 
