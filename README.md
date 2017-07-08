@@ -19,16 +19,20 @@ Avaliable drivers:
 
 ## Basic Usage
 
-To use `EventsManager`:
+### Instantiate EventManager
+
+To use `EventManager`:
 
 ```php
-use SimpleEventStoreManager\Application\EventsManager;
+use SimpleEventStoreManager\Application\EventManager;
 
 // $driver driver
 // $params connection array
-$eventsManager = new EventsManager('pdo', $pdo_params);
+$eventManager = new EventManager('pdo', $pdo_params);
 
 ```
+
+### Collecting Events
 
 Please note that your events MUST be an instance `SimpleEventStoreManager\Domain\Model\Event`.
 
@@ -90,7 +94,7 @@ require __DIR__.'/../app/bootstrap.php';
 
 $request = Request::createFromGlobals();
 
-// instantiate $eventsQuery
+// instantiate $eventQuery
 $eventManager = new EventManager('mongo', $config['mongo']);
 $eventQuery = new EventQuery(
     $eventManager->eventStore(),
