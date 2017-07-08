@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\DataTransformer\Contracts;
+namespace SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts;
 
 use Symfony\Component\HttpFoundation\Response;
 

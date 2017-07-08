@@ -8,12 +8,12 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\DataTransformer;
+namespace SimpleEventStoreManager\Infrastructure\DataTransformers;
 
-use SimpleEventStoreManager\Infrastructure\DataTransformer\Contracts\DataTransformerInterface;
-use SimpleEventStoreManager\Infrastructure\DataTransformer\Representations\EventCollectionObjectRepresentation;
-use SimpleEventStoreManager\Infrastructure\DataTransformer\Representations\EventObjectRepresentation;
-use SimpleEventStoreManager\Infrastructure\DataTransformer\Representations\EventsObjectRepresentation;
+use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
+use SimpleEventStoreManager\Infrastructure\DataTransformers\Representations\EventCollectionObjectRepresentation;
+use SimpleEventStoreManager\Infrastructure\DataTransformers\Representations\EventObjectRepresentation;
+use SimpleEventStoreManager\Infrastructure\DataTransformers\Representations\EventsObjectRepresentation;
 use Symfony\Component\HttpFoundation\Response;
 
 class XMLEventDataTransformer extends AbstractEventDataTransformer implements DataTransformerInterface

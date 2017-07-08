@@ -11,7 +11,7 @@
 namespace SimpleEventStoreManager\Application;
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
-use SimpleEventStoreManager\Infrastructure\DataTransformer\Contracts\DataTransformerInterface;
+use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class EventQuery

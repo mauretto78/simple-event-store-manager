@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\DataTransformer\Representations;
+namespace SimpleEventStoreManager\Infrastructure\DataTransformers\Representations;
 
 class EventObjectRepresentation
 {
