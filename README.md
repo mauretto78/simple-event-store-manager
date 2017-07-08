@@ -37,7 +37,7 @@ Please note that your events MUST be an instance `SimpleEventStoreManager\Domain
 Consider this full example:
 
 ```php
-use SimpleEventStoreManager\Application\EventsManager;
+use SimpleEventStoreManager\Application\eventManager;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Domain\Model\Event;
 
@@ -84,7 +84,7 @@ In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tr
 ```php
 use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventsQuery;
-use SimpleEventStoreManager\Application\EventsManager;
+use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
 
