@@ -10,15 +10,43 @@
 
 namespace SimpleEventStoreManager\Infrastructure\DataTransformer;
 
-use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use JMS\Serializer\Serializer;
 
-class JsonEventDataTransformer extends AbstractEventDataTransformer implements DataTransformerInterface
+class JsonEventDataTransformer implements DataTransformerInterface
 {
+    /**
+     * @var Serializer
+     */
+    private $serializer;
+
+    /**
+     * @var Request
+     */
+    private $request;
+
+    /**
+     * @var bool
+     */
+    private $paginationLink;
+
+    /**
+     * JsonEventDataTransformer constructor.
+     *
+     * @param Serializer $serializer
+     * @param Request $request
+     * @param bool $paginationLink
+     */
+    public function __construct(Serializer $serializer, Request $request, $paginationLink = false)
+    {
+        $this->serializer = $serializer;
+        $this->request = $request;
+        $this->paginationLink = $paginationLink;
+    }
+
     /**
      * @param array $events
      * @param int $eventsCount
@@ -57,5 +85,75 @@ class JsonEventDataTransformer extends AbstractEventDataTransformer implements D
         }
 
         return $jsonResponse;
+    }
+
+    /**
+     * @param $events
+     *
+     * @return array
+     */
+    private function convertEventsDataToArray($events)
+    {
+        return array_map(
+            function ($event) {
+                return [
+                    'id' => $event->id,
+                    'name' => $event->name,
+                    'body' => unserialize($event->body),
+                    'occurred_on' => $event->occurred_on,
+                ];
+            },
+            $events
+        );
+    }
+
+    /**
+     * @param int $currentPage
+     * @param int $numberOfPages
+     *
+     * @return array
+     */
+    private function calculateLinks($currentPage, $numberOfPages)
+    {
+        $baseUrl = $this->getBaseUrl();
+        $prev = ($currentPage > 1) ? $currentPage - 1 : null;
+        $next = ($currentPage < $numberOfPages) ? $currentPage + 1 : null;
+
+        $separator = ($this->paginationLink) ? '/' : '?page=';
+
+        return [
+            'current' => $baseUrl.$separator.$currentPage,
+            'prev' => ($prev) ? $baseUrl.$separator.$prev : null,
+            'next' => ($next) ? $baseUrl.$separator.$next : null,
+            'last' => ($numberOfPages > 0) ? $baseUrl.$separator.$numberOfPages : null,
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    private function getBaseUrl()
+    {
+        if ($this->request->getScheme()) {
+            $url = (null !== $page = $this->request->attributes->get('page')) ? str_replace('/'.$page, '', $this->request->getUri()) : str_replace('/?'.$this->request->getQueryString(), '', $this->request->getUri());
+
+            return $url;
+        }
+
+        return 'http://localhost';
+    }
+
+    /**
+     * @param $pageCount
+     *
+     * @return int
+     */
+    private function getHttpStatusCode($pageCount)
+    {
+        if ($pageCount <= 0) {
+            return Response::HTTP_NOT_FOUND;
+        }
+
+        return Response::HTTP_OK;
     }
 }

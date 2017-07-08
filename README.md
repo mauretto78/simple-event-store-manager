@@ -108,6 +108,8 @@ $response->send();
 
 ```
 
+Please note you can choose JSON or XML format for data representation.
+
 ## Support
 
 If you found an issue or had an idea please refer [to this section](https://github.com/mauretto78/simple-event-store-manager/issues).
