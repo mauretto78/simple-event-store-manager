@@ -13,9 +13,8 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
-use SimpleEventStoreManager\Domain\Model\Event;
 
-class InMemoryEventStore extends AbstractEventStore
+class InMemoryEventStore extends AbstractEventStore implements EventStoreInterface
 {
     /**
      * @var array

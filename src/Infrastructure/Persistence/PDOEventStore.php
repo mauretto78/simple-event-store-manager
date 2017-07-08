@@ -14,7 +14,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class PDOEventStore extends AbstractEventStore
+class PDOEventStore extends AbstractEventStore implements EventStoreInterface
 {
     /**
      * @var \PDO

@@ -14,9 +14,8 @@ use Predis\Client;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
-use SimpleEventStoreManager\Domain\Model\Event;
 
-class RedisEventStore extends AbstractEventStore
+class RedisEventStore extends AbstractEventStore implements EventStoreInterface
 {
     /**
      * @var Client

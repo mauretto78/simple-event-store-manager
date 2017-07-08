@@ -44,5 +44,5 @@ interface EventStoreInterface
      * @param int $maxPerPage
      * @return mixed
      */
-    public function all($page = 1, $maxPerPage = 25);
+    public function paginate($page = 1, $maxPerPage = 25);
 }

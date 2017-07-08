@@ -14,46 +14,14 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-abstract class AbstractEventStore implements EventStoreInterface
+abstract class AbstractEventStore
 {
-    /**
-     * @param EventInterface $event
-     * @return mixed
-     */
-    public function store(EventInterface $event)
-    {
-    }
-
-    /**
-     * @param EventId $eventId
-     * @return mixed
-     */
-    public function restore(EventId $eventId)
-    {
-    }
-
-    /**
-     * @return int
-     */
-    public function eventsCount()
-    {
-    }
-
-    /**
-     * @param \DateTimeImmutable|null $from
-     * @param \DateTimeImmutable|null $to
-     * @return mixed
-     */
-    public function eventsInRangeDate(\DateTimeImmutable $from = null, \DateTimeImmutable $to = null)
-    {
-    }
-
     /**
      * @param int $page
      * @param int $maxPerPage
      * @return mixed
      */
-    public function all($page = 1, $maxPerPage = 25)
+    public function paginate($page = 1, $maxPerPage = 25)
     {
         $events = $this->eventsInRangeDate();
 

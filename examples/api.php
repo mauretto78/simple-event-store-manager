@@ -12,6 +12,7 @@ use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventQuery;
 use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
+use SimpleEventStoreManager\Infrastructure\DataTransformer\XMLEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
 
 require __DIR__.'/../app/bootstrap.php';
