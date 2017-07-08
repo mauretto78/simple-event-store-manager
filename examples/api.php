@@ -30,7 +30,7 @@ $eventQuery = new EventQuery(
 );
 
 // send Response
-$page = (null !== $page = $request->query->get('page')) ? $request->query->get('page') : 1;
+$page = (null !== $page = $request->query->get('page')) ? $page : 1;
 $maxPerPage = 10;
 $response = $eventQuery->paginate($page, $maxPerPage);
 $response->send();
