@@ -70,7 +70,7 @@ class EventQueryTest extends BaseTestCase
             )
         );
 
-        $response = $eventsQuery->query(1, 1);
+        $response = $eventsQuery->paginate(1, 1);
         $content = json_decode($response->getContent());
 
         $this->assertInstanceOf(Response::class, $response);
@@ -79,7 +79,7 @@ class EventQueryTest extends BaseTestCase
         $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
         $this->assertEquals(2, $content->_meta->total_count);
 
-        $response = $eventsQuery->query(5);
+        $response = $eventsQuery->paginate(5);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 }

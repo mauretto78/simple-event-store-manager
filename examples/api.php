@@ -19,9 +19,9 @@ require __DIR__.'/../app/bootstrap.php';
 $request = Request::createFromGlobals();
 
 // instantiate $eventsQuery
-$eventsManager = new EventManager('mongo', $config['mongo']);
-$eventsQuery = new EventQuery(
-    $eventsManager->eventStore(),
+$eventManager = new EventManager('mongo', $config['mongo']);
+$eventQuery = new EventQuery(
+    $eventManager->eventStore(),
     new JsonEventDataTransformer(
         SerializerBuilder::create()->build(),
         $request
@@ -31,5 +31,5 @@ $eventsQuery = new EventQuery(
 // send Response
 $page = (null !== $page = $request->query->get('page')) ? $request->query->get('page') : 1;
 $maxPerPage = 10;
-$response = $eventsQuery->query($page, $maxPerPage);
+$response = $eventQuery->paginate($page, $maxPerPage);
 $response->send();

@@ -126,7 +126,7 @@ class JsonEventDataTransformer implements DataTransformerInterface
             'current' => $baseUrl.$separator.$currentPage,
             'prev' => ($prev) ? $baseUrl.$separator.$prev : null,
             'next' => ($next) ? $baseUrl.$separator.$next : null,
-            'last' => $baseUrl.$separator.$numberOfPages,
+            'last' => ($numberOfPages > 0) ? $baseUrl.$separator.$numberOfPages : null,
         ];
     }
 

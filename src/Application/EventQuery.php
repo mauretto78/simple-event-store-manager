@@ -45,7 +45,7 @@ class EventQuery
      *
      * @return Response
      */
-    public function query($page = 1, $maxPerPage = 25)
+    public function paginate($page = 1, $maxPerPage = 25)
     {
         return $this->dataTransformer->transform(
             $this->eventStore->all($page, $maxPerPage),
