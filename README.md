@@ -83,16 +83,16 @@ In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tr
 
 ```php
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventsQuery;
+use SimpleEventStoreManager\Application\EventQuery;
 use SimpleEventStoreManager\Application\EventManager;
-use SimpleEventStoreManager\Infrastructure\DataTransformer\JsonEventDataTransformer;
+use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
 
 require __DIR__.'/../app/bootstrap.php';
 
 $request = Request::createFromGlobals();
 
-// instantiate $eventQuery
+// instantiate $eventsQuery
 $eventManager = new EventManager('mongo', $config['mongo']);
 $eventQuery = new EventQuery(
     $eventManager->eventStore(),
