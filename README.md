@@ -65,9 +65,9 @@ $eventsManager->eventStore()->eventsCount();
 
 ```
 
-## Query Stored Events
+### Query Stored Events
 
-You can query events in a range of dates:
+You can query stored events in a range of dates:
 
 ```php
 // ..
