@@ -16,8 +16,8 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
-use SimpleEventStoreManager\Infrastructure\DataTransformers\XMLEventDataTransformer;
-use SimpleEventStoreManager\Infrastructure\DataTransformers\YAMLEventDataTransformer;
+use SimpleEventStoreManager\Infrastructure\DataTransformers\XmlEventDataTransformer;
+use SimpleEventStoreManager\Infrastructure\DataTransformers\YamlEventDataTransformer;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -108,10 +108,10 @@ class EventQueryTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_xml_response()
     {
-        // json representation events
+        // xml representation events
         $eventsQuery = new EventQuery(
             $this->streamManager->eventStore(),
-            new XMLEventDataTransformer(
+            new XmlEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
             )
@@ -138,7 +138,7 @@ class EventQueryTest extends BaseTestCase
         // yaml representation events
         $eventsQuery = new EventQuery(
             $this->streamManager->eventStore(),
-            new YAMLEventDataTransformer(
+            new YamlEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
             )

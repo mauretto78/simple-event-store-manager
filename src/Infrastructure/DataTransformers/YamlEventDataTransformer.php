@@ -11,12 +11,12 @@
 namespace SimpleEventStoreManager\Infrastructure\DataTransformers;
 
 use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
-use SimpleEventStoreManager\Infrastructure\DataTransformers\Representations\EventCollectionObjectRepresentation;
-use SimpleEventStoreManager\Infrastructure\DataTransformers\Representations\EventObjectRepresentation;
-use SimpleEventStoreManager\Infrastructure\DataTransformers\Representations\EventsObjectRepresentation;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use JMS\Serializer\Serializer;
 
-class XMLEventDataTransformer extends AbstractEventDataTransformer implements DataTransformerInterface
+class YamlEventDataTransformer extends AbstractEventDataTransformer implements DataTransformerInterface
 {
     /**
      * @param array $events
@@ -29,27 +29,22 @@ class XMLEventDataTransformer extends AbstractEventDataTransformer implements Da
     public function transform($events, $eventsCount, $page, $maxPerPage)
     {
         $pageCount = count($events);
-        $eventsCollection = new EventCollectionObjectRepresentation(
-            (int) $page,
-            (int) $maxPerPage,
-            (int) $numberOfPages = ceil($eventsCount/$maxPerPage),
-            (int) $eventsCount,
-            $this->calculateLinks($page, $numberOfPages)
-        );
-        foreach ($events as $event) {
-            $eventsCollection->addEvent(new EventObjectRepresentation($event));
-        }
-
         $response = new Response(
             $this->serializer->serialize(
                 [
-                    $eventsCollection
-                ], 'xml'),
+                    '_meta' => [
+                        'page' => $page,
+                        'records_per_page' => $maxPerPage,
+                        'total_pages' => $numberOfPages = ceil($eventsCount/$maxPerPage),
+                        'total_count' => $eventsCount
+                    ],
+                    '_links' => [
+                        $this->calculateLinks($page, $numberOfPages)
+                    ],
+                    'events' => $this->convertEventsDataToArray($events)
+                ], 'yml'),
             $this->getHttpStatusCode($pageCount)
         );
-
-        $response->headers->set('Content-type', 'text/xml');
-        $response->setCharset('utf-8');
 
         // set infinite cache if page is complete
         if ($maxPerPage === $pageCount) {
@@ -57,6 +52,9 @@ class XMLEventDataTransformer extends AbstractEventDataTransformer implements Da
                 ->setMaxAge(60 * 60 * 24 * 365)
                 ->setSharedMaxAge(60 * 60 * 24 * 365);
         }
+
+        $response->headers->set('Content-type', 'text/yaml');
+        $response->setCharset('utf-8');
 
         return $response;
     }
