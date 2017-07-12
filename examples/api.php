@@ -22,7 +22,7 @@ $request = Request::createFromGlobals();
 $eventManager = new EventManager('mongo', $config['mongo']);
 $eventQuery = new EventQuery(
     $eventManager->eventStore(),
-    new JsonEventDataTransformer(
+    new JsonEventDataTransformer( // you can use YAMLEventDataTransformer or XMLEventDataTransformer
         SerializerBuilder::create()->build(),
         $request
     )

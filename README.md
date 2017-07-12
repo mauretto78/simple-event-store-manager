@@ -110,7 +110,7 @@ $response->send();
 
 ```
 
-Please note you can choose JSON or XML format for data representation.
+Please note you can choose JSON, XML or YAML format for data representation.
 
 ## Support
 

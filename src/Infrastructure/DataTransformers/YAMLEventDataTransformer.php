@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the EventStoreManager package.
+ * This file is part of the Simple EventStore Manager package.
  *
  * (c) Mauro Cassani<https://github.com/mauretto78>
  *
@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use JMS\Serializer\Serializer;
 
-class JsonEventDataTransformer extends AbstractEventDataTransformer implements DataTransformerInterface
+class YAMLEventDataTransformer extends AbstractEventDataTransformer implements DataTransformerInterface
 {
     /**
      * @param array $events
@@ -29,7 +29,7 @@ class JsonEventDataTransformer extends AbstractEventDataTransformer implements D
     public function transform($events, $eventsCount, $page, $maxPerPage)
     {
         $pageCount = count($events);
-        $jsonResponse = new JsonResponse(
+        $response = new Response(
             $this->serializer->serialize(
                 [
                     '_meta' => [
@@ -42,19 +42,20 @@ class JsonEventDataTransformer extends AbstractEventDataTransformer implements D
                         $this->calculateLinks($page, $numberOfPages)
                     ],
                     'events' => $this->convertEventsDataToArray($events)
-                ], 'json'),
-            $this->getHttpStatusCode($pageCount),
-            [],
-            true
+                ], 'yml'),
+            $this->getHttpStatusCode($pageCount)
         );
 
         // set infinite cache if page is complete
         if ($maxPerPage === $pageCount) {
-            $jsonResponse
+            $response
                 ->setMaxAge(60 * 60 * 24 * 365)
                 ->setSharedMaxAge(60 * 60 * 24 * 365);
         }
 
-        return $jsonResponse;
+        $response->headers->set('Content-type', 'text/yaml');
+        $response->setCharset('utf-8');
+
+        return $response;
     }
 }
