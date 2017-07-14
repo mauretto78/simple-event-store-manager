@@ -86,8 +86,8 @@ You can record your Domain Events using `EventRecorder` class or `EventRecorderC
 Use `record` method to register your Events, and then release them with `releaseEvents` method:
 
 ```php
-
 // ..
+
 $event = new Event(
     $eventId,
     $name,
@@ -98,7 +98,8 @@ $eventRecorder = new EventRecorder();
 $eventRecorder->record($event);
 
 // ..
-$eventRecorder->releaseEvents()
+$eventRecorder->releaseEvents();
+
 ```
 
 ### EventRecorderCapabilities
@@ -106,7 +107,6 @@ $eventRecorder->releaseEvents()
 Consider this example:
 
 ```php
-
 class DummyEntity
 {
     use EventRecorderCapabilities;
@@ -146,6 +146,7 @@ $dummyEntity = new DummyEntity(
 );
 
 $releasedEvents = $dummyEntity->releaseEvents();
+
 ```
 
 ## API Implementation
