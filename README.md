@@ -77,6 +77,77 @@ $eventManager->eventStore()->eventsInRangeDate(
 
 ```
 
+## Recording Events
+
+You can record your Domain Events using `EventRecorder` class or `EventRecorderCapabilities` trait directly into your Entities.
+
+### EventRecorder
+
+Use `record` method to register your Events, and then release them with `releaseEvents` method:
+
+```php
+
+// ..
+$event = new Event(
+    $eventId,
+    $name,
+    $body
+);
+
+$eventRecorder = new EventRecorder();
+$eventRecorder->record($event);
+
+// ..
+$eventRecorder->releaseEvents()
+```
+
+### EventRecorderCapabilities
+
+Consider this example:
+
+```php
+
+class DummyEntity
+{
+    use EventRecorderCapabilities;
+
+    private $id;
+    private $name;
+    private $email;
+
+    public function __construct(
+        $id,
+        $name,
+        $email
+    )
+    {
+        $this->id = $id;
+        $this->name = $name;
+        $this->email = $email;
+
+        $this->record(
+            new DummyEntityWasCreated(
+                new EventId(),
+                $this
+            )
+        );
+    }
+}
+```
+
+Finally, to release events:
+
+```php
+
+$dummyEntity = new DummyEntity(
+    12,
+    'John Doe',
+    'johndoe@gmail.com'
+);
+
+$releasedEvents = $dummyEntity->releaseEvents();
+```
+
 ## API Implementation
 
 In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tree/master/examples) you will find a simple example of an API implementation. Here is the full code:
