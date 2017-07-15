@@ -12,7 +12,7 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Predis\Client;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 class RedisEventStore extends AbstractEventStore implements EventStoreInterface

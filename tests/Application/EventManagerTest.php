@@ -9,7 +9,7 @@
  */
 
 use SimpleEventStoreManager\Application\EventManager;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class EventManagerTest extends BaseTestCase

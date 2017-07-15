@@ -11,7 +11,7 @@
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 class InMemoryEventStore extends AbstractEventStore implements EventStoreInterface

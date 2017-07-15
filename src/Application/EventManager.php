@@ -11,7 +11,7 @@
 namespace SimpleEventStoreManager\Application;
 
 use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
 
 class EventManager
 {

@@ -32,7 +32,7 @@ Avaliable drivers:
 
 ### Collecting Events
 
-Please note that your events MUST be an instance `SimpleEventStoreManager\Domain\Model\Event`.
+Please note that your events MUST implement `SimpleEventStoreManager\Domain\Model\Contracts\EventInterface`. You can use the standard `SimpleEventStoreManager\Domain\Model\Event` class or create your own Events.
 
 Consider this full example:
 
