@@ -8,7 +8,9 @@
  * file that was distributed with this source code.
  */
 
-use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\Model\Aggregate;
+use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
@@ -33,10 +35,10 @@ class EventStoreTest extends BaseTestCase
         parent::setUp();
 
         $this->eventStores = [
-            new InMemoryEventStore((new InMemoryDriver())->instance()),
-            new MongoEventStore((new MongoDriver($this->mongo_parameters))->instance()),
+            //new InMemoryEventStore((new InMemoryDriver())->instance()),
+            //new MongoEventStore((new MongoDriver($this->mongo_parameters))->instance()),
             new PDOEventStore((new PDODriver($this->pdo_parameters))->instance()),
-            new RedisEventStore((new RedisDriver($this->redis_parameters))->instance()),
+            //new RedisEventStore((new RedisDriver($this->redis_parameters))->instance()),
         ];
     }
 
@@ -48,7 +50,6 @@ class EventStoreTest extends BaseTestCase
         /** @var EventStoreInterface $eventStore */
         foreach ($this->eventStores as $eventStore) {
             $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
-
             $eventId = new EventId();
             $name = 'Doman\\Model\\SomeEvent';
             $body = [
@@ -59,6 +60,7 @@ class EventStoreTest extends BaseTestCase
 
             $event = new Event(
                 $eventId,
+                'Dummy Aggregate',
                 $name,
                 $body
             );
@@ -73,6 +75,7 @@ class EventStoreTest extends BaseTestCase
 
             $event2 = new Event(
                 $eventId2,
+                'Dummy Aggregate',
                 $name2,
                 $body2
             );
@@ -83,16 +86,23 @@ class EventStoreTest extends BaseTestCase
 
             sleep(1);
 
-            $events = $eventStore->eventsInRangeDate(
-                new \DateTimeImmutable('yesterday'),
-                new \DateTimeImmutable()
-            );
+            $aggregateByName = $eventStore->findAggregateByName('Dummy Aggregate');
 
-            $this->assertEquals((string) $eventId, $storedEvent->id);
+            $this->assertEquals('dummy-aggregate', $aggregateByName->name);
+            $this->assertEquals($storedEvent->id, (string) $eventId);
             $this->assertEquals($name, $storedEvent->name);
             $this->assertEquals($body, unserialize($storedEvent->body));
             $this->assertEquals($now, $storedEvent->occurred_on);
             $this->assertGreaterThan(0, $eventStore->eventsCount());
+
+            $events = $eventStore->query(
+                [
+                    'aggregate_name' => 'Dummy Aggregate',
+                    'from' => 'yesterday',
+                    'to' => 'now'
+                ]
+            );
+
             $this->assertGreaterThan(0, count($events));
         }
     }

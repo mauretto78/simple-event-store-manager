@@ -10,11 +10,24 @@
 
 namespace SimpleEventStoreManager\Domain\EventStore\Contracts;
 
+use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 interface EventStoreInterface
 {
+    /**
+     * @param AggregateId $aggregateId
+     * @return mixed
+     */
+    public function findAggregateById(AggregateId $aggregateId);
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function findAggregateByName($name);
+
     /**
      * @param EventInterface $event
      * @return mixed
@@ -33,11 +46,10 @@ interface EventStoreInterface
     public function eventsCount();
 
     /**
-     * @param \DateTimeImmutable|null $from
-     * @param \DateTimeImmutable|null $to
+     * @param array $parameters
      * @return mixed
      */
-    public function eventsInRangeDate(\DateTimeImmutable $from = null, \DateTimeImmutable $to = null);
+    public function query(array $parameters = []);
 
     /**
      * @param int $page

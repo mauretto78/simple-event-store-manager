@@ -10,15 +10,20 @@
 
 namespace SimpleEventStoreManager\Domain\Model\Contracts;
 
-use SimpleEventStoreManager\Domain\Model\Event;
+use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 interface EventInterface
 {
     /**
-     * @return string
+     * @return EventId
      */
     public function id();
+
+    /**
+     * @return Aggregate
+     */
+    public function aggregate();
 
     /**
      * @return string

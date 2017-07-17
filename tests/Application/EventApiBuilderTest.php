@@ -9,10 +9,10 @@
  */
 
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventQuery;
+use SimpleEventStoreManager\Application\EventApiBuilder;
 
 use SimpleEventStoreManager\Application\EventManager;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Yaml\Yaml;
 
-class EventQueryTest extends BaseTestCase
+class EventApiBuilderTest extends BaseTestCase
 {
     /**
      * @var EventStoreInterface
@@ -82,7 +82,7 @@ class EventQueryTest extends BaseTestCase
     {
 
         // json representation events
-        $eventsQuery = new EventQuery(
+        $eventsQuery = new EventApiBuilder(
             $this->streamManager->eventStore(),
             new JsonEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -109,7 +109,7 @@ class EventQueryTest extends BaseTestCase
     public function it_should_store_events_perform_queries_and_retrive_xml_response()
     {
         // xml representation events
-        $eventsQuery = new EventQuery(
+        $eventsQuery = new EventApiBuilder(
             $this->streamManager->eventStore(),
             new XmlEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -136,7 +136,7 @@ class EventQueryTest extends BaseTestCase
     public function it_should_store_events_perform_queries_and_retrive_yaml_response()
     {
         // yaml representation events
-        $eventsQuery = new EventQuery(
+        $eventsQuery = new EventApiBuilder(
             $this->streamManager->eventStore(),
             new YamlEventDataTransformer(
                 SerializerBuilder::create()->build(),

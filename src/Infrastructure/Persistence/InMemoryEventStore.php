@@ -10,12 +10,20 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
+use Cocur\Slugify\Slugify;
+use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 class InMemoryEventStore extends AbstractEventStore implements EventStoreInterface
 {
+    /**
+     * @var array
+     */
+    private $aggregates;
+
     /**
      * @var array
      */
@@ -26,7 +34,33 @@ class InMemoryEventStore extends AbstractEventStore implements EventStoreInterfa
      */
     public function __construct()
     {
+        $this->aggregates = [];
         $this->events = [];
+    }
+
+    /**
+     * @param AggregateId $aggregateId
+     * @return mixed
+     */
+    public function findAggregateById(AggregateId $aggregateId)
+    {
+        return isset($this->aggregates[(string) $aggregateId]) ? $this->aggregates[(string) $aggregateId] : null;
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function findAggregateByName($name)
+    {
+        $sluggify = new Slugify();
+        $aggregateName = $sluggify->slugify($name);
+
+        foreach ($this->aggregates as $aggregate){
+            if($aggregate->name === $aggregateName){
+                return $aggregate;
+            }
+        }
     }
 
     /**
@@ -36,17 +70,28 @@ class InMemoryEventStore extends AbstractEventStore implements EventStoreInterfa
      */
     public function store(EventInterface $event)
     {
-        $eventId = (string) $event->id();
+        $eventId = $event->id();
+        $eventAggregateId = $event->aggregate()->id();
+        $eventAggregateName = $event->aggregate()->name();
         $eventName = $event->name();
         $eventBody = $event->body();
         $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
 
-        $this->events[$eventId] = (object) [
+        if(null === $this->findAggregateById($eventAggregateId)){
+            $this->aggregates[(string) $eventAggregateId] = (object) [
+                'id' => $eventAggregateId,
+                'name' => $eventAggregateName,
+            ];
+        }
+
+        $this->events[(string) $eventId] = (object) [
             'id' => $eventId,
+            'aggregate_id' => $eventAggregateId,
             'name' => $eventName,
             'body' => $eventBody,
             'occurred_on' => $eventOccurredOn,
         ];
+
     }
 
     /**
@@ -56,7 +101,7 @@ class InMemoryEventStore extends AbstractEventStore implements EventStoreInterfa
      */
     public function restore(EventId $eventId)
     {
-        return (isset($this->events[$eventId->id()])) ? $this->events[$eventId->id()] : null;
+        return isset($this->events[(string) $eventId]) ? $this->events[(string) $eventId] : null;
     }
 
     /**
@@ -68,12 +113,10 @@ class InMemoryEventStore extends AbstractEventStore implements EventStoreInterfa
     }
 
     /**
-     * @param \DateTimeImmutable|null $from
-     * @param \DateTimeImmutable|null $to
-     *
-     * @return array
+     * @param array $parameters
+     * @return mixed
      */
-    public function eventsInRangeDate(\DateTimeImmutable $from = null, \DateTimeImmutable $to = null)
+    public function query(array $parameters = [])
     {
         return $this->events;
     }

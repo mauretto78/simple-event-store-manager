@@ -14,7 +14,7 @@ use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class EventQuery
+class EventApiBuilder
 {
     /**
      * @var DataTransformerInterface
@@ -27,7 +27,7 @@ class EventQuery
     private $eventStore;
 
     /**
-     * EventQuery constructor.
+     * EventApiBuilder constructor.
      * @param EventStoreInterface $eventStore
      * @param DataTransformerInterface $dataTransformer
      */

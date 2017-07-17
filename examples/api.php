@@ -9,7 +9,7 @@
  */
 
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventQuery;
+use SimpleEventStoreManager\Application\EventApiBuilder;
 use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,7 +20,7 @@ $request = Request::createFromGlobals();
 
 // instantiate $eventsQuery
 $eventManager = new EventManager('mongo', $config['mongo']);
-$eventQuery = new EventQuery(
+$eventQuery = new EventApiBuilder(
     $eventManager->eventStore(),
     // here you can use:
     // - JsonEventDataTransformer

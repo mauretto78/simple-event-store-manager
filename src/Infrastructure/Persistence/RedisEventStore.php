@@ -92,4 +92,13 @@ class RedisEventStore extends AbstractEventStore implements EventStoreInterface
 
         return $events;
     }
+
+    /**
+     * @param array $parameters
+     * @return mixed
+     */
+    public function query(array $parameters = [])
+    {
+        // TODO: Implement query() method.
+    }
 }

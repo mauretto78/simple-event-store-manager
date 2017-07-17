@@ -69,15 +69,25 @@ abstract class BaseTestCase extends TestCase
      */
     private function createMySQLSchema()
     {
-        $sql = 'CREATE TABLE IF NOT EXISTS `events` (
+        $sqlArray = [];
+        $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `event_aggregates` (
           `id` varchar(255) NOT NULL DEFAULT \'\',
+          `name` varchar(255) UNIQUE,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+
+        $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `events` (
+          `id` varchar(255) NOT NULL DEFAULT \'\',
+          `aggregate_id` varchar(255),
           `name` varchar(255) DEFAULT NULL,
           `body` longtext,
           `occurred_on` timestamp NULL DEFAULT NULL,
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 
-        self::$pdo->query($sql);
+        foreach ($sqlArray as $sql){
+            self::$pdo->query($sql);
+        }
     }
 
     /**
@@ -151,6 +161,7 @@ abstract class BaseTestCase extends TestCase
     private function destroyMySQLSchema()
     {
         self::$pdo->query('DROP TABLE `events`;');
+        self::$pdo->query('DROP TABLE `event_aggregates`;');
     }
 
     /**

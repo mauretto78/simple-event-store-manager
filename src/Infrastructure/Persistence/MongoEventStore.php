@@ -46,6 +46,7 @@ class MongoEventStore extends AbstractEventStore implements EventStoreInterface
     public function store(EventInterface $event)
     {
         $eventId = (string) $event->id();
+        $aggregate = $event->aggregateId();
         $eventName = $event->name();
         $eventBody = $event->body();
         $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
@@ -79,22 +80,27 @@ class MongoEventStore extends AbstractEventStore implements EventStoreInterface
     }
 
     /**
-     * @param \DateTimeImmutable|null $from
-     * @param \DateTimeImmutable|null $to
-     *
-     * @return array
+     * @param array $parameters
+     * @return mixed
      */
-    public function eventsInRangeDate(\DateTimeImmutable $from = null, \DateTimeImmutable $to = null)
+    public function query(array $parameters = [])
     {
         $filterArray = [];
 
-        if ($from && $to) {
+        if (isset($parameters['from']) && isset($parameters['to'])) {
+            $from = new \DateTimeImmutable($parameters['from']);
+            $to = new \DateTimeImmutable($parameters['to']);
+
             $filterArray = [
                 'occurred_on' => [
                     '$gte' => $from->format('Y-m-d H:i:s'),
                     '$lte' => $to->format('Y-m-d H:i:s'),
                 ]
             ];
+        }
+
+        if(isset($parameters['aggregate'])){
+
         }
 
         $document = $this->collection->find($filterArray);

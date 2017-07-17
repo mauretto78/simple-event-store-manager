@@ -10,6 +10,8 @@
 
 use SimpleEventStoreManager\Domain\EventRecorder\EventRecorder;
 use SimpleEventStoreManager\Domain\EventRecorder\EventRecorderCapabilities;
+use SimpleEventStoreManager\Domain\Model\Aggregate;
+use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
@@ -32,6 +34,7 @@ class EventTest extends BaseTestCase
 
         $event = new Event(
             $eventId,
+            'Dummy Aggregate',
             $name,
             $body
         );
@@ -41,6 +44,7 @@ class EventTest extends BaseTestCase
 
         $this->assertEquals($eventId, $eventId->id());
         $this->assertEquals($eventId, $event->id());
+        $this->assertEquals($event->aggregate()->name(), 'dummy-aggregate');
         $this->assertEquals($name, $event->name());
         $this->assertEquals($body, unserialize($event->body()));
         $this->assertInstanceOf(DateTimeImmutable::class, $event->occurredOn());
@@ -69,7 +73,7 @@ class EventTest extends BaseTestCase
 
         foreach ($releasedEvents as $event){
             $this->assertInstanceOf(DummyEntityWasCreated::class, $event);
-            $this->assertInstanceOf(DummyEntity::class, $event->body());
+            $this->assertInstanceOf(DummyEntity::class, unserialize($event->body()));
         }
     }
 }
@@ -95,78 +99,14 @@ class DummyEntity
         $this->record(
             new DummyEntityWasCreated(
                 new EventId(),
+                'entity-'.$this->id.'created',
+                'DummyEntityWasCreated',
                 $this
             )
         );
     }
 }
 
-class DummyEntityWasCreated implements EventInterface
+class DummyEntityWasCreated extends Event
 {
-    /**
-     * @var EventId
-     */
-    private $id;
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @var mixed
-     */
-    private $body;
-
-    /**
-     * @var \DateTimeImmutable
-     */
-    private $occurred_on;
-
-    /**
-     * Event constructor.
-     * @param EventId $id
-     * @param $body
-     */
-    public function __construct(
-        EventId $id,
-        $body
-    ) {
-        $this->id = $id;
-        $this->name = get_class($this);
-        $this->body = serialize($body);
-        $this->occurred_on = new \DateTimeImmutable();
-    }
-
-    /**
-     * @return string
-     */
-    public function id()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return string
-     */
-    public function name()
-    {
-        return $this->name;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function body()
-    {
-        return unserialize($this->body);
-    }
-
-    /**
-     * @return \DateTimeImmutable
-     */
-    public function occurredOn()
-    {
-        return new \DateTimeImmutable('now');
-    }
 }
