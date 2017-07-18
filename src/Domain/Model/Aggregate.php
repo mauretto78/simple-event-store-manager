@@ -11,6 +11,7 @@
 namespace SimpleEventStoreManager\Domain\Model;
 
 use Cocur\Slugify\Slugify;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 
 class Aggregate
 {
@@ -23,6 +24,11 @@ class Aggregate
      * @var string
      */
     private $name;
+
+    /**
+     * @var EventInterface[]
+     */
+    private $events;
 
     /**
      * Aggregate constructor.
@@ -59,8 +65,22 @@ class Aggregate
      */
     private function setName($name)
     {
-        $slugify = new Slugify();
+        $this->name = (new Slugify())->slugify($name);
+    }
 
-        $this->name = $slugify->slugify($name);
+    /**
+     * @return EventInterface[]
+     */
+    public function events()
+    {
+        return $this->events;
+    }
+
+    /**
+     * @param EventInterface $event
+     */
+    public function addEvent(EventInterface $event)
+    {
+        $this->events[(string) $event->id()] = $event;
     }
 }

@@ -11,7 +11,7 @@
 namespace SimpleEventStoreManager\Application;
 
 use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 
 class EventManager
 {
@@ -21,7 +21,7 @@ class EventManager
     private $driver;
 
     /**
-     * @var EventStoreInterface
+     * @var EventRepositoryInterface
      */
     private $eventStore;
 
@@ -90,7 +90,7 @@ class EventManager
     }
 
     /**
-     * @return EventStoreInterface
+     * @return EventRepositoryInterface
      */
     public function eventStore()
     {

@@ -9,7 +9,7 @@
  */
 
 use SimpleEventStoreManager\Application\EventManager;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class EventManagerTest extends BaseTestCase
@@ -33,6 +33,6 @@ class EventManagerTest extends BaseTestCase
         $eventStore = $streamManager->eventStore();
 
         $this->assertEquals('mongo', $streamManager->driver());
-        $this->assertInstanceOf(eventStoreInterface::class, $eventStore);
+        $this->assertInstanceOf(EventRepositoryInterface::class, $eventStore);
     }
 }

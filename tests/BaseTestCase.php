@@ -79,9 +79,10 @@ abstract class BaseTestCase extends TestCase
         $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `events` (
           `id` varchar(255) NOT NULL DEFAULT \'\',
           `aggregate_id` varchar(255),
+          `aggregate_name` varchar(255),
           `name` varchar(255) DEFAULT NULL,
           `body` longtext,
-          `occurred_on` timestamp NULL DEFAULT NULL,
+          `occurred_on` datetime(6) NULL DEFAULT NULL,
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 
@@ -170,6 +171,7 @@ abstract class BaseTestCase extends TestCase
     private function destroyMongoDb()
     {
         self::$mongo->events->drop();
+        self::$mongo->event_aggregates->drop();
     }
 
     /**

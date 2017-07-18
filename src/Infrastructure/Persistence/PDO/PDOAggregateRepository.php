@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the EventStoreManager package.
+ * This file is part of the Simple EventStore Manager package.
  *
  * (c) Mauro Cassani<https://github.com/mauretto78>
  *
@@ -11,11 +11,14 @@
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Cocur\Slugify\Slugify;
+use SimpleEventStoreManager\Domain\Model\Aggregate;
+use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class PDOEventStore extends AbstractEventStore implements EventStoreInterface
+class PDOAggregateRepository extends AbstractAggregateRepository implements AggregateRepositoryInterface
 {
     /**
      * @var \PDO
@@ -23,42 +26,56 @@ class PDOEventStore extends AbstractEventStore implements EventStoreInterface
     private $pdo;
 
     /**
-     * PDOEventStore constructor.
+     * PDOEventRepository constructor.
      *
      * @param \PDO $pdo
      */
     public function __construct(\PDO $pdo)
     {
         $this->pdo = $pdo;
-        $this->createSchema();
     }
 
     /**
-     * create schema.
+     * @param AggregateId $id
+     * @return mixed
      */
-    private function createSchema()
+    public function byId(AggregateId $id)
     {
-        $sqlArray = [];
-        $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `event_aggregates` (
-          `id` varchar(255) NOT NULL DEFAULT \'\',
-          `name` varchar(255) UNIQUE,
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-
-        $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `events` (
-          `id` varchar(255) NOT NULL DEFAULT \'\',
-          `aggregate_id` varchar(255),
-          `name` varchar(255) DEFAULT NULL,
-          `body` longtext,
-          `occurred_on` timestamp NULL DEFAULT NULL,
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-
-        foreach ($sqlArray as $sql){
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute();
-        }
+        // TODO: Implement byId() method.
     }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function byName($name)
+    {
+        // TODO: Implement byName() method.
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     * @return mixed
+     */
+    public function save(Aggregate $aggregate)
+    {
+        // TODO: Implement save() method.
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * @param string $name
@@ -101,10 +118,11 @@ class PDOEventStore extends AbstractEventStore implements EventStoreInterface
             $eventAggregateId = $aggregate->id;
         }
 
-        $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :name, :body, :occurred_on)';
+        $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id', $eventId);
         $stmt->bindParam(':aggregate_id', $eventAggregateId);
+        $stmt->bindParam(':aggregate_name', $eventAggregateName);
         $stmt->bindParam(':name', $eventName);
         $stmt->bindParam(':body', $eventBody);
         $stmt->bindParam(':occurred_on', $eventOccurredOn);
@@ -183,8 +201,7 @@ class PDOEventStore extends AbstractEventStore implements EventStoreInterface
         }
 
         if(isset($parameters['aggregate_name'])){
-            $sluggify = new Slugify();
-            $aggregateName = $sluggify->slugify($parameters['aggregate_name']);
+            $aggregateName = $this->slugify->slugify($parameters['aggregate_name']);
             $stmt->bindParam(':aggregate_name', $aggregateName);
         }
 
@@ -192,4 +209,6 @@ class PDOEventStore extends AbstractEventStore implements EventStoreInterface
 
         return $stmt->fetchAll(\PDO::FETCH_OBJ);
     }
+
+
 }

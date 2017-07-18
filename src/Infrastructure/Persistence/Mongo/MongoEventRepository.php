@@ -12,10 +12,10 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use MongoDB\Database;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class MongoEventStore extends AbstractEventStore implements EventStoreInterface
+class MongoEventRepository extends AbstractAggregateRepository implements EventRepositoryInterface
 {
     /**
      * @var Database
@@ -25,17 +25,35 @@ class MongoEventStore extends AbstractEventStore implements EventStoreInterface
     /**
      * @var \MongoDB\Collection
      */
-    private $collection;
+    private $events;
 
     /**
-     * MongoEventStore constructor.
+     * @var \MongoDB\Collection
+     */
+    private $aggregates;
+
+    /**
+     * MongoEventRepository constructor.
      *
      * @param Database $mongo
      */
     public function __construct(Database $mongo)
     {
+        parent::__construct();
         $this->mongo = $mongo;
-        $this->collection = $this->mongo->events;
+        $this->events = $this->mongo->events;
+        $this->aggregates = $this->mongo->event_aggregates;
+    }
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function findAggregateByName($name)
+    {
+        $document = $this->aggregates->findOne(['name' => $this->slugify->slugify($name)]);
+
+        return $document;
     }
 
     /**
@@ -46,13 +64,20 @@ class MongoEventStore extends AbstractEventStore implements EventStoreInterface
     public function store(EventInterface $event)
     {
         $eventId = (string) $event->id();
-        $aggregate = $event->aggregateId();
         $eventName = $event->name();
         $eventBody = $event->body();
         $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
 
-        $this->collection->insertOne([
+        if(!$aggregate = $this->findAggregateByName($event->aggregate()->name())){
+            $aggregate = $this->aggregates->insertOne([
+                'id' => (string) $event->aggregate()->id(),
+                'name' => $event->aggregate()->name()
+            ]);
+        }
+
+        $this->events->insertOne([
             'id' => $eventId,
+            'aggregate' => $aggregate,
             'name' => $eventName,
             'body' => $eventBody,
             'occurred_on' => $eventOccurredOn
@@ -66,7 +91,7 @@ class MongoEventStore extends AbstractEventStore implements EventStoreInterface
      */
     public function restore(EventId $eventId)
     {
-        $document = $this->collection->findOne(['id' => $eventId->id()]);
+        $document = $this->events->findOne(['id' => $eventId->id()]);
 
         return $document;
     }
@@ -76,7 +101,7 @@ class MongoEventStore extends AbstractEventStore implements EventStoreInterface
      */
     public function eventsCount()
     {
-        return $this->collection->count();
+        return $this->events->count();
     }
 
     /**
@@ -99,11 +124,13 @@ class MongoEventStore extends AbstractEventStore implements EventStoreInterface
             ];
         }
 
-        if(isset($parameters['aggregate'])){
-
+        if(isset($parameters['aggregate_name'])){
+            $filterArray = [
+                'aggregate.name' => $this->slugify->slugify($parameters['aggregate_name'])
+            ];
         }
 
-        $document = $this->collection->find($filterArray);
+        $document = $this->events->find($filterArray);
 
         return $document->toArray();
     }

@@ -12,7 +12,7 @@ use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventApiBuilder;
 
 use SimpleEventStoreManager\Application\EventManager;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
@@ -26,7 +26,7 @@ use Symfony\Component\Yaml\Yaml;
 class EventApiBuilderTest extends BaseTestCase
 {
     /**
-     * @var EventStoreInterface
+     * @var EventRepositoryInterface
      */
     private $eventStore;
 

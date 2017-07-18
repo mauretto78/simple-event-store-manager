@@ -12,7 +12,6 @@ use SimpleEventStoreManager\Domain\EventRecorder\EventRecorder;
 use SimpleEventStoreManager\Domain\EventRecorder\EventRecorderCapabilities;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Tests\BaseTestCase;
@@ -22,7 +21,7 @@ class EventTest extends BaseTestCase
     /**
      * @test
      */
-    public function create_an_event_and_record_it_with_EventRecorder()
+    public function create_an_aggregate_with_some_events_and_record_them_with_EventRecorder()
     {
         $eventId = new EventId();
         $name = 'Doman\\Model\\SomeEvent';
@@ -32,16 +31,23 @@ class EventTest extends BaseTestCase
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $event = new Event(
-            $eventId,
-            'Dummy Aggregate',
-            $name,
-            $body
+        $aggregate = new Aggregate(
+            new AggregateId(),
+            'Dummy Aggregate'
+        );
+        $aggregate->addEvent(
+            $event = new Event(
+                $eventId,
+                $aggregate,
+                $name,
+                $body
+            )
         );
 
         $eventRecorder = new EventRecorder();
         $eventRecorder->record($event);
 
+        $this->assertCount(1, $aggregate->events());
         $this->assertEquals($eventId, $eventId->id());
         $this->assertEquals($eventId, $event->id());
         $this->assertEquals($event->aggregate()->name(), 'dummy-aggregate');
@@ -59,7 +65,7 @@ class EventTest extends BaseTestCase
     /**
      * @test
      */
-    public function create_an_event_in_an_entity_and_record_it_with_EventRecorderCapabilities_trait()
+    public function create_an_aggregate_with_some_events_and_record_them_with_EventRecorderCapabilities_trait()
     {
         $dummyEntity = new DummyEntity(
             12,
@@ -99,7 +105,10 @@ class DummyEntity
         $this->record(
             new DummyEntityWasCreated(
                 new EventId(),
-                'entity-'.$this->id.'created',
+                new Aggregate(
+                    new AggregateId(),
+                    'Dummy Aggregate'
+                ),
                 'DummyEntityWasCreated',
                 $this
             )

@@ -8,37 +8,39 @@
  * file that was distributed with this source code.
  */
 
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PDODriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
-use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventStore;
-use SimpleEventStoreManager\Infrastructure\Persistence\MongoEventStore;
-use SimpleEventStoreManager\Infrastructure\Persistence\PDOEventStore;
-use SimpleEventStoreManager\Infrastructure\Persistence\RedisEventStore;
+use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\MongoEventRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\PDOEventRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\RedisEventRepository;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
-class EventStoreTest extends BaseTestCase
+class AggregateRepositoryTest extends BaseTestCase
 {
     /**
      * @var array
      */
-    private $eventStores;
+    private $repos;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->eventStores = [
-            //new InMemoryEventStore((new InMemoryDriver())->instance()),
-            //new MongoEventStore((new MongoDriver($this->mongo_parameters))->instance()),
-            new PDOEventStore((new PDODriver($this->pdo_parameters))->instance()),
-            //new RedisEventStore((new RedisDriver($this->redis_parameters))->instance()),
+        $this->repos = [
+            new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
+            //new MongoEventRepository((new MongoDriver($this->mongo_parameters))->instance()),
+            //new PDOEventRepository((new PDODriver($this->pdo_parameters))->instance()),
+            //new RedisEventRepository((new RedisDriver($this->redis_parameters))->instance()),
         ];
     }
 
@@ -47,9 +49,13 @@ class EventStoreTest extends BaseTestCase
      */
     public function it_should_store_and_restore_events()
     {
-        /** @var EventStoreInterface $eventStore */
-        foreach ($this->eventStores as $eventStore) {
-            $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
+        /** @var AggregateRepositoryInterface $repo */
+        foreach ($this->repos as $repo) {
+
+
+
+
+            /*$now = (new \DateTimeImmutable())->format('Y-m-d H:i:s');
             $eventId = new EventId();
             $name = 'Doman\\Model\\SomeEvent';
             $body = [
@@ -103,7 +109,7 @@ class EventStoreTest extends BaseTestCase
                 ]
             );
 
-            $this->assertGreaterThan(0, count($events));
+            $this->assertGreaterThan(0, count($events));*/
         }
     }
 }

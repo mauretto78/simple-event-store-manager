@@ -12,10 +12,10 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Predis\Client;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class RedisEventStore extends AbstractEventStore implements EventStoreInterface
+class RedisEventRepository extends AbstractAggregateRepository implements EventRepositoryInterface
 {
     /**
      * @var Client
@@ -23,7 +23,7 @@ class RedisEventStore extends AbstractEventStore implements EventStoreInterface
     private $client;
 
     /**
-     * RedisEventStore constructor.
+     * RedisEventRepository constructor.
      *
      * @param Client $client
      */

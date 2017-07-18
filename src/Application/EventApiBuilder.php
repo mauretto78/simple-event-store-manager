@@ -10,7 +10,7 @@
 
 namespace SimpleEventStoreManager\Application;
 
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventStoreInterface;
+use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -22,17 +22,17 @@ class EventApiBuilder
     private $dataTransformer;
 
     /**
-     * @var EventStoreInterface
+     * @var EventRepositoryInterface
      */
     private $eventStore;
 
     /**
      * EventApiBuilder constructor.
-     * @param EventStoreInterface $eventStore
+     * @param EventRepositoryInterface $eventStore
      * @param DataTransformerInterface $dataTransformer
      */
     public function __construct(
-        EventStoreInterface $eventStore,
+        EventRepositoryInterface $eventStore,
         DataTransformerInterface $dataTransformer
     ) {
         $this->eventStore = $eventStore;

@@ -10,11 +10,9 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
-use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
-use SimpleEventStoreManager\Domain\Model\EventId;
 
-abstract class AbstractEventStore
+abstract class AbstractAggregateRepository
 {
     /**
      * @param int $page
@@ -23,7 +21,7 @@ abstract class AbstractEventStore
      */
     public function paginate($page = 1, $maxPerPage = 25)
     {
-        $events = $this->eventsInRangeDate();
+        $events = $this->query();
 
         return array_slice($events, ($page - 1) * $maxPerPage, $maxPerPage);
     }
