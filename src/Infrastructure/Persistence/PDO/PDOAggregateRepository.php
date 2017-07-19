@@ -16,6 +16,7 @@ use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 class PDOAggregateRepository extends AbstractAggregateRepository implements AggregateRepositoryInterface
@@ -37,122 +38,92 @@ class PDOAggregateRepository extends AbstractAggregateRepository implements Aggr
 
     /**
      * @param AggregateId $id
-     * @return mixed
+     *
+     * @return Aggregate
      */
-    public function byId(AggregateId $id)
+    public function byId(AggregateId $id, $hydrateEvents = true)
     {
-        // TODO: Implement byId() method.
-    }
-
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function byName($name)
-    {
-        // TODO: Implement byName() method.
-    }
-
-    /**
-     * @param Aggregate $aggregate
-     * @return mixed
-     */
-    public function save(Aggregate $aggregate)
-    {
-        // TODO: Implement save() method.
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * @param string $name
-     * @return mixed
-     */
-    public function findAggregateByName($name)
-    {
-        $sluggify = new Slugify();
-        $aggregateName = $sluggify->slugify($name);
-
-        $sql = 'SELECT * FROM `event_aggregates` WHERE `name`=:name';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':name', $aggregateName);
+        $aggregateId = $id->id();
+        $stmt = $this->pdo->prepare($this->getAggregateByIdSql($hydrateEvents));
+        $stmt->bindParam(':id', $aggregateId);
         $stmt->execute();
 
-        return $stmt->fetchObject();
-    }
-
-    /**
-     * @param EventInterface $event
-     *
-     * @return mixed
-     */
-    public function store(EventInterface $event)
-    {
-        $eventId = $event->id();
-        $eventAggregateId = $event->aggregate()->id();
-        $eventAggregateName = $event->aggregate()->name();
-        $eventName = $event->name();
-        $eventBody = $event->body();
-        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
-
-        if(!$aggregate = $this->findAggregateByName($eventAggregateName)){
-            $sql = 'INSERT INTO `event_aggregates` (`id`, `name`) VALUES (:id, :name)';
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':id', $eventAggregateId);
-            $stmt->bindParam(':name', $eventAggregateName);
-            $stmt->execute();
-        } else {
-            $eventAggregateId = $aggregate->id;
+        if ($row = $stmt->fetchAll(\PDO::FETCH_ASSOC)) {
+            return $this->buildAggregate($row, $hydrateEvents);
         }
 
-        $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':id', $eventId);
-        $stmt->bindParam(':aggregate_id', $eventAggregateId);
-        $stmt->bindParam(':aggregate_name', $eventAggregateName);
-        $stmt->bindParam(':name', $eventName);
-        $stmt->bindParam(':body', $eventBody);
-        $stmt->bindParam(':occurred_on', $eventOccurredOn);
-        $stmt->execute();
+        return null;
     }
 
     /**
-     * @param EventId $eventId
-     *
-     * @return mixed
+     * @param bool $hydrateEvents
+     * @return string
      */
-    public function restore(EventId $eventId)
+    private function getAggregateByIdSql($hydrateEvents = true)
     {
-        $eventId = $eventId->id();
+        if($hydrateEvents){
+            return 'SELECT 
+                event_aggregates.id as aggregate_id,
+                event_aggregates.name as aggregate_name,
+                events.id as event_id,
+                events.name as event_name,
+                events.body as event_body,
+                events.occurred_on as event_occurred_on
+                FROM `event_aggregates` JOIN `events` ON event_aggregates.id=events.aggregate_id WHERE event_aggregates.id=:id';
+        }
 
-        $sql = 'SELECT * FROM `events` WHERE `id`=:id';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':id', $eventId);
+        return 'SELECT event_aggregates.id as aggregate_id, event_aggregates.name as aggregate_name FROM `event_aggregates` WHERE event_aggregates.id=:id';
+    }
+
+    /**
+     * @param string $name
+     *
+     * @return Aggregate
+     */
+    public function byName($name, $hydrateEvents = true)
+    {
+        $name = (new Slugify())->slugify($name);
+
+        $stmt = $this->pdo->prepare($this->getAggregateByNameSql($hydrateEvents));
+        $stmt->bindParam(':name', $name);
         $stmt->execute();
+        if ($rows = $stmt->fetchAll(\PDO::FETCH_ASSOC)) {
+            return $this->buildAggregate($rows, $hydrateEvents);
+        }
 
-        return $stmt->fetchObject();
+        return null;
+    }
+
+    /**
+     * @param bool $hydrateEvents
+     * @return string
+     */
+    private function getAggregateByNameSql($hydrateEvents = true)
+    {
+        if($hydrateEvents){
+            return 'SELECT 
+                event_aggregates.id as aggregate_id,
+                event_aggregates.name as aggregate_name,
+                events.id as event_id,
+                events.name as event_name,
+                events.body as event_body,
+                events.occurred_on as event_occurred_on
+                FROM `event_aggregates` JOIN `events` ON event_aggregates.id=events.aggregate_id WHERE event_aggregates.name=:name';
+        }
+
+        return 'SELECT event_aggregates.id as aggregate_id, event_aggregates.name as aggregate_name FROM `event_aggregates` WHERE event_aggregates.name=:name';
     }
 
     /**
      * @return int
      */
-    public function eventsCount()
+    public function eventsCount(Aggregate $aggregate)
     {
-        $sql = 'SELECT * FROM `events`';
+        $aggregateId = $aggregate->id();
+
+        $sql = 'SELECT * FROM `events` WHERE aggregate_id = :id';
         $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':id', $aggregateId);
         $stmt->execute();
 
         return $stmt->rowCount();
@@ -160,29 +131,22 @@ class PDOAggregateRepository extends AbstractAggregateRepository implements Aggr
 
     /**
      * @param array $parameters
-     * @return mixed
+     *
+     * @return Event[]
      */
-    public function query(array $parameters = [])
+    public function queryEvents(Aggregate $aggregate, array $parameters = [])
     {
+        $aggregateId = $aggregate->id();
         $sql = 'SELECT * FROM `events`';
-        $join = [];
-        $where = [];
 
-        if(isset($parameters['from']) && isset($parameters['to'])) {
-            $where[] = '`occurred_on` BETWEEN :from AND :to';
+        $where = ['`aggregate_id` = :id'];
+
+        if(isset($parameters['from'])) {
+            $where[] = '`occurred_on` >= :from';
         }
 
-        if(isset($parameters['aggregate_id'])){
-            $where[] = '`aggregate_id` = :aggregate_id';
-        }
-
-        if(isset($parameters['aggregate_name'])){
-            $join[] = '`event_aggregates` ON event_aggregates.id = events.aggregate_id';
-            $where[] = 'event_aggregates.name = :aggregate_name';
-        }
-
-        foreach ($join as $statement){
-            $sql .= ' JOIN ' . $statement;
+        if(isset($parameters['to'])) {
+            $where[] = '`occurred_on` <= :to';
         }
 
         foreach ($where as $index => $statement){
@@ -191,24 +155,77 @@ class PDOAggregateRepository extends AbstractAggregateRepository implements Aggr
 
         $sql .= ' ORDER BY `occurred_on` ASC';
         $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':id', $aggregateId);
 
-        if(isset($parameters['from']) && isset($parameters['to'])) {
+        if(isset($parameters['from'])) {
             $from = (new \DateTimeImmutable($parameters['from']))->format('Y-m-d H:i:s');
-            $to = (new \DateTimeImmutable($parameters['to']))->format('Y-m-d H:i:s');
-
             $stmt->bindParam(':from', $from);
+        }
+
+        if(isset($parameters['to'])) {
+            $to = (new \DateTimeImmutable($parameters['to']))->format('Y-m-d H:i:s');
             $stmt->bindParam(':to', $to);
         }
 
-        if(isset($parameters['aggregate_name'])){
-            $aggregateName = $this->slugify->slugify($parameters['aggregate_name']);
-            $stmt->bindParam(':aggregate_name', $aggregateName);
+        $stmt->execute();
+        $events = [];
+
+        foreach ($stmt->fetchAll(\PDO::FETCH_ASSOC) as $row){
+            $eventRepo = new PDOEventRepository($this->pdo);
+            $events[] = $eventRepo->buildEvent($row);
         }
 
-        $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_OBJ);
+        return $events;
     }
 
+    /**
+     * @param Aggregate $aggregate
+     * @return mixed
+     */
+    public function save(Aggregate $aggregate)
+    {
+        $AggregateId = $aggregate->id();
+        $AggregateName = $aggregate->name();
 
+        $sql = 'INSERT INTO `event_aggregates` (`id`, `name`) VALUES (:id, :name)';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':id', $AggregateId);
+        $stmt->bindParam(':name', $AggregateName);
+        $stmt->execute();
+
+        /** @var Event $event */
+        foreach ($aggregate->events() as $event){
+            $eventRepo = new PDOEventRepository($this->pdo);
+            $eventRepo->save($event);
+        }
+    }
+
+    /**
+     * @param array $rows
+     *
+     * @return Aggregate
+     */
+    public function buildAggregate(array $rows, $hydrateEvents)
+    {
+        $aggregate = new Aggregate(
+            new AggregateId($rows[0]['aggregate_id']),
+            $rows[0]['aggregate_name']
+        );
+
+        if($hydrateEvents){
+            foreach ($rows as $row){
+                $aggregate->addEvent(
+                    new Event(
+                        new EventId($row['event_id']),
+                        $aggregate,
+                        $row['event_name'],
+                        unserialize($row['event_body']),
+                        $row['event_occurred_on']
+                    )
+                );
+            }
+        }
+
+        return $aggregate;
+    }
 }

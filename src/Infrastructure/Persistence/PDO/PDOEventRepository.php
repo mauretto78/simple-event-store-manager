@@ -80,7 +80,7 @@ class PDOEventRepository extends AbstractAggregateRepository implements EventRep
      *
      * @return Event
      */
-    private function buildEvent(array $row)
+    public function buildEvent(array $row)
     {
         return new Event(
             new EventId($row['id']),

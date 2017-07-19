@@ -36,46 +36,50 @@ class InMemoryAggregateRepository extends AbstractAggregateRepository implements
 
     /**
      * @param AggregateId $id
-     * @return mixed
+     *
+     * @return Aggregate
      */
-    public function byId(AggregateId $id)
+    public function byId(AggregateId $id, $hydrateEvents = true)
     {
-        return $this->aggregates[(string) $id];
+        return (isset($this->aggregates[(string) $id])) ? $this->aggregates[(string) $id] : null;
     }
 
     /**
      * @param string $name
-     * @return mixed
+     *
+     * @return Aggregate
      */
-    public function byName($name)
+    public function byName($name, $hydrateEvents = true)
     {
         $aggregateName = (new Slugify())->slugify($name);
-
         foreach ($this->aggregates as $aggregate){
-            if($aggregate->name === $aggregateName){
+            if($aggregate->name() === $aggregateName){
                 return $aggregate;
             }
         }
+
+        return null;
     }
 
     /**
-     * @param AggregateId $id
+     * @param Aggregate $aggregate
+     *
      * @return int
      */
-    public function eventsCount(AggregateId $id)
+    public function eventsCount(Aggregate $aggregate)
     {
-        $aggregate = $this->byId($id);
-
-        return count($aggregate->events);
+        return count($aggregate->events());
     }
 
     /**
+     * @param Aggregate $aggregate
      * @param array $parameters
-     * @return mixed
+     *
+     * @return Event[]
      */
-    public function query(array $parameters = [])
+    public function queryEvents(Aggregate $aggregate, array $parameters = [])
     {
-        return $this->aggregates;
+        return $aggregate->events();
     }
 
     /**

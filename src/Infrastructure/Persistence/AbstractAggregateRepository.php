@@ -10,8 +10,6 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
-use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreInterface;
-
 abstract class AbstractAggregateRepository
 {
     /**
