@@ -11,8 +11,11 @@
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use MongoDB\Database;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
+use MongoDB\Model\BSONDocument;
+use SimpleEventStoreManager\Domain\Model\Aggregate;
+use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 class MongoEventRepository extends AbstractAggregateRepository implements EventRepositoryInterface
@@ -28,56 +31,47 @@ class MongoEventRepository extends AbstractAggregateRepository implements EventR
     private $events;
 
     /**
-     * @var \MongoDB\Collection
-     */
-    private $aggregates;
-
-    /**
      * MongoEventRepository constructor.
      *
      * @param Database $mongo
      */
     public function __construct(Database $mongo)
     {
-        parent::__construct();
         $this->mongo = $mongo;
         $this->events = $this->mongo->events;
-        $this->aggregates = $this->mongo->event_aggregates;
     }
 
     /**
-     * @param string $name
-     * @return mixed
-     */
-    public function findAggregateByName($name)
-    {
-        $document = $this->aggregates->findOne(['name' => $this->slugify->slugify($name)]);
-
-        return $document;
-    }
-
-    /**
-     * @param EventInterface $event
+     * @param EventId $id
      *
+     * @return Event
+     */
+    public function byId(EventId $id)
+    {
+        if($document = $this->events->findOne(['id' => $id->id()])){
+            return $this->buildEvent($document);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param Event $event
      * @return mixed
      */
-    public function store(EventInterface $event)
+    public function save(Event $event)
     {
         $eventId = (string) $event->id();
         $eventName = $event->name();
         $eventBody = $event->body();
-        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
-
-        if(!$aggregate = $this->findAggregateByName($event->aggregate()->name())){
-            $aggregate = $this->aggregates->insertOne([
-                'id' => (string) $event->aggregate()->id(),
-                'name' => $event->aggregate()->name()
-            ]);
-        }
+        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
 
         $this->events->insertOne([
             'id' => $eventId,
-            'aggregate' => $aggregate,
+            'aggregate' => [
+                'id' => (string) $event->aggregate()->id(),
+                'name' => $event->aggregate()->name()
+            ],
             'name' => $eventName,
             'body' => $eventBody,
             'occurred_on' => $eventOccurredOn
@@ -85,53 +79,21 @@ class MongoEventRepository extends AbstractAggregateRepository implements EventR
     }
 
     /**
-     * @param EventId $eventId
+     * @param BSONDocument $document
      *
-     * @return mixed
+     * @return Event
      */
-    public function restore(EventId $eventId)
+    public function buildEvent(BSONDocument $document)
     {
-        $document = $this->events->findOne(['id' => $eventId->id()]);
-
-        return $document;
-    }
-
-    /**
-     * @return int
-     */
-    public function eventsCount()
-    {
-        return $this->events->count();
-    }
-
-    /**
-     * @param array $parameters
-     * @return mixed
-     */
-    public function query(array $parameters = [])
-    {
-        $filterArray = [];
-
-        if (isset($parameters['from']) && isset($parameters['to'])) {
-            $from = new \DateTimeImmutable($parameters['from']);
-            $to = new \DateTimeImmutable($parameters['to']);
-
-            $filterArray = [
-                'occurred_on' => [
-                    '$gte' => $from->format('Y-m-d H:i:s'),
-                    '$lte' => $to->format('Y-m-d H:i:s'),
-                ]
-            ];
-        }
-
-        if(isset($parameters['aggregate_name'])){
-            $filterArray = [
-                'aggregate.name' => $this->slugify->slugify($parameters['aggregate_name'])
-            ];
-        }
-
-        $document = $this->events->find($filterArray);
-
-        return $document->toArray();
+        return new Event(
+            new EventId($document->id),
+            new Aggregate(
+                new AggregateId($document->aggregate->id),
+                $document->aggregate->name
+            ),
+            $document->name,
+            unserialize($document->body),
+            $document->occurred_on
+        );
     }
 }

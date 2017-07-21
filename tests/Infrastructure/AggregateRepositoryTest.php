@@ -8,7 +8,6 @@
  * file that was distributed with this source code.
  */
 
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
@@ -17,13 +16,9 @@ use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PDODriver;
-use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
 use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\MongoEventRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\MongoAggregateRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\PDOAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\PDOEventRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\RedisEventRepository;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class AggregateRepositoryTest extends BaseTestCase
@@ -37,12 +32,12 @@ class AggregateRepositoryTest extends BaseTestCase
     {
         parent::setUp();
 
-        $this->repos = [
+        $this->repos = array(
             new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
-            //new MongoEventRepository((new MongoDriver($this->mongo_parameters))->instance()),
+            new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
             new PDOAggregateRepository((new PDODriver($this->pdo_parameters))->instance()),
             //new RedisEventRepository((new RedisDriver($this->redis_parameters))->instance()),
-        ];
+        );
     }
 
     /**
@@ -89,10 +84,11 @@ class AggregateRepositoryTest extends BaseTestCase
             );
 
             $repo->save($aggregate);
-            $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd')));
+
+            $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd'), false));
             $this->assertEquals($aggregate, $repo->byId($aggregateId));
             $this->assertEquals($aggregate, $repo->byName('Dummy Aggregate'));
-            $this->assertNull($repo->byName('not existing aggregate'));
+            $this->assertNull($repo->byName('not existing aggregate'), false);
             $this->assertEquals(2, $repo->eventsCount($aggregate));
 
             sleep(1);

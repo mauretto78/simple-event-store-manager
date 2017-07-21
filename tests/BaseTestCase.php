@@ -170,8 +170,8 @@ abstract class BaseTestCase extends TestCase
      */
     private function destroyMongoDb()
     {
-        //self::$mongo->events->drop();
-        //self::$mongo->event_aggregates->drop();
+        self::$mongo->events->drop();
+        self::$mongo->event_aggregates->drop();
     }
 
     /**
