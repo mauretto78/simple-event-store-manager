@@ -17,9 +17,11 @@ use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PDODriver;
+use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
 use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\MongoEventRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\PDOEventRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\RedisEventRepository;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class EventRepositoryTest extends BaseTestCase
@@ -37,7 +39,7 @@ class EventRepositoryTest extends BaseTestCase
             new InMemoryEventRepository((new InMemoryDriver())->instance()),
             new MongoEventRepository((new MongoDriver($this->mongo_parameters))->instance()),
             new PDOEventRepository((new PDODriver($this->pdo_parameters))->instance()),
-            //new RedisEventRepository((new RedisDriver($this->redis_parameters))->instance()),
+            new RedisEventRepository((new RedisDriver($this->redis_parameters))->instance()),
         ];
     }
 

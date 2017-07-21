@@ -10,6 +10,7 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
@@ -23,7 +24,8 @@ class InMemoryEventRepository implements EventRepositoryInterface
 
     /**
      * @param EventId $id
-     * @return mixed
+     *
+     * @return Event
      */
     public function byId(EventId $id)
     {
@@ -31,10 +33,11 @@ class InMemoryEventRepository implements EventRepositoryInterface
     }
 
     /**
-     * @param Event $event
+     * @param EventInterface $event
+     *
      * @return mixed
      */
-    public function save(Event $event)
+    public function save(EventInterface $event)
     {
         $event->aggregate()->addEvent($event);
 

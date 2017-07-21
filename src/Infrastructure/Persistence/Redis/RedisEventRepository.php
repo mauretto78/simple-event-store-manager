@@ -12,7 +12,8 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Predis\Client;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 class RedisEventRepository extends AbstractAggregateRepository implements EventRepositoryInterface
@@ -33,72 +34,58 @@ class RedisEventRepository extends AbstractAggregateRepository implements EventR
     }
 
     /**
+     * @param EventId $id
+     *
+     * @return Event
+     */
+    public function byId(EventId $id)
+    {
+        $redisKey = 'event:'.$id;
+        if ($row = $this->client->hgetall($redisKey)) {
+            return $this->buildEvent($row);
+        }
+
+        return null;
+    }
+
+    /**
      * @param EventInterface $event
      *
      * @return mixed
      */
-    public function store(EventInterface $event)
+    public function save(EventInterface $event)
     {
         $eventId = (string) $event->id();
+        $eventAggregate = $event->aggregate();
         $eventName = $event->name();
         $eventBody = $event->body();
-        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
+        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
+        $redisKey = 'event:'.$eventId;
 
-        $this->client->hset($eventId, 'id', $eventId);
-        $this->client->hset($eventId, 'name', $eventName);
-        $this->client->hset($eventId, 'body', $eventBody);
-        $this->client->hset($eventId, 'occurred_on', $eventOccurredOn);
+        $this->client->hset($redisKey, 'id', $eventId);
+        $this->client->hset($redisKey, 'aggregate', serialize($eventAggregate));
+        $this->client->hset($redisKey, 'name', $eventName);
+        $this->client->hset($redisKey, 'body', $eventBody);
+        $this->client->hset($redisKey, 'occurred_on', $eventOccurredOn);
 
-        $this->client->zadd(
-            'eventsMt',
-            [
-                $eventId => number_format(microtime(true), 0, '.', '')
-            ]
+        $this->client->sadd('eventsAggregatesIndexById:'.$event->aggregate()->id(), [$redisKey]);
+        $this->client->sadd('eventsAggregatesIndexByName:'.$event->aggregate()->name(), [$redisKey]);
+        $this->client->zadd('eventsMtIndex', [$redisKey => number_format(microtime(true), 0, '.', '')]);
+    }
+
+    /**
+     * @param array $row
+     *
+     * @return Event
+     */
+    public function buildEvent(array $row)
+    {
+        return new Event(
+            new EventId($row['id']),
+            unserialize($row['aggregate']),
+            $row['name'],
+            unserialize($row['body']),
+            $row['occurred_on']
         );
-    }
-
-    /**
-     * @param EventId $eventId
-     *
-     * @return object
-     */
-    public function restore(EventId $eventId)
-    {
-        return (object) $this->client->hgetall($eventId);
-    }
-
-    /**
-     * @return int
-     */
-    public function eventsCount()
-    {
-        return count($this->client->zrange('eventsMt', 0, -1));
-    }
-
-    /**
-     * @param \DateTimeImmutable|null $from
-     * @param \DateTimeImmutable|null $to
-     *
-     * @return array
-     */
-    public function eventsInRangeDate(\DateTimeImmutable $from = null, \DateTimeImmutable $to = null)
-    {
-        $events = [];
-        $indexArray = ($from && $to) ? $this->client->zrangebyscore('eventsMt', $from->format('U'), $to->format('U')) : $this->client->zrange('eventsMt', 0, -1);
-
-        foreach ($indexArray as $index) {
-            $events[$index] = (object) $this->client->hgetall($index);
-        }
-
-        return $events;
-    }
-
-    /**
-     * @param array $parameters
-     * @return mixed
-     */
-    public function query(array $parameters = [])
-    {
-        // TODO: Implement query() method.
     }
 }

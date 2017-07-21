@@ -12,6 +12,7 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
@@ -52,10 +53,11 @@ class PDOEventRepository extends AbstractAggregateRepository implements EventRep
     }
 
     /**
-     * @param Event $event
+     * @param EventInterface $event
+     *
      * @return mixed
      */
-    public function save(Event $event)
+    public function save(EventInterface $event)
     {
         $eventId = $event->id();
         $eventAggregateId = $event->aggregate()->id();

@@ -14,6 +14,7 @@ use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
@@ -56,10 +57,11 @@ class MongoEventRepository extends AbstractAggregateRepository implements EventR
     }
 
     /**
-     * @param Event $event
+     * @param EventInterface $event
+     *
      * @return mixed
      */
-    public function save(Event $event)
+    public function save(EventInterface $event)
     {
         $eventId = (string) $event->id();
         $eventName = $event->name();

@@ -17,13 +17,15 @@ interface EventRepositoryInterface
 {
     /**
      * @param EventId $id
-     * @return mixed
+     *
+     * @return Event
      */
     public function byId(EventId $id);
 
     /**
-     * @param Event $event
+     * @param EventInterface $event
+     *
      * @return mixed
      */
-    public function save(Event $event);
+    public function save(EventInterface $event);
 }

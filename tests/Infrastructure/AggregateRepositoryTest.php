@@ -16,9 +16,12 @@ use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PDODriver;
+use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
 use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryAggregateRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\MongoAggregateRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\PDOAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\RedisAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\RedisEventRepository;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class AggregateRepositoryTest extends BaseTestCase
@@ -32,12 +35,12 @@ class AggregateRepositoryTest extends BaseTestCase
     {
         parent::setUp();
 
-        $this->repos = array(
-            new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
-            new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
-            new PDOAggregateRepository((new PDODriver($this->pdo_parameters))->instance()),
-            //new RedisEventRepository((new RedisDriver($this->redis_parameters))->instance()),
-        );
+        $this->repos = [
+            //new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
+            //new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
+            //new PDOAggregateRepository((new PDODriver($this->pdo_parameters))->instance()),
+            new RedisAggregateRepository((new RedisDriver($this->redis_parameters))->instance()),
+        ];
     }
 
     /**
