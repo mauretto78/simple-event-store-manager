@@ -28,7 +28,7 @@ class MongoDriver implements DriverInterface
     private $instance;
 
     /**
-     * PDODriver constructor.
+     * PdoDriver constructor.
      *
      * @codeCoverageIgnore
      *

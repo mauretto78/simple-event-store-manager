@@ -10,6 +10,7 @@
 
 namespace SimpleEventStoreManager\Infrastructure\DataTransformers;
 
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use JMS\Serializer\Serializer;
@@ -53,12 +54,12 @@ abstract class AbstractEventDataTransformer
     protected function convertEventsDataToArray($events)
     {
         return array_map(
-            function ($event) {
+            function (EventInterface $event) {
                 return [
-                    'id' => $event->id,
-                    'name' => $event->name,
-                    'body' => unserialize($event->body),
-                    'occurred_on' => $event->occurred_on,
+                    'id' => $event->id(),
+                    'name' => $event->name(),
+                    'body' => unserialize($event->body()),
+                    'occurred_on' => $event->occurredOn(),
                 ];
             },
             $events

@@ -11,6 +11,8 @@
 namespace SimpleEventStoreManager\Application;
 
 use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
+use SimpleEventStoreManager\Domain\Model\Aggregate;
+use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 
@@ -72,7 +74,7 @@ class EventManager
      */
     private function setRepo($driver, array $config = [])
     {
-        $aggregateRepo = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($driver).'\\'.$this->normalizeDriverName($driver).'AggregateRepository';
+        $aggregateRepo = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($driver).'AggregateRepository';
         $driver = 'SimpleEventStoreManager\Infrastructure\Drivers\\'.$this->normalizeDriverName($driver).'Driver';
         $instance = (new $driver($config))->instance();
         $this->repo = new $aggregateRepo($instance);
@@ -90,14 +92,45 @@ class EventManager
         return ucwords($driver);
     }
 
+    /**
+     * @param $aggregateName
+     * @param int $page
+     * @param int $maxPerPage
+     *
+     * @return array
+     */
     public function stream($aggregateName, $page = 1, $maxPerPage = 25)
     {
-        /*$events = $this->query();
-
-        return array_slice($events, ($page - 1) * $maxPerPage, $maxPerPage);*/
+        return ($this->streamCount($aggregateName)) ? array_slice($this->repo->byName($aggregateName)->events(), ($page - 1) * $maxPerPage, $maxPerPage) : null;
     }
 
+    /**
+     * @param $aggregateName
+     *
+     * @return int
+     */
+    public function streamCount($aggregateName)
+    {
+        return ($this->repo->exists($aggregateName)) ? count($this->repo->byName($aggregateName)->events()) : 0;
+    }
+
+    /**
+     * @param $aggregateName
+     * @param EventInterface $event
+     */
     public function storeEvent($aggregateName, EventInterface $event)
     {
+        if($this->repo->exists($aggregateName)){
+            $aggregate = $this->repo->byName($aggregateName);
+            $aggregate->addEvent($event);
+        } else {
+            $aggregate = new Aggregate(
+                new AggregateId(),
+                $aggregateName
+            );
+            $aggregate->addEvent($event);
+        }
+
+        $this->repo->save($aggregate);
     }
 }

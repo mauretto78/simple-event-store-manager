@@ -35,5 +35,5 @@ $eventQuery = new EventApiBuilder(
 // send Response
 $page = (null !== $page = $request->query->get('page')) ? $page : 1;
 $maxPerPage = 10;
-$response = $eventQuery->paginate($page, $maxPerPage);
+$response = $eventQuery->response($page, $maxPerPage);
 $response->send();

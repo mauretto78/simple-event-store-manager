@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence\Mongo;
+namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Cocur\Slugify\Slugify;
 use MongoDB\Database;
@@ -16,6 +16,7 @@ use MongoDB\Model\BSONDocument;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
@@ -108,9 +109,32 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
 
         /** @var Event $event */
         foreach ($aggregate->events() as $event){
-            $eventRepo = new MongoEventRepository($this->mongo);
-            $eventRepo->save($event);
+            $this->saveEvent($event, $aggregate);
         }
+    }
+
+    /**
+     * @param EventInterface $event
+     *
+     * @return mixed
+     */
+    private function saveEvent(EventInterface $event, Aggregate $aggregate)
+    {
+        $eventId = (string) $event->id();
+        $eventName = $event->name();
+        $eventBody = $event->body();
+        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
+
+        $this->events->insertOne([
+            'id' => $eventId,
+            'aggregate' => [
+                'id' => (string) $aggregate->id(),
+                'name' => $aggregate->name()
+            ],
+            'name' => $eventName,
+            'body' => $eventBody,
+            'occurred_on' => $eventOccurredOn
+        ]);
     }
 
     /**
@@ -118,7 +142,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    public function buildAggregate(BSONDocument $document)
+    private function buildAggregate(BSONDocument $document)
     {
         $aggregate = new Aggregate(
             new AggregateId($document->id),
@@ -130,7 +154,6 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
             $aggregate->addEvent(
                 new Event(
                     new EventId($event->id),
-                    $aggregate,
                     $event->name,
                     unserialize($event->body),
                     $event->occurred_on

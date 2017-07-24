@@ -14,7 +14,7 @@ use SimpleEventStoreManager\Infrastructure\Drivers\Contracts\DriverInterface;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\MalformedDriverConfigException;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\NotInstalledDriverCheckException;
 
-class PDODriver implements DriverInterface
+class PdoDriver implements DriverInterface
 {
     /**
      * @var
@@ -27,7 +27,7 @@ class PDODriver implements DriverInterface
     private $instance;
 
     /**
-     * PDODriver constructor.
+     * PdoDriver constructor.
      *
      * @codeCoverageIgnore
      *

@@ -20,11 +20,6 @@ class Event implements EventInterface
     private $id;
 
     /**
-     * @var Aggregate
-     */
-    private $aggregate;
-
-    /**
      * @var string
      */
     private $name;
@@ -43,20 +38,17 @@ class Event implements EventInterface
      * Event constructor.
      *
      * @param EventId $id
-     * @param $aggregate
      * @param $name
      * @param $body
      * @param $occurred_on
      */
     public function __construct(
         EventId $id,
-        Aggregate $aggregate,
         $name,
         $body,
         $occurred_on = null
     ) {
         $this->id = $id;
-        $this->aggregate = $aggregate;
         $this->name = $name;
         $this->body = serialize($body);
         $this->occurred_on = ($occurred_on) ? new \DateTimeImmutable($occurred_on) : new \DateTimeImmutable();
@@ -68,14 +60,6 @@ class Event implements EventInterface
     public function id()
     {
         return $this->id;
-    }
-
-    /**
-     * @return Aggregate
-     */
-    public function aggregate()
-    {
-        return $this->aggregate;
     }
 
     /**

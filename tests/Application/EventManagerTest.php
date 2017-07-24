@@ -9,7 +9,8 @@
  */
 
 use SimpleEventStoreManager\Application\EventManager;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Event;
+use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class EventManagerTest extends BaseTestCase
@@ -29,10 +30,43 @@ class EventManagerTest extends BaseTestCase
      */
     public function it_should_store_and_restore_events()
     {
-        $streamManager = new EventManager('mongo', $this->mongo_parameters);
-        $eventStore = $streamManager->eventStore();
+        $eventId = new EventId();
+        $name = 'Doman\\Model\\SomeEvent';
+        $body = [
+            'id' => 1,
+            'title' => 'Lorem Ipsum',
+            'text' => 'Dolor lorem ipso facto dixit'
+        ];
 
-        $this->assertEquals('mongo', $streamManager->driver());
-        $this->assertInstanceOf(EventRepositoryInterface::class, $eventStore);
+        $eventId2 = new EventId();
+        $name2 = 'Doman\\Model\\SomeEvent2';
+        $body2 = [
+            'id' => 2,
+            'title' => 'Lorem Ipsum',
+            'text' => 'Dolor lorem ipso facto dixit'
+        ];
+
+        $eventManager = new EventManager('mongo', $this->mongo_parameters);
+        $eventManager->storeEvent(
+            'Dummy Aggregate',
+            new Event(
+                $eventId,
+                $name,
+                $body
+            )
+        );
+        $eventManager->storeEvent(
+            'Dummy Aggregate',
+            new Event(
+                $eventId2,
+                $name2,
+                $body2
+            )
+        );
+
+        $stream = $eventManager->stream('Dummy Aggregate');
+
+        $this->assertEquals('mongo', $eventManager->driver());
+        $this->assertCount(2, $stream);
     }
 }

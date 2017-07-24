@@ -10,7 +10,7 @@
 
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
-use SimpleEventStoreManager\Infrastructure\Drivers\PDODriver;
+use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
@@ -27,7 +27,7 @@ class DriverTest extends BaseTestCase
         $mongo = new MongoDriver($this->mongo_parameters);
         $this->assertInstanceOf(\MongoDB\Database::class, $mongo->instance());
 
-        $pdo = new PDODriver($this->pdo_parameters);
+        $pdo = new PdoDriver($this->pdo_parameters);
         $this->assertInstanceOf(\PDO::class, $pdo->instance());
 
         $redis = new RedisDriver($this->redis_parameters);

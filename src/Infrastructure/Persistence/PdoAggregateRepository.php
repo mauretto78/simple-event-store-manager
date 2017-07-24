@@ -8,12 +8,13 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence\Pdo;
+namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Cocur\Slugify\Slugify;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
@@ -145,9 +146,33 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
 
         /** @var Event $event */
         foreach ($aggregate->events() as $event){
-            $eventRepo = new PDOEventRepository($this->pdo);
-            $eventRepo->save($event);
+            $this->saveEvent($event, $aggregate);
         }
+    }
+
+    /**
+     * @param EventInterface $event
+     *
+     * @return mixed
+     */
+    private function saveEvent(EventInterface $event, Aggregate $aggregate)
+    {
+        $eventId = $event->id();
+        $eventAggregateId = $aggregate->id();
+        $eventAggregateName = $aggregate->name();
+        $eventName = $event->name();
+        $eventBody = $event->body();
+        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
+
+        $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':id', $eventId);
+        $stmt->bindParam(':aggregate_id', $eventAggregateId);
+        $stmt->bindParam(':aggregate_name', $eventAggregateName);
+        $stmt->bindParam(':name', $eventName);
+        $stmt->bindParam(':body', $eventBody);
+        $stmt->bindParam(':occurred_on', $eventOccurredOn);
+        $stmt->execute();
     }
 
     /**
@@ -155,7 +180,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    public function buildAggregate(array $rows)
+    private function buildAggregate(array $rows)
     {
         $aggregate = new Aggregate(
             new AggregateId($rows[0]['aggregate_id']),
@@ -166,7 +191,6 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
             $aggregate->addEvent(
                 new Event(
                     new EventId($row['event_id']),
-                    $aggregate,
                     $row['event_name'],
                     unserialize($row['event_body']),
                     $row['event_occurred_on']

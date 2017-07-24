@@ -10,7 +10,6 @@
 
 namespace SimpleEventStoreManager\Application;
 
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -22,20 +21,20 @@ class EventApiBuilder
     private $dataTransformer;
 
     /**
-     * @var EventRepositoryInterface
+     * @var EventManager
      */
-    private $eventStore;
+    private $eventManger;
 
     /**
      * EventApiBuilder constructor.
-     * @param EventRepositoryInterface $eventStore
+     * @param EventManager $eventManger
      * @param DataTransformerInterface $dataTransformer
      */
     public function __construct(
-        EventRepositoryInterface $eventStore,
+        EventManager $eventManger,
         DataTransformerInterface $dataTransformer
     ) {
-        $this->eventStore = $eventStore;
+        $this->eventManger = $eventManger;
         $this->dataTransformer = $dataTransformer;
     }
 
@@ -45,11 +44,11 @@ class EventApiBuilder
      *
      * @return Response
      */
-    public function paginate($page = 1, $maxPerPage = 25)
+    public function response($aggregateName, $page = 1, $maxPerPage = 25)
     {
         return $this->dataTransformer->transform(
-            $this->eventStore->paginate($page, $maxPerPage),
-            $this->eventStore->eventsCount(),
+            $this->eventManger->stream($aggregateName, $page, $maxPerPage),
+            $this->eventManger->streamCount($aggregateName),
             $page,
             $maxPerPage
         );

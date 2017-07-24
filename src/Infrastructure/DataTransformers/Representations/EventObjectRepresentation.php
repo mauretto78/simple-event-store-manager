@@ -10,6 +10,8 @@
 
 namespace SimpleEventStoreManager\Infrastructure\DataTransformers\Representations;
 
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
+
 class EventObjectRepresentation
 {
     private $id;
@@ -17,11 +19,11 @@ class EventObjectRepresentation
     private $body;
     private $occurred_on;
 
-    public function __construct($event)
+    public function __construct(EventInterface $event)
     {
-        $this->id = $event->id;
-        $this->name = $event->name;
-        $this->body = unserialize($event->body);
-        $this->occurred_on = $event->occurred_on;
+        $this->id = $event->id();
+        $this->name = $event->name();
+        $this->body = unserialize($event->body());
+        $this->occurred_on = $event->occurredOn();
     }
 }

@@ -16,7 +16,7 @@ use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
-class EventTest extends BaseTestCase
+class AggregateTest extends BaseTestCase
 {
     /**
      * @test
@@ -35,10 +35,10 @@ class EventTest extends BaseTestCase
             new AggregateId(),
             'Dummy Aggregate'
         );
+
         $aggregate->addEvent(
             $event = new Event(
                 $eventId,
-                $aggregate,
                 $name,
                 $body
             )
@@ -50,7 +50,7 @@ class EventTest extends BaseTestCase
         $this->assertCount(1, $aggregate->events());
         $this->assertEquals($eventId, $eventId->id());
         $this->assertEquals($eventId, $event->id());
-        $this->assertEquals($event->aggregate()->name(), 'dummy-aggregate');
+        $this->assertEquals($aggregate->name(), 'dummy-aggregate');
         $this->assertEquals($name, $event->name());
         $this->assertEquals($body, unserialize($event->body()));
         $this->assertInstanceOf(DateTimeImmutable::class, $event->occurredOn());
@@ -105,10 +105,6 @@ class DummyEntity
         $this->record(
             new DummyEntityWasCreated(
                 new EventId(),
-                new Aggregate(
-                    new AggregateId(),
-                    'Dummy Aggregate'
-                ),
                 'DummyEntityWasCreated',
                 $this
             )

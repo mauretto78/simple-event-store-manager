@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence\Redis;
+namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Cocur\Slugify\Slugify;
 use Predis\Client;
@@ -16,6 +16,7 @@ use Predis\Collection\Iterator\SetKey;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
@@ -103,9 +104,31 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
 
         /** @var Event $event */
         foreach ($aggregate->events() as $event){
-            $eventRepo = new RedisEventRepository($this->client);
-            $eventRepo->save($event);
+            $this->saveEvent($event, $aggregate);
         }
+    }
+
+    /**
+     * @param EventInterface $event
+     * @param Aggregate $aggregate
+     */
+    private function saveEvent(EventInterface $event, Aggregate $aggregate)
+    {
+        $eventId = (string) $event->id();
+        $eventAggregate = $aggregate;
+        $eventName = $event->name();
+        $eventBody = $event->body();
+        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
+        $redisKey = 'event:'.$eventId;
+
+        $this->client->hset($redisKey, 'id', $eventId);
+        $this->client->hset($redisKey, 'aggregate', serialize($eventAggregate));
+        $this->client->hset($redisKey, 'name', $eventName);
+        $this->client->hset($redisKey, 'body', $eventBody);
+        $this->client->hset($redisKey, 'occurred_on', $eventOccurredOn);
+
+        $this->client->sadd('eventsAggregatesIndexById:'.$aggregate->id(), [$redisKey]);
+        $this->client->sadd('eventsAggregatesIndexByName:'.$aggregate->name(), [$redisKey]);
     }
 
     /**
@@ -113,7 +136,7 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    public function buildAggregate(array $row)
+    private function buildAggregate(array $row)
     {
         $aggregate = new Aggregate(
             new AggregateId($row['id']),
@@ -126,7 +149,6 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
             $aggregate->addEvent(
                 new Event(
                     new EventId($event['id']),
-                    unserialize($event['aggregate']),
                     $event['name'],
                     unserialize($event['body']),
                     $event['occurred_on']

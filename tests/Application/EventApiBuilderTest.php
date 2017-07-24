@@ -12,7 +12,6 @@ use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventApiBuilder;
 
 use SimpleEventStoreManager\Application\EventManager;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
@@ -26,23 +25,17 @@ use Symfony\Component\Yaml\Yaml;
 class EventApiBuilderTest extends BaseTestCase
 {
     /**
-     * @var EventRepositoryInterface
-     */
-    private $eventStore;
-
-    /**
      * @var EventManager
      */
-    private $streamManager;
+    private $eventManager;
+
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->streamManager = new EventManager('mongo', $this->mongo_parameters);
-        $this->eventStore = $this->streamManager->eventStore();
+        $this->eventManager = new EventManager('mongo', $this->mongo_parameters);
 
-        // store events
         $eventId = new EventId();
         $name = 'Doman\\Model\\SomeEvent';
         $body = [
@@ -50,12 +43,6 @@ class EventApiBuilderTest extends BaseTestCase
             'title' => 'Lorem Ipsum',
             'text' => 'Dolor lorem ipso facto dixit'
         ];
-
-        $event = new Event(
-            $eventId,
-            $name,
-            $body
-        );
 
         $eventId2 = new EventId();
         $name2 = 'Doman\\Model\\SomeEvent2';
@@ -65,14 +52,23 @@ class EventApiBuilderTest extends BaseTestCase
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $event2 = new Event(
-            $eventId2,
-            $name2,
-            $body2
+        $this->eventManager->storeEvent(
+            'Dummy Aggregate',
+            new Event(
+                $eventId,
+                $name,
+                $body
+            )
         );
 
-        $this->eventStore->store($event);
-        $this->eventStore->store($event2);
+        $this->eventManager->storeEvent(
+            'Dummy Aggregate',
+            new Event(
+                $eventId2,
+                $name2,
+                $body2
+            )
+        );
     }
 
     /**
@@ -80,17 +76,16 @@ class EventApiBuilderTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_json_response()
     {
-
         // json representation events
-        $eventsQuery = new EventApiBuilder(
-            $this->streamManager->eventStore(),
+        $eventApiBuilder = new EventApiBuilder(
+            $this->eventManager,
             new JsonEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
             )
         );
 
-        $response = $eventsQuery->paginate(1, 1);
+        $response = $eventApiBuilder->response('Dummy Aggregate', 1, 1);
         $content = json_decode($response->getContent());
 
         $this->assertInstanceOf(Response::class, $response);
@@ -99,7 +94,7 @@ class EventApiBuilderTest extends BaseTestCase
         $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
         $this->assertEquals(2, $content->_meta->total_count);
 
-        $response = $eventsQuery->paginate(5);
+        $response = $eventApiBuilder->response('Dummy Aggregate',5);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
@@ -110,14 +105,14 @@ class EventApiBuilderTest extends BaseTestCase
     {
         // xml representation events
         $eventsQuery = new EventApiBuilder(
-            $this->streamManager->eventStore(),
+            $this->eventManager,
             new XmlEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
             )
         );
 
-        $response = $eventsQuery->paginate(1, 1);
+        $response = $eventsQuery->response('Dummy Aggregate', 1, 1);
         $content = simplexml_load_string($response->getContent());
 
         $this->assertInstanceOf(Response::class, $response);
@@ -126,7 +121,7 @@ class EventApiBuilderTest extends BaseTestCase
         $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
         $this->assertEquals(2, (string) $content->entry->total_count);
 
-        $response = $eventsQuery->paginate(5);
+        $response = $eventsQuery->response('Dummy Aggregate',5);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
@@ -137,14 +132,14 @@ class EventApiBuilderTest extends BaseTestCase
     {
         // yaml representation events
         $eventsQuery = new EventApiBuilder(
-            $this->streamManager->eventStore(),
+            $this->eventManager,
             new YamlEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
             )
         );
 
-        $response = $eventsQuery->paginate(1, 1);
+        $response = $eventsQuery->response('Dummy Aggregate', 1, 1);
         $content = Yaml::parse($response->getContent());
 
         $this->assertInstanceOf(Response::class, $response);
@@ -156,7 +151,7 @@ class EventApiBuilderTest extends BaseTestCase
         $this->assertEquals(2, $content['_meta']['total_pages']);
         $this->assertEquals(2, $content['_meta']['total_count']);
 
-        $response = $eventsQuery->paginate(5);
+        $response = $eventsQuery->response('Dummy Aggregate',5);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 }

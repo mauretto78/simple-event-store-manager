@@ -21,11 +21,6 @@ interface EventInterface
     public function id();
 
     /**
-     * @return Aggregate
-     */
-    public function aggregate();
-
-    /**
      * @return string
      */
     public function name()

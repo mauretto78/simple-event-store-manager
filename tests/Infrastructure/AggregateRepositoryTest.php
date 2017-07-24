@@ -15,12 +15,12 @@ use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
-use SimpleEventStoreManager\Infrastructure\Drivers\PDODriver;
+use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
-use SimpleEventStoreManager\Infrastructure\Persistence\InMemory\InMemoryAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\Mongo\MongoAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\Pdo\PdoAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\Redis\RedisAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\MongoAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\PdoAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\RedisAggregateRepository;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class AggregateRepositoryTest extends BaseTestCase
@@ -37,7 +37,7 @@ class AggregateRepositoryTest extends BaseTestCase
         $this->repos = [
             new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
             new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
-            new PdoAggregateRepository((new PDODriver($this->pdo_parameters))->instance()),
+            new PdoAggregateRepository((new PdoDriver($this->pdo_parameters))->instance()),
             new RedisAggregateRepository((new RedisDriver($this->redis_parameters))->instance()),
         ];
     }
@@ -56,6 +56,7 @@ class AggregateRepositoryTest extends BaseTestCase
                 'title' => 'Lorem Ipsum',
                 'text' => 'Dolor lorem ipso facto dixit'
             ];
+
             $eventId2 = new EventId();
             $name2 = 'Doman\\Model\\SomeEvent2';
             $body2 = [
@@ -71,7 +72,6 @@ class AggregateRepositoryTest extends BaseTestCase
             $aggregate->addEvent(
                 $event = new Event(
                     $eventId,
-                    $aggregate,
                     $name,
                     $body
                 )
@@ -79,7 +79,6 @@ class AggregateRepositoryTest extends BaseTestCase
             $aggregate->addEvent(
                 $event = new Event(
                     $eventId2,
-                    $aggregate,
                     $name2,
                     $body2
                 )
@@ -87,11 +86,11 @@ class AggregateRepositoryTest extends BaseTestCase
 
             $repo->save($aggregate);
 
-            $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd'), false));
+            $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd')));
             $this->assertEquals($aggregate, $repo->byId($aggregateId));
             $this->assertEquals($aggregate, $repo->byName('Dummy Aggregate'));
             $this->assertTrue($repo->exists('Dummy Aggregate'));
-            $this->assertNull($repo->byName('not existing aggregate'), false);
+            $this->assertNull($repo->byName('not existing aggregate'));
             $this->assertEquals(2, $repo->eventsCount($aggregate));
         }
     }
