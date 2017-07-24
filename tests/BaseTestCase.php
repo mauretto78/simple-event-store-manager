@@ -96,7 +96,7 @@ abstract class BaseTestCase extends TestCase
      */
     final public function createConnections()
     {
-        // PDO connection
+        // Pdo connection
         if (self::$pdo == null) {
             try {
                 $dsn = $this->pdo_parameters['driver'].':dbname='.$this->pdo_parameters['database'].';host='.$this->pdo_parameters['host'];
@@ -105,7 +105,7 @@ abstract class BaseTestCase extends TestCase
 
                 self::$pdo = new \PDO($dsn, $username, $password);
             } catch (\PDOException $e) {
-                die('PDO Error: ' . $e->getMessage());
+                die('Pdo Error: ' . $e->getMessage());
             }
         }
 

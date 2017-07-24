@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence;
+namespace SimpleEventStoreManager\Infrastructure\Persistence\InMemory;
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;

@@ -17,17 +17,17 @@ interface AggregateRepositoryInterface
 {
     /**
      * @param AggregateId $id
-     * @param bool $hydrateEvents
+     *
      * @return Aggregate
      */
-    public function byId(AggregateId $id, $hydrateEvents = true);
+    public function byId(AggregateId $id);
 
     /**
      * @param $name
-     * @param bool $hydrateEvents
+     *
      * @return Aggregate
      */
-    public function byName($name, $hydrateEvents = true);
+    public function byName($name);
 
     /**
      * @return int
@@ -35,14 +35,15 @@ interface AggregateRepositoryInterface
     public function eventsCount(Aggregate $aggregate);
 
     /**
-     * @param Aggregate $aggregate
-     * @param array $parameters
-     * @return mixed
+     * @param $name
+     *
+     * @return bool
      */
-    public function queryEvents(Aggregate $aggregate, array $parameters = []);
+    public function exists($name);
 
     /**
      * @param Aggregate $aggregate
+     *
      * @return mixed
      */
     public function save(Aggregate $aggregate);

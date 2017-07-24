@@ -17,11 +17,10 @@ use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PDODriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
-use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\MongoAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\PDOAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\RedisAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\RedisEventRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\InMemory\InMemoryAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\Mongo\MongoAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\Pdo\PdoAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\Redis\RedisAggregateRepository;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class AggregateRepositoryTest extends BaseTestCase
@@ -36,9 +35,9 @@ class AggregateRepositoryTest extends BaseTestCase
         parent::setUp();
 
         $this->repos = [
-            //new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
-            //new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
-            //new PDOAggregateRepository((new PDODriver($this->pdo_parameters))->instance()),
+            new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
+            new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
+            new PdoAggregateRepository((new PDODriver($this->pdo_parameters))->instance()),
             new RedisAggregateRepository((new RedisDriver($this->redis_parameters))->instance()),
         ];
     }
@@ -91,23 +90,9 @@ class AggregateRepositoryTest extends BaseTestCase
             $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd'), false));
             $this->assertEquals($aggregate, $repo->byId($aggregateId));
             $this->assertEquals($aggregate, $repo->byName('Dummy Aggregate'));
+            $this->assertTrue($repo->exists('Dummy Aggregate'));
             $this->assertNull($repo->byName('not existing aggregate'), false);
             $this->assertEquals(2, $repo->eventsCount($aggregate));
-
-            sleep(1);
-
-            $query = $repo->queryEvents(
-                $aggregate,
-                [
-                    'from' => 'yesterday',
-                    'to' => 'now',
-                ]
-            );
-
-            $this->assertCount(2, $query);
-            foreach ($query as $item){
-                $this->assertInstanceOf(Event::class, $item);
-            }
         }
     }
 }

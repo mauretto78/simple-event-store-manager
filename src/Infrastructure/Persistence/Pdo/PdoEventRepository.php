@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence;
+namespace SimpleEventStoreManager\Infrastructure\Persistence\Pdo;
 
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
@@ -17,7 +17,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class PDOEventRepository extends AbstractAggregateRepository implements EventRepositoryInterface
+class PdoEventRepository implements EventRepositoryInterface
 {
     /**
      * @var \PDO
@@ -25,7 +25,7 @@ class PDOEventRepository extends AbstractAggregateRepository implements EventRep
     private $pdo;
 
     /**
-     * PDOEventRepository constructor.
+     * PdoEventRepository constructor.
      *
      * @param \PDO $pdo
      */

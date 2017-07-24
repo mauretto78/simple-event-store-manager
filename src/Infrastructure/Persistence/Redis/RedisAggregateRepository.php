@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence;
+namespace SimpleEventStoreManager\Infrastructure\Persistence\Redis;
 
 use Cocur\Slugify\Slugify;
 use Predis\Client;
@@ -19,7 +19,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class RedisAggregateRepository extends AbstractAggregateRepository implements AggregateRepositoryInterface
+class RedisAggregateRepository implements AggregateRepositoryInterface
 {
     /**
      * @var Client
@@ -38,14 +38,13 @@ class RedisAggregateRepository extends AbstractAggregateRepository implements Ag
 
     /**
      * @param AggregateId $id
-     * @param bool $hydrateEvents
      *
      * @return Aggregate
      */
-    public function byId(AggregateId $id, $hydrateEvents = true)
+    public function byId(AggregateId $id)
     {
         if ($aggregate = $this->client->hgetall('aggregate:'.$id)) {
-            return $this->buildAggregate($aggregate, $hydrateEvents);
+            return $this->buildAggregate($aggregate);
         }
 
         return null;
@@ -54,15 +53,15 @@ class RedisAggregateRepository extends AbstractAggregateRepository implements Ag
     /**
      * @param $name
      * @param bool $hydrateEvents
+     *
      * @return Aggregate
      */
     public function byName($name, $hydrateEvents = true)
     {
         $aggregate = new SetKey($this->client, 'aggregatesIndexByName:'.(new Slugify())->slugify($name));
-
         foreach ($aggregate as $aggregateKey) {
             if ($row = $this->client->hgetall($aggregateKey)) {
-                return $this->buildAggregate($row, $hydrateEvents);
+                return $this->buildAggregate($row);
             }
 
             return null;
@@ -78,29 +77,13 @@ class RedisAggregateRepository extends AbstractAggregateRepository implements Ag
     }
 
     /**
-     * @param Aggregate $aggregate
-     * @param array $parameters
+     * @param $name
      *
-     * @return Event[]
+     * @return bool
      */
-    public function queryEvents(Aggregate $aggregate, array $parameters = [])
+    public function exists($name)
     {
-        $results = [];
-
-        $from = (isset($parameters['from'])) ? new \DateTimeImmutable($parameters['from']) : new \DateTimeImmutable();
-        $to = (isset($parameters['to'])) ? new \DateTimeImmutable($parameters['to']) : new \DateTimeImmutable();
-
-        $eventMicroTimeArray = ($from && $to) ? $this->client->zrangebyscore('eventsMtIndex', $from->format('U'), $to->format('U')) : $this->client->zrange('eventsMt', 0, -1);
-
-        foreach ($this->client->smembers('eventsAggregatesIndexById:'.$aggregate->id()) as $eventKey){
-            if(in_array($eventKey, $eventMicroTimeArray)){
-                $event = $this->client->hgetall($eventKey);
-                $eventRepo = new RedisEventRepository($this->client);
-                $results[] = $eventRepo->buildEvent($event);
-            }
-        }
-
-        return $results;
+        return (new SetKey($this->client, 'aggregatesIndexByName:'.(new Slugify())->slugify($name))) ? true : false;
     }
 
     /**
@@ -127,31 +110,28 @@ class RedisAggregateRepository extends AbstractAggregateRepository implements Ag
 
     /**
      * @param array $row
-     * @param $hydrateEvents
      *
      * @return Aggregate
      */
-    public function buildAggregate(array $row, $hydrateEvents)
+    public function buildAggregate(array $row)
     {
         $aggregate = new Aggregate(
             new AggregateId($row['id']),
             $row['name']
         );
 
-        if($hydrateEvents){
-            $events = new SetKey($this->client, 'eventsAggregatesIndexById:'.$row['id']);
-            foreach ($events as $eventKey){
-                $event = $this->client->hgetall($eventKey);
-                $aggregate->addEvent(
-                    new Event(
-                        new EventId($event['id']),
-                        unserialize($event['aggregate']),
-                        $event['name'],
-                        unserialize($event['body']),
-                        $event['occurred_on']
-                    )
-                );
-            }
+        $events = new SetKey($this->client, 'eventsAggregatesIndexById:'.$row['id']);
+        foreach ($events as $eventKey){
+            $event = $this->client->hgetall($eventKey);
+            $aggregate->addEvent(
+                new Event(
+                    new EventId($event['id']),
+                    unserialize($event['aggregate']),
+                    $event['name'],
+                    unserialize($event['body']),
+                    $event['occurred_on']
+                )
+            );
         }
 
         return $aggregate;

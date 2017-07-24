@@ -11,7 +11,8 @@
 namespace SimpleEventStoreManager\Application;
 
 use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 
 class EventManager
 {
@@ -21,9 +22,9 @@ class EventManager
     private $driver;
 
     /**
-     * @var EventRepositoryInterface
+     * @var AggregateRepositoryInterface
      */
-    private $eventStore;
+    private $repo;
 
     /**
      * StreamManager constructor.
@@ -33,7 +34,7 @@ class EventManager
     public function __construct($driver = 'mongo', array $parameters = [])
     {
         $this->setDriver($driver);
-        $this->setEventStore($driver, $parameters);
+        $this->setRepo($driver, $parameters);
     }
 
     /**
@@ -69,12 +70,12 @@ class EventManager
      *
      * @param array $config
      */
-    private function setEventStore($driver, array $config = [])
+    private function setRepo($driver, array $config = [])
     {
-        $eventStore = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($driver).'EventStore';
+        $aggregateRepo = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($driver).'\\'.$this->normalizeDriverName($driver).'AggregateRepository';
         $driver = 'SimpleEventStoreManager\Infrastructure\Drivers\\'.$this->normalizeDriverName($driver).'Driver';
         $instance = (new $driver($config))->instance();
-        $this->eventStore = new $eventStore($instance);
+        $this->repo = new $aggregateRepo($instance);
     }
 
     /**
@@ -89,11 +90,14 @@ class EventManager
         return ucwords($driver);
     }
 
-    /**
-     * @return EventRepositoryInterface
-     */
-    public function eventStore()
+    public function stream($aggregateName, $page = 1, $maxPerPage = 25)
     {
-        return $this->eventStore;
+        /*$events = $this->query();
+
+        return array_slice($events, ($page - 1) * $maxPerPage, $maxPerPage);*/
+    }
+
+    public function storeEvent($aggregateName, EventInterface $event)
+    {
     }
 }

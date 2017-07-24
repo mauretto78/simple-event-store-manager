@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence;
+namespace SimpleEventStoreManager\Infrastructure\Persistence\Mongo;
 
 use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
@@ -19,7 +19,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class MongoEventRepository extends AbstractAggregateRepository implements EventRepositoryInterface
+class MongoEventRepository implements EventRepositoryInterface
 {
     /**
      * @var Database

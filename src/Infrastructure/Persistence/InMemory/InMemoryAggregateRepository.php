@@ -8,18 +8,15 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence;
+namespace SimpleEventStoreManager\Infrastructure\Persistence\InMemory;
 
 use Cocur\Slugify\Slugify;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Domain\EventStore\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventId;
 
-class InMemoryAggregateRepository extends AbstractAggregateRepository implements AggregateRepositoryInterface
+class InMemoryAggregateRepository implements AggregateRepositoryInterface
 {
     /**
      * @var array
@@ -39,7 +36,7 @@ class InMemoryAggregateRepository extends AbstractAggregateRepository implements
      *
      * @return Aggregate
      */
-    public function byId(AggregateId $id, $hydrateEvents = true)
+    public function byId(AggregateId $id)
     {
         return (isset($this->aggregates[(string) $id])) ? $this->aggregates[(string) $id] : null;
     }
@@ -49,7 +46,7 @@ class InMemoryAggregateRepository extends AbstractAggregateRepository implements
      *
      * @return Aggregate
      */
-    public function byName($name, $hydrateEvents = true)
+    public function byName($name)
     {
         $aggregateName = (new Slugify())->slugify($name);
         foreach ($this->aggregates as $aggregate){
@@ -72,14 +69,19 @@ class InMemoryAggregateRepository extends AbstractAggregateRepository implements
     }
 
     /**
-     * @param Aggregate $aggregate
-     * @param array $parameters
-     *
-     * @return Event[]
+     * @param $name
+     * @return bool
      */
-    public function queryEvents(Aggregate $aggregate, array $parameters = [])
+    public function exists($name)
     {
-        return $aggregate->events();
+        $aggregateName = (new Slugify())->slugify($name);
+        foreach ($this->aggregates as $aggregate){
+            if($aggregate->name() === $aggregateName){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

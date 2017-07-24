@@ -40,7 +40,7 @@ class MongoDriver implements DriverInterface
     {
         $this->setConfig($config);
         if (!$this->check()) {
-            throw new NotInstalledDriverCheckException('PDO is not loaded.');
+            throw new NotInstalledDriverCheckException('Pdo is not loaded.');
         }
 
         $this->connect();

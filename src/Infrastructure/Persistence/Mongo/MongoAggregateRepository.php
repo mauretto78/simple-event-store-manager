@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence;
+namespace SimpleEventStoreManager\Infrastructure\Persistence\Mongo;
 
 use Cocur\Slugify\Slugify;
 use MongoDB\Database;
@@ -19,7 +19,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class MongoAggregateRepository extends AbstractAggregateRepository implements AggregateRepositoryInterface
+class MongoAggregateRepository implements AggregateRepositoryInterface
 {
     /**
      * @var Database
@@ -50,14 +50,13 @@ class MongoAggregateRepository extends AbstractAggregateRepository implements Ag
 
     /**
      * @param AggregateId $id
-     * @param bool $hydrateEvents
      *
      * @return Aggregate
      */
-    public function byId(AggregateId $id, $hydrateEvents = true)
+    public function byId(AggregateId $id)
     {
         if($document = $this->aggregates->findOne(['id' => $id->id()])){
-            return $this->buildAggregate($document, $hydrateEvents);
+            return $this->buildAggregate($document);
         }
 
         return null;
@@ -65,14 +64,13 @@ class MongoAggregateRepository extends AbstractAggregateRepository implements Ag
 
     /**
      * @param $name
-     * @param bool $hydrateEvents
      *
      * @return Aggregate
      */
-    public function byName($name, $hydrateEvents = true)
+    public function byName($name)
     {
         if($document = $this->aggregates->findOne(['name' => (new Slugify())->slugify($name)])){
-            return $this->buildAggregate($document, $hydrateEvents);
+            return $this->buildAggregate($document);
         }
 
         return null;
@@ -87,35 +85,12 @@ class MongoAggregateRepository extends AbstractAggregateRepository implements Ag
     }
 
     /**
-     * @param Aggregate $aggregate
-     * @param array $parameters
-     *
-     * @return Event[]
+     * @param $name
+     * @return bool
      */
-    public function queryEvents(Aggregate $aggregate, array $parameters = [])
+    public function exists($name)
     {
-        $filterArray = ['aggregate.id' => (string) $aggregate->id()];
-        $filterArray['occurred_on'] = [];
-
-        if (isset($parameters['from'])) {
-            $from = new \DateTimeImmutable($parameters['from']);
-            array_push($filterArray['occurred_on'], ['$gte' => $from->format('Y-m-d H:i:s.u')]);
-        }
-
-        if (isset($parameters['to'])) {
-            $to = new \DateTimeImmutable($parameters['to']);
-            array_push($filterArray['occurred_on'], ['$lte' => $to->format('Y-m-d H:i:s.u')]);
-        }
-
-        $document = $this->events->find([]);
-
-        $results = [];
-        foreach ($document->toArray() as $event){
-            $eventRepo = new MongoEventRepository($this->mongo);
-            $results[] = $eventRepo->buildEvent($event);
-        }
-
-        return $results;
+        return ($this->aggregates->findOne(['name' => (new Slugify())->slugify($name)])) ? true : false;
     }
 
     /**
@@ -143,26 +118,24 @@ class MongoAggregateRepository extends AbstractAggregateRepository implements Ag
      *
      * @return Aggregate
      */
-    public function buildAggregate(BSONDocument $document, $hydrateEvents)
+    public function buildAggregate(BSONDocument $document)
     {
         $aggregate = new Aggregate(
             new AggregateId($document->id),
             $document->name
         );
 
-        if($hydrateEvents){
-            $events = $this->events->find(['aggregate.id' => (string) $aggregate->id()])->toArray();
-            foreach ($events as $event){
-                $aggregate->addEvent(
-                    new Event(
-                        new EventId($event->id),
-                        $aggregate,
-                        $event->name,
-                        unserialize($event->body),
-                        $event->occurred_on
-                    )
-                );
-            }
+        $events = $this->events->find(['aggregate.id' => (string) $aggregate->id()])->toArray();
+        foreach ($events as $event){
+            $aggregate->addEvent(
+                new Event(
+                    new EventId($event->id),
+                    $aggregate,
+                    $event->name,
+                    unserialize($event->body),
+                    $event->occurred_on
+                )
+            );
         }
 
         return $aggregate;

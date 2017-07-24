@@ -39,7 +39,7 @@ class PDODriver implements DriverInterface
     {
         $this->setConfig($config);
         if (!$this->check()) {
-            throw new NotInstalledDriverCheckException('PDO is not loaded.');
+            throw new NotInstalledDriverCheckException('Pdo is not loaded.');
         }
 
         $this->connect();
@@ -65,7 +65,7 @@ class PDODriver implements DriverInterface
 
         foreach (array_keys($config) as $key) {
             if (!in_array($key, $allowedConfigKeys)) {
-                throw new MalformedDriverConfigException('PDO Driver: malformed config parameters');
+                throw new MalformedDriverConfigException('Pdo Driver: malformed config parameters');
             }
         }
 

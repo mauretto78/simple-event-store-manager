@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Persistence;
+namespace SimpleEventStoreManager\Infrastructure\Persistence\Redis;
 
 use Predis\Client;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
@@ -16,7 +16,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class RedisEventRepository extends AbstractAggregateRepository implements EventRepositoryInterface
+class RedisEventRepository implements EventRepositoryInterface
 {
     /**
      * @var Client
@@ -70,7 +70,6 @@ class RedisEventRepository extends AbstractAggregateRepository implements EventR
 
         $this->client->sadd('eventsAggregatesIndexById:'.$event->aggregate()->id(), [$redisKey]);
         $this->client->sadd('eventsAggregatesIndexByName:'.$event->aggregate()->name(), [$redisKey]);
-        $this->client->zadd('eventsMtIndex', [$redisKey => number_format(microtime(true), 0, '.', '')]);
     }
 
     /**
