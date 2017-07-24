@@ -100,7 +100,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
      */
     public function save(Aggregate $aggregate)
     {
-        if(null === $this->byName($aggregate->name())){
+        if(false === $this->exists($aggregate->name())){
             $this->aggregates->insertOne([
                 'id' => (string) $aggregate->id(),
                 'name' => $aggregate->name()
@@ -109,7 +109,9 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
 
         /** @var Event $event */
         foreach ($aggregate->events() as $event){
-            $this->saveEvent($event, $aggregate);
+            if(false === $this->existsEvent($event)){
+                $this->saveEvent($event, $aggregate);
+            }
         }
     }
 
@@ -135,6 +137,16 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
             'body' => $eventBody,
             'occurred_on' => $eventOccurredOn
         ]);
+    }
+
+    /**
+     * @param EventInterface $event
+     *
+     * @return bool
+     */
+    private function existsEvent(EventInterface $event)
+    {
+        return ($this->events->findOne(['id' => (string) $event->id()])) ? true : false;
     }
 
     /**

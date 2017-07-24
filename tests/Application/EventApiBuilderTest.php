@@ -52,22 +52,23 @@ class EventApiBuilderTest extends BaseTestCase
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $this->eventManager->storeEvent(
-            'Dummy Aggregate',
-            new Event(
-                $eventId,
-                $name,
-                $body
-            )
+        $event = new Event(
+            $eventId,
+            $name,
+            $body
+        );
+        $event2 = new Event(
+            $eventId2,
+            $name2,
+            $body2
         );
 
-        $this->eventManager->storeEvent(
+        $this->eventManager->storeEvents(
             'Dummy Aggregate',
-            new Event(
-                $eventId2,
-                $name2,
-                $body2
-            )
+            [
+                $event,
+                $event2
+            ]
         );
     }
 

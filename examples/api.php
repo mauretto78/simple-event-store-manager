@@ -11,6 +11,8 @@
 use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventApiBuilder;
 use SimpleEventStoreManager\Application\EventManager;
+use SimpleEventStoreManager\Domain\Model\Event;
+use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -19,9 +21,13 @@ require __DIR__.'/../app/bootstrap.php';
 $request = Request::createFromGlobals();
 
 // instantiate $eventsQuery
-$eventManager = new EventManager('mongo', $config['mongo']);
+$eventManager = new EventManager('mongo', $config['mongo'], [
+    'elastic' => true,
+    'elastic_hosts' => $config['elastic']
+]);
+
 $eventQuery = new EventApiBuilder(
-    $eventManager->eventStore(),
+    $eventManager,
     // here you can use:
     // - JsonEventDataTransformer
     // - YamlEventDataTransformer
@@ -34,6 +40,5 @@ $eventQuery = new EventApiBuilder(
 
 // send Response
 $page = (null !== $page = $request->query->get('page')) ? $page : 1;
-$maxPerPage = 10;
-$response = $eventQuery->response($page, $maxPerPage);
+$response = $eventQuery->response($request->query->get('aggregate'), $page);
 $response->send();

@@ -10,11 +10,14 @@
 
 namespace SimpleEventStoreManager\Application;
 
+use Elasticsearch\ClientBuilder;
 use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
+use SimpleEventStoreManager\Application\Exceptions\NotValidEventException;
 use SimpleEventStoreManager\Domain\Model\Aggregate;
 use SimpleEventStoreManager\Domain\Model\AggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
+use SimpleEventStoreManager\Infrastructure\Services\ElasticService;
 
 class EventManager
 {
@@ -29,14 +32,24 @@ class EventManager
     private $repo;
 
     /**
-     * StreamManager constructor.
+     * @var ElasticService
+     */
+    private $elastic;
+
+    /**
+     * EventManager constructor.
      * @param string $driver
      * @param array $parameters
+     * @param array $elasticConfig
      */
-    public function __construct($driver = 'mongo', array $parameters = [])
+    public function __construct($driver = 'mongo', array $parameters = [], array $elasticConfig = [])
     {
         $this->setDriver($driver);
         $this->setRepo($driver, $parameters);
+
+        if(isset($elasticConfig['elastic']) && $elasticConfig['elastic'] === true){
+            $this->setElastic($elasticConfig['elastic_hosts']);
+        }
     }
 
     /**
@@ -70,14 +83,26 @@ class EventManager
     /**
      * @param $driver
      *
-     * @param array $config
+     * @param array $parameters
      */
-    private function setRepo($driver, array $config = [])
+    private function setRepo($driver, array $parameters = [])
     {
         $aggregateRepo = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($driver).'AggregateRepository';
         $driver = 'SimpleEventStoreManager\Infrastructure\Drivers\\'.$this->normalizeDriverName($driver).'Driver';
-        $instance = (new $driver($config))->instance();
+        $instance = (new $driver($parameters))->instance();
         $this->repo = new $aggregateRepo($instance);
+    }
+
+    /**
+     * @param array $hosts
+     */
+    private function setElastic(array $hosts = [])
+    {
+        $this->elastic = new ElasticService(
+            ClientBuilder::create()
+                ->setHosts($hosts)
+                ->build()
+        );
     }
 
     /**
@@ -101,7 +126,7 @@ class EventManager
      */
     public function stream($aggregateName, $page = 1, $maxPerPage = 25)
     {
-        return ($this->streamCount($aggregateName)) ? array_slice($this->repo->byName($aggregateName)->events(), ($page - 1) * $maxPerPage, $maxPerPage) : null;
+        return ($this->streamCount($aggregateName)) ? array_slice($this->repo->byName($aggregateName)->events(), ($page - 1) * $maxPerPage, $maxPerPage) : [];
     }
 
     /**
@@ -116,21 +141,41 @@ class EventManager
 
     /**
      * @param $aggregateName
-     * @param EventInterface $event
+     * @param array EventInterface[] $events
+     * @throws NotValidEventException
      */
-    public function storeEvent($aggregateName, EventInterface $event)
+    public function storeEvents($aggregateName, array $events = [])
     {
-        if($this->repo->exists($aggregateName)){
-            $aggregate = $this->repo->byName($aggregateName);
-            $aggregate->addEvent($event);
-        } else {
-            $aggregate = new Aggregate(
-                new AggregateId(),
-                $aggregateName
-            );
+        $aggregate = $this->getAggregateFromName($aggregateName);
+        foreach ($events as $event){
+            if(!$event instanceof EventInterface){
+                throw new NotValidEventException('Not a valid instance of EventInterface was provided.');
+            }
+
             $aggregate->addEvent($event);
         }
 
         $this->repo->save($aggregate);
+
+        if($this->elastic){
+            $this->elastic->addAggregateToIndex($aggregate);
+        }
+    }
+
+    /**
+     * @param $aggregateName
+     *
+     * @return Aggregate
+     */
+    private function getAggregateFromName($aggregateName)
+    {
+        if($this->repo->exists($aggregateName)){
+            return $this->repo->byName($aggregateName);
+        }
+
+        return new Aggregate(
+            new AggregateId(),
+            $aggregateName
+        );
     }
 }

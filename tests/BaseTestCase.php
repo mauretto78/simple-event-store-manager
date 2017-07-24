@@ -10,12 +10,12 @@
 
 namespace SimpleEventStoreManager\Tests;
 
+use Elasticsearch\Client;
+use Elasticsearch\ClientBuilder;
 use MongoDB\Client as MongoClient;
 use MongoDB\Database;
 use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
-use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventId;
 
 abstract class BaseTestCase extends TestCase
 {
@@ -35,6 +35,11 @@ abstract class BaseTestCase extends TestCase
     private static $redis = null;
 
     /**
+     * @var null|Client
+     */
+    private static $elastic = null;
+
+    /**
      * @var array
      */
     protected $mongo_parameters;
@@ -50,6 +55,11 @@ abstract class BaseTestCase extends TestCase
     protected $redis_parameters;
 
     /**
+     * @var array
+     */
+    protected $elastic_parameters;
+
+    /**
      * setup configuration.
      */
     public function setUp()
@@ -59,6 +69,7 @@ abstract class BaseTestCase extends TestCase
         $this->mongo_parameters = $config['mongo'];
         $this->pdo_parameters = $config['pdo'];
         $this->redis_parameters = $config['redis'];
+        $this->elastic_parameters = $config['elastic'];
 
         $this->createConnections();
         $this->createMySQLSchema();
@@ -144,6 +155,19 @@ abstract class BaseTestCase extends TestCase
                 die('Redis Error: ' . $e->getMessage());
             }
         }
+
+        // Elastic connection
+        if(self::$elastic == null){
+            try {
+                $hosts = $this->elastic_parameters ?: [];
+                self::$elastic = ClientBuilder::create()
+                    ->setHosts($hosts)
+                    ->build();
+            } catch (\Exception $e) {
+                die('Redis Error: ' . $e->getMessage());
+            }
+        }
+
     }
 
     /**
@@ -154,6 +178,7 @@ abstract class BaseTestCase extends TestCase
         $this->destroyMySQLSchema();
         $this->destroyMongoDb();
         $this->destroyRedis();
+        $this->destroyElastic();
     }
 
     /**
@@ -180,5 +205,19 @@ abstract class BaseTestCase extends TestCase
     private function destroyRedis()
     {
         self::$redis->flushall();
+    }
+
+    /**
+     * destroyElastic
+     */
+    private function destroyElastic()
+    {
+        $params = [
+            'index' => 'dummy-aggregate'
+        ];
+
+        if(self::$elastic->indices()->exists($params)){
+            self::$elastic->indices()->delete($params);
+        }
     }
 }

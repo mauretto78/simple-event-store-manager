@@ -31,14 +31,16 @@ Avaliable drivers:
 * `pdo` 
 * `redis` 
 
-### Collecting Events
+### Store Events
 
 Please note that your events MUST implement `EventInterface`. You can use the standard `Event` class or create your own events.
+
+You MUST specify the **name of the aggregate** to which the events belong.
 
 Consider this full example:
 
 ```php
-use SimpleEventStoreManager\Application\eventManager;
+use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Domain\Model\Event;
 
@@ -53,30 +55,63 @@ $myEvent = new Event(
     ]
 );
 
-// store an event
-$eventManager->eventStore()->store($myEvent);
+$myEventId2 = new EventId();
+$myEvent2 = new Event(
+    $myEventId2,
+    'Fully\\Qualified\\Event\\Name2',
+    [
+        'key' => 'value',
+        'key2' => 'value2',
+        'key3' => 'value3',
+    ]
+);
 
-// restore an event
-$eventManager->eventStore()->restore($myEventId);
-
-// get events count
-$eventManager->eventStore()->eventsCount();
-
-```
-
-### Query Stored Events
-
-You can query stored events in a range of dates:
-
-```php
-// ..
-
-$eventManager->eventStore()->eventsInRangeDate(
-    new \DateTimeImmutable('yesterday')
-    new \DateTimeImmutable('now')
+$eventManager->storeEvents(
+    'Your Aggregate Name',
+    [
+        $myEvent,
+        $myEvent2
+    ]
 );
 
 ```
+
+### Get Event Streams
+
+You can get stored events by the name of the aggregate. Please note you can pass to `stream` method two optional arguments, `$page` and `$maxPerPage`:
+
+```php
+$stream = $eventManager->stream('Your Aggregate Name', $page, $maxPerPage);
+foreach($stream as $event){
+    // ..
+}
+
+```
+
+## Sending events to Elastic
+
+You can send Events to an ElasticSearch server. Simply pass an optional array to instance `EventManager` class:
+
+```php
+$eventManager = new EventManager('mongo', $config['mongo'], [
+    'elastic' => true,
+    'elastic_hosts' => $config['elastic']
+]);
+
+// ..
+$eventManager->storeEvents(
+    'Your Aggregate Name',
+    [
+        $myEvent,
+        $myEvent2
+    ]
+);
+
+```
+
+Please refer to [Elastic PHP official page](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_configuration.html) to get more details about configuration.
+
+Events will automatically be sent to Elastic server.
 
 ## Recording Events
 
@@ -156,8 +191,10 @@ In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tr
 
 ```php
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventQuery;
+use SimpleEventStoreManager\Application\EventApiBuilder;
 use SimpleEventStoreManager\Application\EventManager;
+use SimpleEventStoreManager\Domain\Model\Event;
+use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -166,9 +203,13 @@ require __DIR__.'/../app/bootstrap.php';
 $request = Request::createFromGlobals();
 
 // instantiate $eventsQuery
-$eventManager = new EventManager('mongo', $config['mongo']);
-$eventQuery = new EventQuery(
-    $eventManager->eventStore(),
+$eventManager = new EventManager('mongo', $config['mongo'], [
+    'elastic' => true,
+    'elastic_hosts' => $config['elastic']
+]);
+
+$eventQuery = new EventApiBuilder(
+    $eventManager,
     new JsonEventDataTransformer(
         SerializerBuilder::create()->build(),
         $request
@@ -177,8 +218,7 @@ $eventQuery = new EventQuery(
 
 // send Response
 $page = (null !== $page = $request->query->get('page')) ? $page : 1;
-$maxPerPage = 10;
-$response = $eventQuery->paginate($page, $maxPerPage);
+$response = $eventQuery->response($request->query->get('aggregate'), $page);
 $response->send();
 
 ```
