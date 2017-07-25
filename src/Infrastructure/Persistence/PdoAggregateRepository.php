@@ -42,17 +42,21 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     public function byId(AggregateId $id)
     {
         $aggregateId = (string) $id->id();
-        $query = 'SELECT *
-                FROM `event_aggregates` 
+        $query = 'SELECT
+                `event_aggregates`.id AS `aggregate_id`,
+                `event_aggregates`.name AS `aggregate_name`,
+                `events`.id AS `event_id`,
+                `events`.name AS `event_name`,
+                `events`.body AS `event_body`,
+                `events`.occurred_on AS `event_occurred_on`
+                FROM `event_aggregates` JOIN `events` 
+                ON `event_aggregates`.id=`events`.aggregate_id 
                 WHERE `event_aggregates`.id=:id';
         $stmt = $this->pdo->prepare($query);
         $stmt->bindParam(':id', $aggregateId);
         $stmt->execute();
 
         $row = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-        var_dump($row);
-
         if (!empty($row)) {
             return $this->buildAggregate($row);
         }
@@ -69,12 +73,12 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     {
         $name = (new Slugify())->slugify($name);
         $query = 'SELECT 
-            `event_aggregates`.id as `aggregate_id`,
-            `event_aggregates`.name as `aggregate_name`,
-            `events`.id as `event_id`,
-            `events`.name as `event_name`,
-            `events`.body as `event_body`,
-            `events`.occurred_on as `event_occurred_on`
+            `event_aggregates`.id AS `aggregate_id`,
+            `event_aggregates`.name AS `aggregate_name`,
+            `events`.id AS `event_id`,
+            `events`.name AS `event_name`,
+            `events`.body AS `event_body`,
+            `events`.occurred_on AS `event_occurred_on`
             FROM `event_aggregates` JOIN `events` 
             ON `event_aggregates`.id=`events`.aggregate_id 
             WHERE `event_aggregates`.name=:name';
