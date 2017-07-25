@@ -49,9 +49,9 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
                 `events`.name AS `event_name`,
                 `events`.body AS `event_body`,
                 `events`.occurred_on AS `event_occurred_on`
-                FROM `event_aggregates` JOIN `events` 
-                ON `event_aggregates`.id=`events`.aggregate_id 
-                WHERE `event_aggregates`.id=:id';
+                FROM `event_aggregates` INNER JOIN `events` 
+                ON `event_aggregates`.id = `events`.aggregate_id 
+                WHERE `event_aggregates`.id = :id';
         $stmt = $this->pdo->prepare($query);
         $stmt->bindParam(':id', $aggregateId);
         $stmt->execute();
@@ -79,9 +79,9 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
             `events`.name AS `event_name`,
             `events`.body AS `event_body`,
             `events`.occurred_on AS `event_occurred_on`
-            FROM `event_aggregates` JOIN `events` 
-            ON `event_aggregates`.id=`events`.aggregate_id 
-            WHERE `event_aggregates`.name=:name';
+            FROM `event_aggregates` INNER JOIN `events` 
+            ON `event_aggregates`.id = `events`.aggregate_id 
+            WHERE `event_aggregates`.name = :name';
         $stmt = $this->pdo->prepare($query);
         $stmt->bindParam(':name', $name);
         $stmt->execute();
