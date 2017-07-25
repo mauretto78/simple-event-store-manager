@@ -37,7 +37,7 @@ class AggregateRepositoryTest extends BaseTestCase
         $this->repos = [
             new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
             new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
-            //new PdoAggregateRepository((new PdoDriver($this->pdo_parameters))->instance()),
+            new PdoAggregateRepository((new PdoDriver($this->pdo_parameters))->instance()),
             new RedisAggregateRepository((new RedisDriver($this->redis_parameters))->instance()),
         ];
     }

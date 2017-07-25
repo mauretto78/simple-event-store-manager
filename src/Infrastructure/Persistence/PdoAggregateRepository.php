@@ -41,7 +41,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      */
     public function byId(AggregateId $id)
     {
-        $aggregateId = $id->id();
+        $aggregateId = (string) $id->id();
         $stmt = $this->pdo->prepare($this->getAggregateByIdSql());
         $stmt->bindParam(':id', $aggregateId);
         $stmt->execute();
