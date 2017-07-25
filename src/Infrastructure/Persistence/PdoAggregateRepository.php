@@ -152,7 +152,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      */
     private function saveEvent(EventInterface $event, Aggregate $aggregate)
     {
-        $eventId = $event->id();
+        $eventId = (string) $event->id();
         $eventAggregateId = $aggregate->id();
         $eventAggregateName = $aggregate->name();
         $eventName = $event->name();
@@ -168,8 +168,6 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->bindParam(':body', $eventBody);
         $stmt->bindParam(':occurred_on', $eventOccurredOn);
         $stmt->execute();
-
-        echo $stmt->rowCount();
     }
 
     /**
