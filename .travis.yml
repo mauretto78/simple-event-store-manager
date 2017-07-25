@@ -21,8 +21,9 @@ global:
 before_install:
   - if [[ $TRAVIS_PHP_VERSION = "5.6.6" ]]; then echo yes | pecl install mongodb; fi
   - echo "extension=mongodb.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - .travis_mysql_5.7.sh
-  - .mysql-reset-root-password.sh
+  - chmod +x ./scripts/* #thanks https://medium.com/@psaunders
+  - ./script/travis_mysql_5.7.sh
+  - ./script/mysql-reset-root-password.sh
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('travis') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - mysql -e 'CREATE DATABASE travis;'
 
