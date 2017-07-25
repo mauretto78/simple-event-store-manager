@@ -1,6 +1,6 @@
 language: php
 
-sudo: true
+sudo: false
 
 dist: precise
 
@@ -12,7 +12,7 @@ php:
 services:
   - elasticsearch
   - mongodb
-  - mysql
+  - mysql-5.7
   - redis-server
 
 global:
@@ -25,7 +25,6 @@ before_install:
   - mysql -e 'CREATE DATABASE travis;'
 
 before_script:
-  - bash .travis.install-mysql-5.7.sh
   - cp config/parameters.travis.yml config/parameters.yml
   - composer self-update
   - composer install --prefer-source --no-interaction --dev
