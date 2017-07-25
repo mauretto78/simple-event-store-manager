@@ -143,8 +143,6 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         foreach ($aggregate->events() as $event){
             $this->saveEvent($event, $aggregate);
         }
-
-        echo $stmt->rowCount();
     }
 
     /**
@@ -161,6 +159,17 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $eventBody = $event->body();
         $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
 
+        var_dump(
+            [
+                $eventId,
+                $eventAggregateId,
+                $eventAggregateName,
+                $eventName,
+                $eventBody,
+                $eventOccurredOn
+            ]
+        )
+
         $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id', $eventId);
@@ -169,15 +178,10 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->bindParam(':name', $eventName);
         $stmt->bindParam(':body', $eventBody);
         $stmt->bindParam(':occurred_on', $eventOccurredOn);
-
-        try
-        {
-            $stmt->execute();
-        } catch (\Exception $e){
-            echo $e->getMessage();
-        }
+        $stmt->execute();
 
         echo $stmt->rowCount();
+        var_dump($stmt->debugDumpParams());
     }
 
     /**
