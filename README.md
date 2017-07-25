@@ -117,15 +117,24 @@ $eventManager->storeEvents(
 
 ```
 
-Now events will automatically be sent to the Elastic server. 
+Now events will automatically be sent to Elastic server. 
 
 Events are indexed this way, look at the example:
 
-* `index` : 'aggregate-name',
-* `type` : 'UserWasCreated', // Event class name
-* `id` : 'c4a760a8-dbcf-5254-a0d9-6a4474bd1b62', // eventId
-* `body` : ['name' => 'Mauro', 'email' => 'mauretto@gmail.com' ...] // Full event body
- 
+```php
+Array
+(
+    'index' => 'aggregate-name'
+    'type' => 'UserWasCreated', // Event class
+    'id' => 'c4a760a8-dbcf-5254-a0d9-6a4474bd1b62', // eventId
+    'body' => [
+            'name' => 'Mauro', 
+            'email' => 'mauretto@gmail.com' 
+            ...
+        ] // Full event body        
+)
+```
+
 ## Recording Events
 
 You can record your Domain Events using `EventRecorder` class or `EventRecorderCapabilities` trait directly into your Entities.
