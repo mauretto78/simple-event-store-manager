@@ -42,8 +42,16 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     public function byId(AggregateId $id)
     {
         $aggregateId = (string) $id->id();
-        $query = 'SELECT *
-                FROM `event_aggregates` WHERE event_aggregates.id=:id';
+        $query = 'SELECT
+                `event_aggregates`.id as `aggregate_id`,
+                `event_aggregates`.name as `aggregate_name`,
+                `events`.id as `event_id`,
+                `events`.name as `event_name`,
+                `events`.body as `event_body`,
+                `events`.occurred_on as `event_occurred_on`
+                FROM `event_aggregates` JOIN `events` 
+                ON `event_aggregates`.id=`events`.aggregate_id 
+                WHERE `event_aggregates`.id=:id';
         $stmt = $this->pdo->prepare($query);
         $stmt->bindParam(':id', $aggregateId);
         $stmt->execute();
@@ -65,13 +73,15 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     {
         $name = (new Slugify())->slugify($name);
         $query = 'SELECT 
-            event_aggregates.id as aggregate_id,
-            event_aggregates.name as aggregate_name,
-            events.id as event_id,
-            events.name as event_name,
-            events.body as event_body,
-            events.occurred_on as event_occurred_on
-            FROM `event_aggregates` JOIN `events` ON event_aggregates.id=events.aggregate_id WHERE event_aggregates.name=:name';
+            `event_aggregates`.id as `aggregate_id`,
+            `event_aggregates`.name as `aggregate_name`,
+            `events`.id as `event_id`,
+            `events`.name as `event_name`,
+            `events`.body as `event_body`,
+            `events`.occurred_on as `event_occurred_on`
+            FROM `event_aggregates` JOIN `events` 
+            ON `event_aggregates`.id=`events`.aggregate_id 
+            WHERE `event_aggregates`.name=:name';
         $stmt = $this->pdo->prepare($query);
         $stmt->bindParam(':name', $name);
         $stmt->execute();
