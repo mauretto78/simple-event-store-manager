@@ -157,18 +157,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $eventAggregateName = $aggregate->name();
         $eventName = $event->name();
         $eventBody = $event->body();
-        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
-
-        var_dump(
-            [
-                $eventId,
-                $eventAggregateId,
-                $eventAggregateName,
-                $eventName,
-                $eventBody,
-                $eventOccurredOn
-            ]
-        );
+        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
 
         $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';
         $stmt = $this->pdo->prepare($sql);
