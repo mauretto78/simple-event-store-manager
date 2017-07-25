@@ -65,8 +65,9 @@ class AggregateRepositoryTest extends BaseTestCase
                 'text' => 'Dolor lorem ipso facto dixit'
             ];
 
+            $aggregateId = new AggregateId();
             $aggregate = new Aggregate(
-                $aggregateId = new AggregateId(),
+                $aggregateId,
                 'Dummy Aggregate'
             );
             $aggregate->addEvent(
