@@ -78,7 +78,7 @@ $eventManager->storeEvents(
 
 ### Get Event Streams
 
-You can get stored events by the name of the aggregate. Please note you can pass to `stream` method two optional arguments, `$page` and `$maxPerPage`:
+You can get access to stored events only by the name of the aggregate they belongs. 
 
 ```php
 $stream = $eventManager->stream('Your Aggregate Name', $page, $maxPerPage);
@@ -87,15 +87,23 @@ foreach($stream as $event){
 }
 
 ```
+Please note you can pass to `stream` method two optional arguments, `$page` and `$maxPerPage`.
 
 ## Sending events to Elastic
 
-You can send Events to an ElasticSearch server. Simply pass an optional array to instance `EventManager` class:
+You can send events to an ElasticSearch server. Simply pass an optional array when you instance `EventManager` class.
+               
+Please refer to [Elastic PHP official page](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_configuration.html) to get more details about hosts configuration.
+
+Take a look at this example:
 
 ```php
-$eventManager = new EventManager('mongo', $config['mongo'], [
+$eventManager = new EventManager('mongo', $params, [
     'elastic' => true,
-    'elastic_hosts' => $config['elastic']
+    'elastic_hosts' => [
+        'host' => 'localhost',
+        'port' => '9200'
+    ]
 ]);
 
 // ..
@@ -109,10 +117,15 @@ $eventManager->storeEvents(
 
 ```
 
-Please refer to [Elastic PHP official page](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_configuration.html) to get more details about configuration.
+Now events will automatically be sent to the Elastic server. 
 
-Events will automatically be sent to Elastic server.
+Events are indexed this way, look at the example:
 
+* `index` : 'aggregate-name',
+* `type` : 'UserWasCreated', // Event class name
+* `id` : 'c4a760a8-dbcf-5254-a0d9-6a4474bd1b62', // eventId
+* `body` : ['name' => 'Mauro', 'email' => 'mauretto@gmail.com' ...] // Full event body
+ 
 ## Recording Events
 
 You can record your Domain Events using `EventRecorder` class or `EventRecorderCapabilities` trait directly into your Entities.
