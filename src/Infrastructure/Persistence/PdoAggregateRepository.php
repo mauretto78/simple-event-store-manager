@@ -130,7 +130,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      */
     public function save(Aggregate $aggregate)
     {
-        $AggregateId = $aggregate->id();
+        $AggregateId = (string) $aggregate->id();
         $AggregateName = $aggregate->name();
 
         $sql = 'INSERT INTO `event_aggregates` (`id`, `name`) VALUES (:id, :name)';
@@ -157,20 +157,14 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $eventAggregateName = $aggregate->name();
         $eventName = $event->name();
         $eventBody = $event->body();
-        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s');
+        $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
 
-        $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';
+        $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`) VALUES (:id, :aggregate_id, :aggregate_name)';
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id', $eventId);
         $stmt->bindParam(':aggregate_id', $eventAggregateId);
         $stmt->bindParam(':aggregate_name', $eventAggregateName);
-        $stmt->bindParam(':name', $eventName);
-        $stmt->bindParam(':body', $eventBody);
-        $stmt->bindParam(':occurred_on', $eventOccurredOn);
         $stmt->execute();
-
-        echo $stmt->rowCount();
-        var_dump($stmt->debugDumpParams());
     }
 
     /**
