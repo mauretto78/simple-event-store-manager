@@ -13,7 +13,7 @@ namespace SimpleEventStoreManager\Application;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class EventApiBuilder
+class EventQuery
 {
     /**
      * @var DataTransformerInterface
@@ -26,7 +26,7 @@ class EventApiBuilder
     private $eventManger;
 
     /**
-     * EventApiBuilder constructor.
+     * EventQuery constructor.
      * @param EventManager $eventManger
      * @param DataTransformerInterface $dataTransformer
      */
@@ -44,7 +44,7 @@ class EventApiBuilder
      *
      * @return Response
      */
-    public function response($aggregateName, $page = 1, $maxPerPage = 25)
+    public function aggregate($aggregateName, $page = 1, $maxPerPage = 25)
     {
         return $this->dataTransformer->transform(
             $this->eventManger->stream($aggregateName, $page, $maxPerPage),

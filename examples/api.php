@@ -9,7 +9,7 @@
  */
 
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventApiBuilder;
+use SimpleEventStoreManager\Application\EventQuery;
 use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
@@ -26,7 +26,7 @@ $eventManager = new EventManager('mongo', $config['mongo'], [
     'elastic_hosts' => $config['elastic']
 ]);
 
-$eventQuery = new EventApiBuilder(
+$eventQuery = new EventQuery(
     $eventManager,
     // here you can use:
     // - JsonEventDataTransformer
@@ -40,5 +40,5 @@ $eventQuery = new EventApiBuilder(
 
 // send Response
 $page = (null !== $page = $request->query->get('page')) ? $page : 1;
-$response = $eventQuery->response($request->query->get('aggregate'), $page);
+$response = $eventQuery->aggregate($request->query->get('aggregate'), $page);
 $response->send();

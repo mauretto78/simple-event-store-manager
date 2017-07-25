@@ -9,7 +9,7 @@
  */
 
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventApiBuilder;
+use SimpleEventStoreManager\Application\EventQuery;
 
 use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Domain\Model\Event;
@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Yaml\Yaml;
 
-class EventApiBuilderTest extends BaseTestCase
+class EventQueryTest extends BaseTestCase
 {
     /**
      * @var EventManager
@@ -78,7 +78,7 @@ class EventApiBuilderTest extends BaseTestCase
     public function it_should_store_events_perform_queries_and_retrive_json_response()
     {
         // json representation events
-        $eventApiBuilder = new EventApiBuilder(
+        $eventQuery = new EventQuery(
             $this->eventManager,
             new JsonEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -86,7 +86,7 @@ class EventApiBuilderTest extends BaseTestCase
             )
         );
 
-        $response = $eventApiBuilder->response('Dummy Aggregate', 1, 1);
+        $response = $eventQuery->aggregate('Dummy Aggregate', 1, 1);
         $content = json_decode($response->getContent());
 
         $this->assertInstanceOf(Response::class, $response);
@@ -95,7 +95,7 @@ class EventApiBuilderTest extends BaseTestCase
         $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
         $this->assertEquals(2, $content->_meta->total_count);
 
-        $response = $eventApiBuilder->response('Dummy Aggregate',5);
+        $response = $eventQuery->aggregate('Dummy Aggregate',5);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
@@ -105,7 +105,7 @@ class EventApiBuilderTest extends BaseTestCase
     public function it_should_store_events_perform_queries_and_retrive_xml_response()
     {
         // xml representation events
-        $eventsQuery = new EventApiBuilder(
+        $eventsQuery = new EventQuery(
             $this->eventManager,
             new XmlEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -113,7 +113,7 @@ class EventApiBuilderTest extends BaseTestCase
             )
         );
 
-        $response = $eventsQuery->response('Dummy Aggregate', 1, 1);
+        $response = $eventsQuery->aggregate('Dummy Aggregate', 1, 1);
         $content = simplexml_load_string($response->getContent());
 
         $this->assertInstanceOf(Response::class, $response);
@@ -122,7 +122,7 @@ class EventApiBuilderTest extends BaseTestCase
         $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
         $this->assertEquals(2, (string) $content->entry->total_count);
 
-        $response = $eventsQuery->response('Dummy Aggregate',5);
+        $response = $eventsQuery->aggregate('Dummy Aggregate',5);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
@@ -132,7 +132,7 @@ class EventApiBuilderTest extends BaseTestCase
     public function it_should_store_events_perform_queries_and_retrive_yaml_response()
     {
         // yaml representation events
-        $eventsQuery = new EventApiBuilder(
+        $eventsQuery = new EventQuery(
             $this->eventManager,
             new YamlEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -140,7 +140,7 @@ class EventApiBuilderTest extends BaseTestCase
             )
         );
 
-        $response = $eventsQuery->response('Dummy Aggregate', 1, 1);
+        $response = $eventsQuery->aggregate('Dummy Aggregate', 1, 1);
         $content = Yaml::parse($response->getContent());
 
         $this->assertInstanceOf(Response::class, $response);
@@ -152,7 +152,7 @@ class EventApiBuilderTest extends BaseTestCase
         $this->assertEquals(2, $content['_meta']['total_pages']);
         $this->assertEquals(2, $content['_meta']['total_count']);
 
-        $response = $eventsQuery->response('Dummy Aggregate',5);
+        $response = $eventsQuery->aggregate('Dummy Aggregate',5);
         $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 }
