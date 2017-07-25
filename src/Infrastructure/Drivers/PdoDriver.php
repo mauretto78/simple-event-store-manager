@@ -105,6 +105,7 @@ class PdoDriver implements DriverInterface
           `aggregate_name` varchar(255),
           `name` varchar(255) DEFAULT NULL,
           `body` longtext,
+          `occurred_on` datetime(6),
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
