@@ -99,14 +99,15 @@ class PdoDriver implements DriverInterface
      */
     private function createSchema()
     {
-        $sqlArray = [];
-        $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `event_aggregates` (
+        $query = 'CREATE TABLE IF NOT EXISTS `event_aggregates` (
           `id` varchar(255) NOT NULL DEFAULT \'\',
           `name` varchar(255) UNIQUE,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8';
+        $stmt = $this->instance->prepare($query);
+        $stmt->execute();
 
-        $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `events` (
+        $query = 'CREATE TABLE IF NOT EXISTS `events` (
           `id` varchar(255) NOT NULL DEFAULT \'\',
           `aggregate_id` varchar(255),
           `aggregate_name` varchar(255),
@@ -114,12 +115,9 @@ class PdoDriver implements DriverInterface
           `body` longtext,
           `occurred_on` datetime(6) NULL DEFAULT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-
-        foreach ($sqlArray as $sql){
-            $stmt = $this->instance->prepare($sql);
-            $stmt->execute();
-        }
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8';
+        $stmt = $this->instance->prepare($query);
+        $stmt->execute();
     }
 
     /**

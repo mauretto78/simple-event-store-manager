@@ -72,34 +72,6 @@ abstract class BaseTestCase extends TestCase
         $this->elastic_parameters = $config['elastic'];
 
         $this->createConnections();
-        $this->createMySQLSchema();
-    }
-
-    /**
-     * createMySQLSchema
-     */
-    private function createMySQLSchema()
-    {
-        $sqlArray = [];
-        $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `event_aggregates` (
-          `id` varchar(255) NOT NULL DEFAULT \'\',
-          `name` varchar(255) UNIQUE,
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-
-        $sqlArray[] = 'CREATE TABLE IF NOT EXISTS `events` (
-          `id` varchar(255) NOT NULL DEFAULT \'\',
-          `aggregate_id` varchar(255),
-          `aggregate_name` varchar(255),
-          `name` varchar(255) DEFAULT NULL,
-          `body` longtext,
-          `occurred_on` datetime(6) NULL DEFAULT NULL,
-          PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-
-        foreach ($sqlArray as $sql){
-            self::$pdo->query($sql);
-        }
     }
 
     /**

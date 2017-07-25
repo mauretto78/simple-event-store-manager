@@ -174,7 +174,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
 
     public function list_tables()
     {
-        $sql = 'SHOW TABLES';
+        $sql = 'DESCRIBE `events`';
         $query = $this->pdo->query($sql);
 
         return $query->fetchAll(\PDO::FETCH_COLUMN);
