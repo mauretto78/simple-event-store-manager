@@ -87,6 +87,8 @@ class AggregateRepositoryTest extends BaseTestCase
 
             $repo->save($aggregate);
 
+            sleep(1);
+
             $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd')));
             $this->assertEquals($aggregate, $repo->byId($aggregateId));
             $this->assertEquals($aggregate, $repo->byName('Dummy Aggregate'));
