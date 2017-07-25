@@ -99,25 +99,24 @@ class PdoDriver implements DriverInterface
      */
     private function createSchema()
     {
-        $query1 = 'CREATE TABLE IF NOT EXISTS `events` (
-          `id` varchar(255) NOT NULL DEFAULT \'\',
+        $query1 = "CREATE TABLE IF NOT EXISTS `events` (
+          `id` varchar(255) NOT NULL DEFAULT '',
           `aggregate_id` varchar(255),
           `aggregate_name` varchar(255),
           `name` varchar(255) DEFAULT NULL,
           `body` longtext,
-          `occurred_on` datetime(6) NULL DEFAULT NULL,
+          `occurred_on` datetime(6) DEFAULT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-        $stmt = $this->instance->prepare($query1);
-        $stmt->execute();
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 
-        $query2 = 'CREATE TABLE IF NOT EXISTS `event_aggregates` (
-          `id` varchar(255) NOT NULL DEFAULT \'\',
+        $query2 = "CREATE TABLE IF NOT EXISTS `event_aggregates` (
+          `id` varchar(255) NOT NULL DEFAULT '',
           `name` varchar(255) UNIQUE,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
-        $stmt = $this->instance->prepare($query2);
-        $stmt->execute();
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+
+        $this->instance->exec($query1);
+        $this->instance->exec($query2);
     }
 
     /**
