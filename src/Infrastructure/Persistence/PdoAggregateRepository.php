@@ -139,6 +139,8 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->bindParam(':name', $AggregateName);
         $stmt->execute();
 
+        var_dump($this->list_tables());
+
         /** @var Event $event */
         foreach ($aggregate->events() as $event){
             $this->saveEvent($event, $aggregate);
@@ -159,12 +161,23 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $eventBody = $event->body();
         $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
 
-        $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`) VALUES (:id, :aggregate_id, :aggregate_name)';
+        $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id', $eventId);
         $stmt->bindParam(':aggregate_id', $eventAggregateId);
         $stmt->bindParam(':aggregate_name', $eventAggregateName);
+        $stmt->bindParam(':name', $eventName);
+        $stmt->bindParam(':body', $eventBody);
+        $stmt->bindParam(':occurred_on', $eventOccurredOn);
         $stmt->execute();
+    }
+
+    public function list_tables()
+    {
+        $sql = 'SHOW TABLES';
+        $query = $this->pdo->query($sql);
+
+        return $query->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**
