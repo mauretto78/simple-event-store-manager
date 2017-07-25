@@ -12,8 +12,15 @@ php:
 services:
   - elasticsearch
   - mongodb
-  - mysql-server-5.6
+  - mysql
   - redis-server
+
+addons:
+  apt:
+    sources:
+      - debian-sid
+    packages:
+      - mysql-server-5.6
 
 global:
   - REPORT_EXIT_STATUS=1
