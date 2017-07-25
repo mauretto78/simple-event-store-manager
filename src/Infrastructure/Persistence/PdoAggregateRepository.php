@@ -168,7 +168,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
                 $eventBody,
                 $eventOccurredOn
             ]
-        )
+        );
 
         $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';
         $stmt = $this->pdo->prepare($sql);
