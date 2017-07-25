@@ -12,20 +12,14 @@ php:
 services:
   - elasticsearch
   - mongodb
-  - mysql
   - redis-server
-
-addons:
-  apt:
-    sources:
-      - debian-sid
-    packages:
-      - mysql-server-5.6
 
 global:
   - REPORT_EXIT_STATUS=1
 
 before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq mysql-server-5.6 mysql-client-5.6 mysql-client-core-5.6
   - if [[ $TRAVIS_PHP_VERSION = "5.6.6" ]]; then echo yes | pecl install mongodb; fi
   - echo "extension=mongodb.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('travis') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
