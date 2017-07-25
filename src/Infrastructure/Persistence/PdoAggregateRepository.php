@@ -41,7 +41,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      */
     public function byId(AggregateId $id)
     {
-        $aggregateId = (string) $id->id();
+        echo $aggregateId = (string) $id->id();
         $query = 'SELECT 
                 event_aggregates.id as aggregate_id,
                 event_aggregates.name as aggregate_name,
