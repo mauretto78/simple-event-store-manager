@@ -55,6 +55,8 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->execute();
 
         $row = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        var_dump($row);
+
         if (!empty($row)) {
             return $this->buildAggregate($row);
         }
@@ -70,7 +72,15 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     public function byName($name)
     {
         $name = (new Slugify())->slugify($name);
-        $stmt = $this->pdo->prepare($this->getAggregateByNameSql());
+        $query = 'SELECT 
+            event_aggregates.id as aggregate_id,
+            event_aggregates.name as aggregate_name,
+            events.id as event_id,
+            events.name as event_name,
+            events.body as event_body,
+            events.occurred_on as event_occurred_on
+            FROM `event_aggregates` JOIN `events` ON event_aggregates.id=events.aggregate_id WHERE event_aggregates.name=:name';
+        $stmt = $this->pdo->prepare($query);
         $stmt->bindParam(':name', $name);
         $stmt->execute();
 
@@ -80,21 +90,6 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         }
 
         return null;
-    }
-
-    /**
-     * @return string
-     */
-    private function getAggregateByNameSql()
-    {
-        return 'SELECT 
-            event_aggregates.id as aggregate_id,
-            event_aggregates.name as aggregate_name,
-            events.id as event_id,
-            events.name as event_name,
-            events.body as event_body,
-            events.occurred_on as event_occurred_on
-            FROM `event_aggregates` JOIN `events` ON event_aggregates.id=events.aggregate_id WHERE event_aggregates.name=:name';
     }
 
     /**

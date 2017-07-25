@@ -3,7 +3,7 @@ language: php
 sudo: false
 
 php:
-  - 5.6
+  - 5.6.6
   - 7.0
   - 7.1
 
@@ -17,7 +17,7 @@ global:
   - REPORT_EXIT_STATUS=1
 
 before_install:
-  - if [[ $TRAVIS_PHP_VERSION = "5.6" ]]; then echo yes | pecl install mongodb; fi
+  - if [[ $TRAVIS_PHP_VERSION = "5.6.6" ]]; then echo yes | pecl install mongodb; fi
   - echo "extension=mongodb.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - echo "USE mysql;\nUPDATE user SET password=PASSWORD('travis') WHERE user='root';\nFLUSH PRIVILEGES;\n" | mysql -u root
   - mysql -e 'CREATE DATABASE travis;'
