@@ -56,6 +56,8 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->bindParam(':id', $aggregateId);
         $stmt->execute();
 
+        //var_dump($stmt->debugDumpParams());
+
         $row = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         if (!empty($row)) {
             return $this->buildAggregate($row);
@@ -166,6 +168,8 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->bindParam(':body', $eventBody);
         $stmt->bindParam(':occurred_on', $eventOccurredOn);
         $stmt->execute();
+
+        echo $stmt->rowCount();
     }
 
     /**
