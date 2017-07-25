@@ -143,6 +143,8 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         foreach ($aggregate->events() as $event){
             $this->saveEvent($event, $aggregate);
         }
+
+        echo $stmt->rowCount();
     }
 
     /**
@@ -167,7 +169,15 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->bindParam(':name', $eventName);
         $stmt->bindParam(':body', $eventBody);
         $stmt->bindParam(':occurred_on', $eventOccurredOn);
-        $stmt->execute();
+
+        try
+        {
+            $stmt->execute();
+        } catch (\Exception $e){
+            echo $e->getMessage();
+        }
+
+        echo $stmt->rowCount();
     }
 
     /**
