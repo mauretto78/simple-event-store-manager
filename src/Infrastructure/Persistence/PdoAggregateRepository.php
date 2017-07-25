@@ -137,8 +137,6 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->bindParam(':name', $AggregateName);
         $stmt->execute();
 
-        var_dump($this->list_tables());
-
         /** @var Event $event */
         foreach ($aggregate->events() as $event){
             $this->saveEvent($event, $aggregate);
@@ -168,14 +166,6 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt->bindParam(':body', $eventBody);
         $stmt->bindParam(':occurred_on', $eventOccurredOn);
         $stmt->execute();
-    }
-
-    public function list_tables()
-    {
-        $sql = 'DESCRIBE `events`';
-        $query = $this->pdo->query($sql);
-
-        return $query->fetchAll(\PDO::FETCH_COLUMN);
     }
 
     /**
