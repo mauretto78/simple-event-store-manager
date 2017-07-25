@@ -124,7 +124,7 @@ Events are indexed this way, look at the example:
 ```php
 Array
 (
-    'index' => 'aggregate-name'
+    'index' => 'aggregate-name' // Aggregate name
     'type' => 'UserWasCreated', // Event class
     'id' => 'c4a760a8-dbcf-5254-a0d9-6a4474bd1b62', // eventId
     'body' => [
