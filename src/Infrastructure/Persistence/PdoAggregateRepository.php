@@ -42,23 +42,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     public function byId(AggregateId $id)
     {
         $aggregateId = (string) $id->id();
-        $stmt = $this->pdo->prepare($this->getAggregateByIdSql());
-        $stmt->bindParam(':id', $aggregateId);
-        $stmt->execute();
-
-        if ($row = $stmt->fetchAll(\PDO::FETCH_ASSOC)) {
-            return $this->buildAggregate($row);
-        }
-
-        return null;
-    }
-
-    /**
-     * @return string
-     */
-    private function getAggregateByIdSql()
-    {
-        return 'SELECT 
+        $query = 'SELECT 
                 event_aggregates.id as aggregate_id,
                 event_aggregates.name as aggregate_name,
                 events.id as event_id,
@@ -66,6 +50,16 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
                 events.body as event_body,
                 events.occurred_on as event_occurred_on
                 FROM `event_aggregates` JOIN `events` ON event_aggregates.id=events.aggregate_id WHERE event_aggregates.id=:id';
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindParam(':id', $aggregateId);
+        $stmt->execute();
+
+        $row = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        if (!empty($row)) {
+            return $this->buildAggregate($row);
+        }
+
+        return null;
     }
 
     /**
@@ -79,7 +73,9 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $stmt = $this->pdo->prepare($this->getAggregateByNameSql());
         $stmt->bindParam(':name', $name);
         $stmt->execute();
-        if ($rows = $stmt->fetchAll(\PDO::FETCH_ASSOC)) {
+
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        if (!empty($rows)) {
             return $this->buildAggregate($rows);
         }
 
