@@ -36,7 +36,7 @@ class AggregateRepositoryTest extends BaseTestCase
 
         $this->repos = [
             new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
-            new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
+            //new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
             new PdoAggregateRepository((new PdoDriver($this->pdo_parameters))->instance()),
             new RedisAggregateRepository((new RedisDriver($this->redis_parameters))->instance()),
         ];
@@ -86,8 +86,6 @@ class AggregateRepositoryTest extends BaseTestCase
             );
 
             $repo->save($aggregate);
-
-            sleep(1);
 
             $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd')));
             $this->assertEquals($aggregate, $repo->byId($aggregateId));
