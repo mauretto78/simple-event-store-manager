@@ -1,3 +1,7 @@
+elastic:
+  host: 'localhost'
+  port: '9200'
+
 mongo:
   host: 'localhost'
   username: ~

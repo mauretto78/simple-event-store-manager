@@ -8,6 +8,7 @@ php:
   - 7.1
 
 services:
+  - elasticsearch
   - mongodb
   - mysql
   - redis-server
