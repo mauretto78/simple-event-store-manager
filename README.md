@@ -208,18 +208,17 @@ $eventManager = new EventManager('mongo', $config['mongo'], [
     'elastic_hosts' => $config['elastic']
 ]);
 
-$eventQuery = new EventApiBuilder(
+$eventQuery = new EventQuery(
     $eventManager,
+    // here you can use:
+    // - JsonEventDataTransformer
+    // - YamlEventDataTransformer
+    // - XMLEventDataTransformer
     new JsonEventDataTransformer(
         SerializerBuilder::create()->build(),
         $request
     )
 );
-
-// send Response
-$page = (null !== $page = $request->query->get('page')) ? $page : 1;
-$response = $eventQuery->response($request->query->get('aggregate'), $page);
-$response->send();
 
 ```
 
