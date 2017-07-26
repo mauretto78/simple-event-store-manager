@@ -243,8 +243,14 @@ $eventQuery = new EventQuery(
 );
 
 ```
-
 Please note you can choose JSON, XML or YAML format for data representation.
+
+## Requirements
+
+* PHP 5.5.6 +
+* MySQL 5.6 + (if you use `pdo` driver)
+* MongoDB 3.0 + (if you use `mongo` driver)
+* Redis 3.2 + (if you use `redis` driver)
 
 ## Support
 
