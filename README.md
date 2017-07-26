@@ -193,7 +193,7 @@ class DummyEntity
 }
 
 // ...
-class DummyEntityWasCreated implementes EventInterface
+class DummyEntityWasCreated implements EventInterface
 {
     private $id;
     
