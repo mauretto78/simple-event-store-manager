@@ -2,6 +2,7 @@
 
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/3d6db2b3-db42-4155-97ed-2c28cec1c998/mini.png)](https://insight.sensiolabs.com/projects/3d6db2b3-db42-4155-97ed-2c28cec1c998)
 [![Build Status](https://travis-ci.org/mauretto78/simple-event-store-manager.svg?branch=master)](https://travis-ci.org/mauretto78/simple-event-store-manager)
+[![Coverage Status](https://coveralls.io/repos/github/mauretto78/simple-event-store-manager/badge.svg?branch=master)](https://coveralls.io/github/mauretto78/simple-event-store-manager?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ad9fb8b8c1304a149a8507926a03d44b)](https://www.codacy.com/app/mauretto78/simple-event-store-manager?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mauretto78/simple-event-store-manager&amp;utm_campaign=Badge_Grade)
 [![license](https://img.shields.io/github/license/mauretto78/simple-event-store-manager.svg)]()
 [![Packagist](https://img.shields.io/packagist/v/mauretto78/simple-event-store-manager.svg)]()
