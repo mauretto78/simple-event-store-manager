@@ -23,8 +23,7 @@ interface EventInterface
     /**
      * @return string
      */
-    public function name()
-    ;
+    public function name();
 
     /**
      * @return mixed

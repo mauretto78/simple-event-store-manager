@@ -160,7 +160,7 @@ $eventRecorder->releaseEvents();
 
 ```
 
-### EventRecorderCapabilities
+### EventRecorderCapabilities trait
 
 Consider this example:
 
@@ -191,6 +191,44 @@ class DummyEntity
         );
     }
 }
+
+// ...
+class DummyEntityWasCreated implementes EventInterface
+{
+    private $id;
+    
+    private $body;
+        
+    public function __construct(
+        EventId $id,
+        $body
+    ) {
+        $this->id = $id;
+        $this->name = get_class($this);
+        $this->body = serialize($body);
+        $this->occurred_on = ($occurred_on) ? new \DateTimeImmutable($occurred_on) : new \DateTimeImmutable();
+    }
+    
+    public function id()
+    {
+        return $this->id;
+    }
+
+    public function name()
+    {
+        return $this->name;
+    }
+
+    public function body()
+    {
+        return $this->body;
+    }
+
+    public function occurredOn()
+    {
+        return $this->occurred_on;
+    }
+}
 ```
 
 Finally, to release events:
@@ -208,6 +246,8 @@ $releasedEvents = $dummyEntity->releaseEvents();
 ```
 
 ## API Implementation
+
+You can use `EventQuery` to easily create a simple API endpoint to get event streams.
 
 In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tree/master/examples) you will find a simple example of an API implementation. Here is the full code:
 
@@ -242,7 +282,15 @@ $eventQuery = new EventQuery(
     )
 );
 
+// send Response
+$page = (null !== $page = $request->query->get('page')) ? $page : 1;
+$response = $eventQuery->aggregate($request->query->get('aggregate'), $page);
+$response->send();
+
 ```
+
+When a page is full, an **infinite cache** is automatically set.
+
 Please note you can choose JSON, XML or YAML format for data representation.
 
 ## Requirements
