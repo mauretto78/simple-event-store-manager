@@ -20,6 +20,7 @@ class EventCollectionObjectRepresentation
     private $prevLink;
     private $nextLink;
     private $lastLink;
+    private $events;
 
     /**
      * EventsCollection constructor.
@@ -46,11 +47,6 @@ class EventCollectionObjectRepresentation
         $this->nextLink = $links['next'];
         $this->lastLink = $links['last'];
     }
-
-    /**
-     * @var array
-     */
-    private $events;
 
     /**
      * @param EventObjectRepresentation $event
