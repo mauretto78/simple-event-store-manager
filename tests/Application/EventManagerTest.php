@@ -9,6 +9,7 @@
  */
 
 use SimpleEventStoreManager\Application\EventManager;
+use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Tests\BaseTestCase;
@@ -22,7 +23,8 @@ class EventManagerTest extends BaseTestCase
      */
     public function it_should_throw_NotSupportedDriverException_if_not_supported_driver_is_passed()
     {
-        new EventManager('not-allowed-driver', []);
+        EventManager::build()
+            ->setDriver('not-allowed-driver');
     }
 
     /**
@@ -34,7 +36,10 @@ class EventManagerTest extends BaseTestCase
     {
         $notValidEvent = new NotValidEvent(1, 'Lorem Ipsum');
 
-        $eventManager = new EventManager('mongo', $this->mongo_parameters);
+        $eventManager = EventManager::build()
+            ->setDriver('mongo')
+            ->setConnection($this->mongo_parameters);
+
         $eventManager->storeEvents(
             'Dummy Aggregate',
             [
@@ -75,22 +80,31 @@ class EventManagerTest extends BaseTestCase
             $body2
         );
 
-        $eventManager = new EventManager('mongo', $this->mongo_parameters, [
-            'elastic' => true,
-            'elastic_hosts' => $this->elastic_parameters
-        ]);
-        $eventManager->storeEvents(
-            'Dummy Aggregate',
-            [
-                $event,
-                $event2
-            ]
-        );
+        $eventManager = EventManager::build()
+            ->setDriver('mongo')
+            ->setConnection($this->mongo_parameters)
+            ->setElastic($this->elastic_parameters);
 
-        $stream = $eventManager->stream('Dummy Aggregate');
+        $emAsArray = $eventManager->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY);
+        $emAsObject = $eventManager->setReturnType(AggregateRepositoryInterface::RETURN_AS_OBJECT);
 
-        $this->assertEquals('mongo', $eventManager->driver());
-        $this->assertCount(2, $stream);
+        $eventManagers = [$emAsArray, $emAsObject];
+
+        foreach ($eventManagers as $eventManager){
+            $eventManager->storeEvents(
+                'Dummy Aggregate',
+                [
+                    $event,
+                    $event2
+                ]
+            );
+
+            $stream = $eventManager->stream('Dummy Aggregate');
+            $this->assertCount(2, $stream);
+
+            $stream = $eventManager->stream('Not existing aggregate');
+            $this->assertCount(0, $stream);
+        }
     }
 }
 

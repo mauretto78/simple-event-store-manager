@@ -28,13 +28,19 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
     private $client;
 
     /**
+     * @var int
+     */
+    private $return;
+
+    /**
      * RedisEventRepository constructor.
      *
      * @param Client $client
      */
-    public function __construct(Client $client)
+    public function __construct(Client $client, $return = self::RETURN_AS_ARRAY)
     {
         $this->client = $client;
+        $this->return = $return;
     }
 
     /**
@@ -42,10 +48,10 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    public function byId(AggregateId $id)
+    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY)
     {
         if ($aggregate = $this->client->hgetall('aggregate:'.$id)) {
-            return $this->buildAggregate($aggregate);
+            return $this->buildAggregate($aggregate, $returnType);
         }
 
         return null;
@@ -53,19 +59,32 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
 
     /**
      * @param $name
-     * @param bool $hydrateEvents
-     *
-     * @return Aggregate
+     * @param int $returnType
+     * @return array|null|Aggregate
      */
-    public function byName($name, $hydrateEvents = true)
+    public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
         $aggregate = new SetKey($this->client, 'aggregatesIndexByName:'.(new Slugify())->slugify($name));
         foreach ($aggregate as $aggregateKey) {
             if ($row = $this->client->hgetall($aggregateKey)) {
-                return $this->buildAggregate($row);
+                return $this->buildAggregate($row, $returnType);
             }
-
             return null;
+        }
+    }
+
+    /**
+     * @param array $rows
+     * @return Aggregate|array
+     */
+    private function buildAggregate(array $rows, $returnType)
+    {
+        switch ($returnType){
+            case self::RETURN_AS_ARRAY:
+                return $this->buildAggregateAsArray($rows);
+
+            case self::RETURN_AS_OBJECT:
+                return $this->buildAggregateAsObject($rows);
         }
     }
 
@@ -84,7 +103,7 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
      */
     public function exists($name)
     {
-        return (new SetKey($this->client, 'aggregatesIndexByName:'.(new Slugify())->slugify($name))) ? true : false;
+        return ($this->byName($name)) ? true : false;
     }
 
     /**
@@ -136,7 +155,31 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    private function buildAggregate(array $row)
+    private function buildAggregateAsArray(array $row)
+    {
+        $returnArray['id'] = (string) $row['id'];
+        $returnArray['name'] = $row['name'];
+
+        $events = new SetKey($this->client, 'eventsAggregatesIndexById:'.$row['id']);
+        foreach ($events as $eventKey){
+            $event = $this->client->hgetall($eventKey);
+            $returnArray['events'][] = [
+                'id' => (string) $event['id'],
+                'name' => $event['name'],
+                'body' => unserialize($event['body']),
+                'occurred_on' => $event['occurred_on'],
+            ];
+        }
+
+        return $returnArray;
+    }
+
+    /**
+     * @param array $row
+     *
+     * @return Aggregate
+     */
+    private function buildAggregateAsObject(array $row)
     {
         $aggregate = new Aggregate(
             new AggregateId($row['id']),

@@ -87,10 +87,17 @@ class AggregateRepositoryTest extends BaseTestCase
 
             $repo->save($aggregate);
 
+            $aggregateAsArray = $repo->byId($aggregateId, AggregateRepositoryInterface::RETURN_AS_ARRAY);
+
             $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd')));
+            $this->assertFalse($repo->exists('not-existing-aggregate'));
             $this->assertEquals(2, $repo->eventsCount($aggregate));
-            $this->assertEquals($aggregate, $repo->byId($aggregateId));
-            $this->assertEquals($aggregate, $repo->byName('Dummy Aggregate'));
+            $this->assertArrayHasKey('id', $aggregateAsArray);
+            $this->assertArrayHasKey('name', $aggregateAsArray);
+            $this->assertArrayHasKey('events', $aggregateAsArray);
+            $this->assertCount(2, $aggregateAsArray['events']);
+            $this->assertEquals($aggregate, $repo->byId($aggregateId, AggregateRepositoryInterface::RETURN_AS_OBJECT));
+            $this->assertEquals($aggregate, $repo->byName('Dummy Aggregate', AggregateRepositoryInterface::RETURN_AS_OBJECT));
             $this->assertTrue($repo->exists('Dummy Aggregate'));
             $this->assertNull($repo->byName('not existing aggregate'));
         }

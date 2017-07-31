@@ -33,28 +33,44 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param AggregateId $id
      *
-     * @return Aggregate
+     * @return Aggregate|array
      */
-    public function byId(AggregateId $id)
+    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY)
     {
-        return (isset($this->aggregates[(string) $id])) ? $this->aggregates[(string) $id] : null;
+        return (isset($this->aggregates[(string) $id])) ? $this->buildAggregate($this->aggregates[(string) $id], $returnType) : null;
     }
 
     /**
      * @param string $name
      *
-     * @return Aggregate
+     * @return Aggregate|array
      */
-    public function byName($name)
+    public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
         $aggregateName = (new Slugify())->slugify($name);
         foreach ($this->aggregates as $aggregate){
             if($aggregate->name() === $aggregateName){
-                return $aggregate;
+                return $this->buildAggregate($aggregate, $returnType);
             }
         }
 
         return null;
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     * @param int $returnType
+     * @return Aggregate|array
+     */
+    private function buildAggregate(Aggregate $aggregate, $returnType)
+    {
+        switch ($returnType){
+            case self::RETURN_AS_ARRAY:
+                return $this->buildAggregateAsArray($aggregate);
+
+            case self::RETURN_AS_OBJECT:
+                return $this->buildAggregateAsObject($aggregate);
+        }
     }
 
     /**
@@ -90,5 +106,35 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     public function save(Aggregate $aggregate)
     {
         $this->aggregates[(string) $aggregate->id()] = $aggregate;
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     * @return array
+     */
+    private function buildAggregateAsArray(Aggregate $aggregate)
+    {
+        $returnArray['id'] = (string) $aggregate->id();
+        $returnArray['name'] = $aggregate->name();
+
+        foreach ($aggregate->events() as $event){
+            $returnArray['events'][] = [
+                'id' => (string) $event->id(),
+                'name' => $event->name(),
+                'body' => unserialize($event->body()),
+                'occurred_on' => $event->occurredOn()->format('Y-m-d H:i:s.u'),
+            ];
+        }
+
+        return $returnArray;
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     * @return Aggregate
+     */
+    private function buildAggregateAsObject(Aggregate $aggregate)
+    {
+        return $aggregate;
     }
 }

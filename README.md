@@ -17,19 +17,23 @@ To use `EventManager`:
 
 ```php
 use SimpleEventStoreManager\Application\EventManager;
+use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 
-// $driver driver
-// $params connection array
-$eventManager = new EventManager('mongo', $params);
-
+$eventManager = EventManager::build()
+    ->setDriver('mongo')
+    ->setConnection($params)
+    ->setReturnType(AggregateRepositoryInterface::RETURN_AS_OBJECT);
+    
 ```
 
 Avaliable drivers:
 
 * `in-memory` 
-* `mongo` (default driver) 
+* `mongo`
 * `pdo` 
 * `redis` 
+
+You can choose if you want to return event aggregates as objects or as simple associative arrays.
 
 ### Store Events
 
@@ -66,6 +70,7 @@ $myEvent2 = new Event(
     ]
 );
 
+// ..
 $eventManager->storeEvents(
     'Your Aggregate Name',
     [
@@ -98,13 +103,15 @@ Please refer to [Elastic PHP official page](https://www.elastic.co/guide/en/elas
 Take a look at this example:
 
 ```php
-$eventManager = new EventManager('mongo', $params, [
-    'elastic' => true,
-    'elastic_hosts' => [
-        'host' => 'localhost',
-        'port' => '9200'
-    ]
-]);
+$eventManager = EventManager::build()
+    ->setDriver('mongo')
+    ->setConnection($params)
+    ->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY)
+    ->setElastic([
+         'host' => 'localhost',
+         'port' => '9200'
+     ]);
+
 
 // ..
 $eventManager->storeEvents(
@@ -265,10 +272,11 @@ require __DIR__.'/../app/bootstrap.php';
 $request = Request::createFromGlobals();
 
 // instantiate $eventsQuery
-$eventManager = new EventManager('mongo', $config['mongo'], [
-    'elastic' => true,
-    'elastic_hosts' => $config['elastic']
-]);
+$eventManager = EventManager::build()
+    ->setDriver('mongo')
+    ->setConnection($parameters)
+    ->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY)
+    ->setElastic($elastic);
 
 $eventQuery = new EventQuery(
     $eventManager,

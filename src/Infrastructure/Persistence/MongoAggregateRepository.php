@@ -38,8 +38,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     private $aggregates;
 
     /**
-     * MongoEventRepository constructor.
-     *
+     * MongoAggregateRepository constructor.
      * @param Database $mongo
      */
     public function __construct(Database $mongo)
@@ -54,10 +53,10 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    public function byId(AggregateId $id)
+    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY)
     {
         if($document = $this->aggregates->findOne(['id' => $id->id()])){
-            return $this->buildAggregate($document);
+            return $this->buildAggregate($document, $returnType);
         }
 
         return null;
@@ -68,13 +67,28 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    public function byName($name)
+    public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
         if($document = $this->aggregates->findOne(['name' => (new Slugify())->slugify($name)])){
-            return $this->buildAggregate($document);
+            return $this->buildAggregate($document, $returnType);
         }
 
         return null;
+    }
+
+    /**
+     * @param $document
+     * @return Aggregate|array
+     */
+    private function buildAggregate($document, $returnType)
+    {
+        switch ($returnType){
+            case self::RETURN_AS_ARRAY:
+                return $this->buildAggregateAsArray($document);
+
+            case self::RETURN_AS_OBJECT:
+                return $this->buildAggregateAsObject($document);
+        }
     }
 
     /**
@@ -154,7 +168,30 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    private function buildAggregate(BSONDocument $document)
+    private function buildAggregateAsArray(BSONDocument $document)
+    {
+        $returnArray['id'] = (string) $document->id;
+        $returnArray['name'] = $document->name;
+
+        $events = $this->events->find(['aggregate.id' => (string) $document->id])->toArray();
+        foreach ($events as $event){
+            $returnArray['events'][] = [
+                'id' => (string) $event->id,
+                'name' => $event->name,
+                'body' => unserialize($event->body),
+                'occurred_on' => $event->occurred_on,
+            ];
+        }
+
+        return $returnArray;
+    }
+
+    /**
+     * @param BSONDocument $document
+     *
+     * @return Aggregate
+     */
+    private function buildAggregateAsObject(BSONDocument $document)
     {
         $aggregate = new Aggregate(
             new AggregateId($document->id),

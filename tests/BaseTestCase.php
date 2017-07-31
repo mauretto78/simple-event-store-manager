@@ -185,7 +185,7 @@ abstract class BaseTestCase extends TestCase
     private function destroyElastic()
     {
         $params = [
-            'index' => 'dummy-aggregate'
+            'index' => 'events'
         ];
 
         if(self::$elastic->indices()->exists($params)){

@@ -15,19 +15,24 @@ use SimpleEventStoreManager\Domain\Model\AggregateId;
 
 interface AggregateRepositoryInterface
 {
+    const RETURN_AS_ARRAY = 1;
+    const RETURN_AS_OBJECT = 2;
+
     /**
      * @param AggregateId $id
+     * @param int $returnType
      *
      * @return Aggregate
      */
-    public function byId(AggregateId $id);
+    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY);
 
     /**
      * @param $name
+     * @param int $returnType
      *
      * @return Aggregate
      */
-    public function byName($name);
+    public function byName($name, $returnType = self::RETURN_AS_ARRAY);
 
     /**
      * @return int

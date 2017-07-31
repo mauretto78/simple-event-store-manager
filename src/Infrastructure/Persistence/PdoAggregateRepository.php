@@ -36,10 +36,11 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     *
-     * @return Aggregate
+     * @param AggregateId $id
+     * @param int $returnType
+     * @return array|null|Aggregate
      */
-    public function byId(AggregateId $id)
+    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY)
     {
         $aggregateId = (string) $id->id();
         $query = 'SELECT
@@ -58,18 +59,18 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
 
         $row = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         if (!empty($row)) {
-            return $this->buildAggregate($row);
+            return $this->buildAggregate($row, $returnType);
         }
 
         return null;
     }
 
     /**
-     * @param string $name
-     *
-     * @return Aggregate
+     * @param $name
+     * @param int $returnType
+     * @return array|null|Aggregate
      */
-    public function byName($name)
+    public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
         $name = (new Slugify())->slugify($name);
         $query = 'SELECT 
@@ -88,10 +89,25 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
 
         $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         if (!empty($rows)) {
-            return $this->buildAggregate($rows);
+            return $this->buildAggregate($rows, $returnType);
         }
 
         return null;
+    }
+
+    /**
+     * @param array $rows
+     * @return Aggregate|array
+     */
+    private function buildAggregate(array $rows, $returnType)
+    {
+        switch ($returnType){
+            case self::RETURN_AS_ARRAY:
+                return $this->buildAggregateAsArray($rows);
+
+            case self::RETURN_AS_OBJECT:
+                return $this->buildAggregateAsObject($rows);
+        }
     }
 
     /**
@@ -114,12 +130,13 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      */
     public function exists($name)
     {
-        $sql = 'SELECT COUNT(id) FROM `event_aggregates` WHERE `name` = :name';
+        $name = (new Slugify())->slugify($name);
+        $sql = 'SELECT id FROM `event_aggregates` WHERE `name` = :name';
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':name', $name);
         $stmt->execute();
 
-        return ($stmt->rowCount()) ? true : false;
+        return ($stmt->rowCount() > 0) ? true : false;
     }
 
     /**
@@ -173,7 +190,29 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      *
      * @return Aggregate
      */
-    private function buildAggregate(array $rows)
+    private function buildAggregateAsArray(array $rows)
+    {
+        $returnArray['id'] = (string) $rows[0]['aggregate_id'];
+        $returnArray['name'] = $rows[0]['aggregate_name'];
+
+        foreach ($rows as $row){
+            $returnArray['events'][] = [
+                'id' => (string) $row['event_id'],
+                'name' => $row['event_name'],
+                'body' => unserialize($row['event_body']),
+                'occurred_on' => $row['event_occurred_on'],
+            ];
+        }
+
+        return $returnArray;
+    }
+
+    /**
+     * @param array $rows
+     *
+     * @return Aggregate
+     */
+    private function buildAggregateAsObject(array $rows)
     {
         $aggregate = new Aggregate(
             new AggregateId($rows[0]['aggregate_id']),

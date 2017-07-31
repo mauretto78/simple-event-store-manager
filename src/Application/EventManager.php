@@ -27,9 +27,19 @@ class EventManager
     private $driver;
 
     /**
+     * @var array
+     */
+    private $connectionParams;
+
+    /**
      * @var AggregateRepositoryInterface
      */
     private $repo;
+
+    /**
+     * @var int
+     */
+    private $returnType;
 
     /**
      * @var ElasticService
@@ -37,27 +47,19 @@ class EventManager
     private $elastic;
 
     /**
-     * EventManager constructor.
-     * @param string $driver
-     * @param array $parameters
-     * @param array $elasticConfig
+     * @return EventManager
      */
-    public function __construct($driver = 'mongo', array $parameters = [], array $elasticConfig = [])
+    public static function build()
     {
-        $this->setDriver($driver);
-        $this->setRepo($driver, $parameters);
-
-        if(isset($elasticConfig['elastic']) && $elasticConfig['elastic'] === true){
-            $this->setElastic($elasticConfig['elastic_hosts']);
-        }
+        return new self();
     }
 
     /**
      * @param $driver
-     *
+     * @return $this
      * @throws NotSupportedDriverException
      */
-    private function setDriver($driver)
+    public function setDriver($driver)
     {
         $allowedDrivers = [
             'in-memory',
@@ -71,38 +73,31 @@ class EventManager
         }
 
         $this->driver = $driver;
-    }
-    /**
-     * @return string
-     */
-    public function driver()
-    {
-        return $this->driver;
+
+        return $this;
     }
 
     /**
-     * @param $driver
-     *
      * @param array $parameters
+     * @return $this
      */
-    private function setRepo($driver, array $parameters = [])
+    public function setConnection(array $parameters = [])
     {
-        $aggregateRepo = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($driver).'AggregateRepository';
-        $driver = 'SimpleEventStoreManager\Infrastructure\Drivers\\'.$this->normalizeDriverName($driver).'Driver';
-        $instance = (new $driver($parameters))->instance();
-        $this->repo = new $aggregateRepo($instance);
+        $this->connectionParams = $parameters;
+        $this->setRepo();
+
+        return $this;
     }
 
     /**
-     * @param array $hosts
+     * setRepo.
      */
-    private function setElastic(array $hosts = [])
+    private function setRepo()
     {
-        $this->elastic = new ElasticService(
-            ClientBuilder::create()
-                ->setHosts($hosts)
-                ->build()
-        );
+        $aggregateRepo = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($this->driver).'AggregateRepository';
+        $driver = 'SimpleEventStoreManager\Infrastructure\Drivers\\'.$this->normalizeDriverName($this->driver).'Driver';
+        $instance = (new $driver($this->connectionParams))->instance();
+        $this->repo = new $aggregateRepo($instance);
     }
 
     /**
@@ -118,6 +113,32 @@ class EventManager
     }
 
     /**
+     * @param int $returnType
+     * @return $this
+     */
+    public function setReturnType($returnType = AggregateRepositoryInterface::RETURN_AS_ARRAY)
+    {
+        $this->returnType = $returnType;
+
+        return $this;
+    }
+
+    /**
+     * @param array $hosts
+     * @return $this
+     */
+    public function setElastic(array $hosts = [])
+    {
+        $this->elastic = new ElasticService(
+            ClientBuilder::create()
+                ->setHosts($hosts)
+                ->build()
+        );
+
+        return $this;
+    }
+
+    /**
      * @param $aggregateName
      * @param int $page
      * @param int $maxPerPage
@@ -126,7 +147,17 @@ class EventManager
      */
     public function stream($aggregateName, $page = 1, $maxPerPage = 25)
     {
-        return ($this->streamCount($aggregateName)) ? array_slice($this->repo->byName($aggregateName)->events(), ($page - 1) * $maxPerPage, $maxPerPage) : [];
+        if($this->streamCount($aggregateName)) {
+            switch ($this->returnType){
+                case AggregateRepositoryInterface::RETURN_AS_ARRAY:
+                    return array_slice($this->repo->byName($aggregateName, $this->returnType)['events'] , ($page - 1) * $maxPerPage, $maxPerPage);
+
+                case AggregateRepositoryInterface::RETURN_AS_OBJECT:
+                    return array_slice($this->repo->byName($aggregateName, $this->returnType)->events(), ($page - 1) * $maxPerPage, $maxPerPage);
+            }
+        }
+
+        return [];
     }
 
     /**
@@ -136,7 +167,17 @@ class EventManager
      */
     public function streamCount($aggregateName)
     {
-        return ($this->repo->exists($aggregateName)) ? count($this->repo->byName($aggregateName)->events()) : 0;
+        if($this->repo->exists($aggregateName)) {
+            switch ($this->returnType){
+                case AggregateRepositoryInterface::RETURN_AS_ARRAY:
+                    return count($this->repo->byName($aggregateName, $this->returnType)['events']);
+
+                case AggregateRepositoryInterface::RETURN_AS_OBJECT:
+                    return count($this->repo->byName($aggregateName, $this->returnType)->events());
+            }
+        }
+
+        return 0;
     }
 
     /**
@@ -170,7 +211,7 @@ class EventManager
     private function getAggregateFromName($aggregateName)
     {
         if($this->repo->exists($aggregateName)){
-            return $this->repo->byName($aggregateName);
+            return $this->repo->byName($aggregateName, AggregateRepositoryInterface::RETURN_AS_OBJECT);
         }
 
         return new Aggregate(

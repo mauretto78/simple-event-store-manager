@@ -12,7 +12,7 @@ namespace SimpleEventStoreManager\Infrastructure\Drivers;
 
 use MongoDB\Client;
 use SimpleEventStoreManager\Infrastructure\Drivers\Contracts\DriverInterface;
-use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\MalformedDriverConfigException;
+use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\ManageAggregateIndexException;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\NotInstalledDriverCheckException;
 
 class MongoDriver implements DriverInterface
@@ -49,7 +49,7 @@ class MongoDriver implements DriverInterface
     /**
      * @param $config
      *
-     * @throws MalformedDriverConfigException
+     * @throws ManageAggregateIndexException
      */
     private function setConfig($config)
     {
@@ -63,7 +63,7 @@ class MongoDriver implements DriverInterface
 
         foreach (array_keys($config) as $key) {
             if (!in_array($key, $allowedConfigKeys)) {
-                throw new MalformedDriverConfigException('Mongo Driver: malformed config parameters');
+                throw new ManageAggregateIndexException('Mongo Driver: malformed config parameters');
             }
         }
 
