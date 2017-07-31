@@ -96,9 +96,7 @@ Please note you can pass to `stream` method two optional arguments, `$page` and 
 
 ## Sending events to Elastic
 
-You can send events to an ElasticSearch server. Simply pass an optional array when you instance `EventManager` class.
-               
-Please refer to [Elastic PHP official page](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_configuration.html) to get more details about hosts configuration.
+You can send events to an ElasticSearch server. Please refer to [Elastic PHP official page](https://www.elastic.co/guide/en/elasticsearch/client/php-api/current/_configuration.html) to get more details about hosts configuration.
 
 Take a look at this example:
 
@@ -303,7 +301,7 @@ Please note you can choose JSON, XML or YAML format for data representation.
 
 ## Requirements
 
-* PHP 5.5.6 +
+* PHP 5.6.6 +
 * MySQL 5.6 + (if you use `pdo` driver)
 * MongoDB 3.0 + (if you use `mongo` driver)
 * Redis 3.2 + (if you use `redis` driver)
