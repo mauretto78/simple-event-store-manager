@@ -50,7 +50,7 @@ class Event implements EventInterface
     ) {
         $this->id = $id;
         $this->name = $name;
-        $this->body = serialize($body);
+        $this->body = $body;
         $this->occurred_on = ($occurred_on) ? new \DateTimeImmutable($occurred_on) : new \DateTimeImmutable();
     }
 

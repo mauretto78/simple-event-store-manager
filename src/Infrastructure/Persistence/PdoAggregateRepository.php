@@ -171,7 +171,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
         $eventAggregateId = (string) $aggregate->id();
         $eventAggregateName = $aggregate->name();
         $eventName = $event->name();
-        $eventBody = $event->body();
+        $eventBody = serialize($event->body());
         $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
 
         $sql = 'INSERT INTO `events` (`id`, `aggregate_id`, `aggregate_name`, `name`, `body`, `occurred_on`) VALUES (:id, :aggregate_id, :aggregate_name, :name, :body, :occurred_on)';

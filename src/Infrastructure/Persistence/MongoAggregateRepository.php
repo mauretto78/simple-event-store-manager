@@ -138,7 +138,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     {
         $eventId = (string) $event->id();
         $eventName = $event->name();
-        $eventBody = $event->body();
+        $eventBody = serialize($event->body());
         $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
 
         $this->events->insertOne([

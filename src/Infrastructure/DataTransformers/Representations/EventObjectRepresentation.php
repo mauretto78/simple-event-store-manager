@@ -23,7 +23,7 @@ class EventObjectRepresentation
     {
         $this->id = $event->id();
         $this->name = $event->name();
-        $this->body = unserialize($event->body());
+        $this->body = $event->body();
         $this->occurred_on = $event->occurredOn();
     }
 }

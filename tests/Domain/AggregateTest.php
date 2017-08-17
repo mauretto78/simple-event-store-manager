@@ -52,7 +52,7 @@ class AggregateTest extends BaseTestCase
         $this->assertEquals($eventId, $event->id());
         $this->assertEquals($aggregate->name(), 'dummy-aggregate');
         $this->assertEquals($name, $event->name());
-        $this->assertEquals($body, unserialize($event->body()));
+        $this->assertEquals($body, $event->body());
         $this->assertInstanceOf(DateTimeImmutable::class, $event->occurredOn());
         $this->assertCount(1, $eventRecorder->releaseEvents());
 
@@ -79,7 +79,7 @@ class AggregateTest extends BaseTestCase
 
         foreach ($releasedEvents as $event){
             $this->assertInstanceOf(DummyEntityWasCreated::class, $event);
-            $this->assertInstanceOf(DummyEntity::class, unserialize($event->body()));
+            $this->assertInstanceOf(DummyEntity::class, $event->body());
         }
     }
 }

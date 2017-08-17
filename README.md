@@ -48,9 +48,8 @@ use SimpleEventStoreManager\Application\EventManager;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Domain\Model\Event;
 
-$myEventId = new EventId();
 $myEvent = new Event(
-    $myEventId,
+    new EventId(),
     'Fully\\Qualified\\Event\\Name',
     [
         'key' => 'value',
@@ -59,9 +58,8 @@ $myEvent = new Event(
     ]
 );
 
-$myEventId2 = new EventId();
 $myEvent2 = new Event(
-    $myEventId2,
+    new EventId(),
     'Fully\\Qualified\\Event\\Name2',
     [
         'key' => 'value',
@@ -136,7 +134,7 @@ Array
             'name' => 'Mauro', 
             'email' => 'mauretto@gmail.com' 
             ...
-        ] // Full event body        
+        ] // Full event body
 )
 ```
 
@@ -210,7 +208,7 @@ class DummyEntityWasCreated implements EventInterface
     ) {
         $this->id = $id;
         $this->name = get_class($this);
-        $this->body = serialize($body);
+        $this->body = $body;
         $this->occurred_on = ($occurred_on) ? new \DateTimeImmutable($occurred_on) : new \DateTimeImmutable();
     }
     
@@ -250,7 +248,7 @@ $releasedEvents = $dummyEntity->releaseEvents();
 
 ```
 
-## API Implementation
+## Get Event Streams
 
 You can use `EventQuery` to easily create a simple API endpoint to get event streams.
 

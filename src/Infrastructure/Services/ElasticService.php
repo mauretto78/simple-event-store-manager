@@ -96,7 +96,7 @@ class ElasticService
      */
     private function buildEventBody(EventInterface $event)
     {
-        $body = (array) unserialize($event->body());
+        $body = (array) $event->body();
         $body['class'] = (new \ReflectionClass($event))->getShortName();
         $body['occurred_on'] = $event->occurredOn()->format('Y-m-d H:i:s.u');
 

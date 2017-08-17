@@ -121,7 +121,7 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
             $returnArray['events'][] = [
                 'id' => (string) $event->id(),
                 'name' => $event->name(),
-                'body' => unserialize($event->body()),
+                'body' => $event->body(),
                 'occurred_on' => $event->occurredOn()->format('Y-m-d H:i:s.u'),
             ];
         }

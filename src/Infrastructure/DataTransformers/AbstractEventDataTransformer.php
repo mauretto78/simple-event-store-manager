@@ -58,7 +58,7 @@ abstract class AbstractEventDataTransformer
                 return [
                     'id' => $event->id(),
                     'name' => $event->name(),
-                    'body' => unserialize($event->body()),
+                    'body' => $event->body(),
                     'occurred_on' => $event->occurredOn(),
                 ];
             },

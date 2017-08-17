@@ -136,7 +136,7 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
         $eventId = (string) $event->id();
         $eventAggregate = $aggregate;
         $eventName = $event->name();
-        $eventBody = $event->body();
+        $eventBody = serialize($event->body());
         $eventOccurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
         $redisKey = 'event:'.$eventId;
 
