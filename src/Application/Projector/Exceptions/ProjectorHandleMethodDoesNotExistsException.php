@@ -8,8 +8,8 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Projection\Exceptions;
+namespace SimpleEventStoreManager\Application\Projector\Exceptions;
 
-class ProjectorDoesNotExistsException extends \Exception
+class ProjectorHandleMethodDoesNotExistsException extends \Exception
 {
 }

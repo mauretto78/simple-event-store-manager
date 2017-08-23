@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Application\Exceptions;
+namespace SimpleEventStoreManager\Application\Event\Exceptions;
 
 class NotValidEventException extends \Exception
 {

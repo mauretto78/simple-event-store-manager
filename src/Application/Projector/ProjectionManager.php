@@ -8,10 +8,10 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Projection;
+namespace SimpleEventStoreManager\Application\Projector;
 
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
-use SimpleEventStoreManager\Infrastructure\Projection\Exceptions\ProjectorDoesNotExistsException;
+use SimpleEventStoreManager\Application\Projector\Exceptions\ProjectorDoesNotExistsException;
 
 class ProjectionManager
 {

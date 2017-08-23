@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-use SimpleEventStoreManager\Application\EventManager;
+use SimpleEventStoreManager\Application\Event\EventManager;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
@@ -18,7 +18,7 @@ class EventManagerTest extends BaseTestCase
 {
     /**
      * @test
-     * @expectedException \SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException
+     * @expectedException \SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedDriverException
      * @expectedExceptionMessage not-allowed-driver is not a supported driver.
      */
     public function it_should_throw_NotSupportedDriverException_if_not_supported_driver_is_passed()
@@ -29,7 +29,7 @@ class EventManagerTest extends BaseTestCase
 
     /**
      * @test
-     * @expectedException \SimpleEventStoreManager\Application\Exceptions\NotValidEventException
+     * @expectedException \SimpleEventStoreManager\Application\Event\Exceptions\NotValidEventException
      * @expectedExceptionMessage Not a valid instance of EventInterface was provided.
      */
     public function it_should_throw_NotValidEventException_if_not_valid_event_is_passed()

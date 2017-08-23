@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the EventStoreManager package.
+ * This file is part of the Simple EventStore Manager package.
  *
  * (c) Mauro Cassani<https://github.com/mauretto78>
  *
@@ -8,8 +8,8 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Application\Exceptions;
+namespace SimpleEventStoreManager\Application\Projector\Exceptions;
 
-class NotSupportedDriverException extends \Exception
+class ProjectorDoesNotExistsException extends \Exception
 {
 }

@@ -8,10 +8,10 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Projection;
+namespace SimpleEventStoreManager\Application\Projector;
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
-use SimpleEventStoreManager\Infrastructure\Projection\Exceptions\ProjectorHandleMethodDoesNotExistsException;
+use SimpleEventStoreManager\Application\Projector\Exceptions\ProjectorHandleMethodDoesNotExistsException;
 
 abstract class Projector
 {

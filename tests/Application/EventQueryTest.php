@@ -9,9 +9,9 @@
  */
 
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\EventQuery;
+use SimpleEventStoreManager\Application\Event\EventQuery;
 
-use SimpleEventStoreManager\Application\EventManager;
+use SimpleEventStoreManager\Application\Event\EventManager;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;

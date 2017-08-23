@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the EventStoreManager package.
+ * This file is part of the Simple EventStore Manager package.
  *
  * (c) Mauro Cassani<https://github.com/mauretto78>
  *
@@ -8,11 +8,11 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Application;
+namespace SimpleEventStoreManager\Application\Event;
 
 use Elasticsearch\ClientBuilder;
-use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
-use SimpleEventStoreManager\Application\Exceptions\NotValidEventException;
+use SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedDriverException;
+use SimpleEventStoreManager\Application\Event\Exceptions\NotValidEventException;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;

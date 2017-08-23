@@ -8,8 +8,8 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Infrastructure\Projection\Exceptions;
+namespace SimpleEventStoreManager\Application\Event\Exceptions;
 
-class ProjectorHandleMethodDoesNotExistsException extends \Exception
+class NotSupportedDriverException extends \Exception
 {
 }

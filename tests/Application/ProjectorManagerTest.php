@@ -1,6 +1,6 @@
 <?php
 /**
- * This file is part of the EventStoreManager package.
+ * This file is part of the Simple EventStore Manager package.
  *
  * (c) Mauro Cassani<https://github.com/mauretto78>
  *
@@ -8,19 +8,19 @@
  * file that was distributed with this source code.
  */
 
+use SimpleEventStoreManager\Application\Projector\Projector;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\EventId;
-use SimpleEventStoreManager\Infrastructure\Projection\ProjectionManager;
-use SimpleEventStoreManager\Infrastructure\Projection\Projector;
+use SimpleEventStoreManager\Application\Projector\ProjectionManager;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class ProjectorManagerTest extends BaseTestCase
 {
     /**
      * @test
-     * @expectedException \SimpleEventStoreManager\Infrastructure\Projection\Exceptions\ProjectorDoesNotExistsException
+     * @expectedException \SimpleEventStoreManager\Application\Projector\Exceptions\ProjectorDoesNotExistsException
      * @expectedExceptionMessage No Projector found for event UserWasCreated.
      */
     public function it_throws_ProjectorDoesNotExistsException_if_projector_does_not_subscribe_the_event()
@@ -49,7 +49,7 @@ class ProjectorManagerTest extends BaseTestCase
 
     /**
      * @test
-     * @expectedException \SimpleEventStoreManager\Infrastructure\Projection\Exceptions\ProjectorHandleMethodDoesNotExistsException
+     * @expectedException \SimpleEventStoreManager\Application\Projector\Exceptions\ProjectorHandleMethodDoesNotExistsException
      * @expectedExceptionMessage UserWasCreated does not implement applyUserWasCreated method.
      */
     public function it_throws_ProjectorHandleMethodDoesNotExistsException_if_projector_does_not_implement_expeceted_apply_method()
