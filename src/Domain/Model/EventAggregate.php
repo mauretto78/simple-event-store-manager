@@ -33,14 +33,14 @@ class EventAggregate
     /**
      * EventAggregate constructor.
      *
-     * @param EventAggregateId $id
      * @param $name
+     * @param EventAggregateId|null $eventAggregateId
      */
     public function __construct(
-        EventAggregateId $id,
-        $name
+        $name,
+        EventAggregateId $eventAggregateId = null
     ) {
-        $this->id = $id;
+        $this->id = ($eventAggregateId) ? $eventAggregateId : new EventAggregateId();
         $this->setName($name);
     }
 

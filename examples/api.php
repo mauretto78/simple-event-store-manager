@@ -11,7 +11,7 @@
 use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\EventQuery;
 use SimpleEventStoreManager\Application\EventManager;
-use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -23,7 +23,7 @@ $request = Request::createFromGlobals();
 $eventManager = EventManager::build()
     ->setDriver('mongo')
     ->setConnection($config['mongo'])
-    ->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY)
+    ->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY)
     ->setElastic($config['elastic']);
 
 $eventQuery = new EventQuery(

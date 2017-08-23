@@ -13,9 +13,9 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 use Cocur\Slugify\Slugify;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
-use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 
-class InMemoryAggregateRepository implements AggregateRepositoryInterface
+class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterface
 {
     /**
      * @var array
@@ -31,13 +31,13 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param EventAggregateId $id
+     * @param EventAggregateId $eventAggregateId
      *
      * @return EventAggregate|array
      */
-    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY)
+    public function byId(EventAggregateId $eventAggregateId, $returnType = self::RETURN_AS_ARRAY)
     {
-        return (isset($this->aggregates[(string) $id])) ? $this->buildAggregate($this->aggregates[(string) $id], $returnType) : null;
+        return (isset($this->aggregates[(string) $eventAggregateId])) ? $this->buildAggregate($this->aggregates[(string) $eventAggregateId], $returnType) : null;
     }
 
     /**
@@ -64,13 +64,11 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
      */
     private function buildAggregate(EventAggregate $aggregate, $returnType)
     {
-        switch ($returnType){
-            case self::RETURN_AS_ARRAY:
-                return $this->buildAggregateAsArray($aggregate);
-
-            case self::RETURN_AS_OBJECT:
-                return $this->buildAggregateAsObject($aggregate);
+        if($returnType === self::RETURN_AS_ARRAY){
+            return $this->buildAggregateAsArray($aggregate);
         }
+
+        return $this->buildAggregateAsObject($aggregate);
     }
 
     /**

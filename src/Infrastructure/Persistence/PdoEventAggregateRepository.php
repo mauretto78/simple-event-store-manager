@@ -13,12 +13,12 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 use Cocur\Slugify\Slugify;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
-use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class PdoAggregateRepository implements AggregateRepositoryInterface
+class PdoEventAggregateRepository implements EventAggregateRepositoryInterface
 {
     /**
      * @var \PDO
@@ -36,13 +36,13 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param EventAggregateId $id
+     * @param EventAggregateId $eventAggregateId
      * @param int $returnType
      * @return array|null|EventAggregate
      */
-    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY)
+    public function byId(EventAggregateId $eventAggregateId, $returnType = self::RETURN_AS_ARRAY)
     {
-        $aggregateId = (string) $id->id();
+        $aggregateId = (string) $eventAggregateId->id();
         $query = 'SELECT
                 `event_aggregates`.id AS `aggregate_id`,
                 `event_aggregates`.name AS `aggregate_name`,
@@ -101,13 +101,11 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      */
     private function buildAggregate(array $rows, $returnType)
     {
-        switch ($returnType){
-            case self::RETURN_AS_ARRAY:
-                return $this->buildAggregateAsArray($rows);
-
-            case self::RETURN_AS_OBJECT:
-                return $this->buildAggregateAsObject($rows);
+        if($returnType === self::RETURN_AS_ARRAY){
+            return $this->buildAggregateAsArray($rows);
         }
+
+        return $this->buildAggregateAsObject($rows);
     }
 
     /**
@@ -215,16 +213,16 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     private function buildAggregateAsObject(array $rows)
     {
         $aggregate = new EventAggregate(
-            new EventAggregateId($rows[0]['aggregate_id']),
-            $rows[0]['aggregate_name']
+            $rows[0]['aggregate_name'],
+            new EventAggregateId($rows[0]['aggregate_id'])
         );
 
         foreach ($rows as $row){
             $aggregate->addEvent(
                 new Event(
-                    new EventId($row['event_id']),
                     $row['event_name'],
                     unserialize($row['event_body']),
+                    new EventId($row['event_id']),
                     $row['event_occurred_on']
                 )
             );

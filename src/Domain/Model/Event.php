@@ -37,18 +37,18 @@ class Event implements EventInterface
     /**
      * Event constructor.
      *
-     * @param EventId $id
      * @param $name
      * @param $body
-     * @param $occurred_on
+     * @param EventId|null $eventId
+     * @param null $occurred_on
      */
     public function __construct(
-        EventId $id,
         $name,
         $body,
+        EventId $eventId = null,
         $occurred_on = null
     ) {
-        $this->id = $id;
+        $this->id = ($eventId) ? $eventId : new EventId();
         $this->name = $name;
         $this->body = $body;
         $this->occurred_on = ($occurred_on) ? new \DateTimeImmutable($occurred_on) : new \DateTimeImmutable();

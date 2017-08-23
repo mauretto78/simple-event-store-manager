@@ -10,17 +10,17 @@
 
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
-use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
-use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\MongoAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\PdoAggregateRepository;
-use SimpleEventStoreManager\Infrastructure\Persistence\RedisAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\MongoEventAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\PdoEventAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\RedisEventAggregateRepository;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class AggregateRepositoryTest extends BaseTestCase
@@ -35,10 +35,10 @@ class AggregateRepositoryTest extends BaseTestCase
         parent::setUp();
 
         $this->repos = [
-            new InMemoryAggregateRepository((new InMemoryDriver())->instance()),
-            new MongoAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
-            new PdoAggregateRepository((new PdoDriver($this->pdo_parameters))->instance()),
-            new RedisAggregateRepository((new RedisDriver($this->redis_parameters))->instance()),
+            new InMemoryEventAggregateRepository((new InMemoryDriver())->instance()),
+            new MongoEventAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
+            new PdoEventAggregateRepository((new PdoDriver($this->pdo_parameters))->instance()),
+            new RedisEventAggregateRepository((new RedisDriver($this->redis_parameters))->instance()),
         ];
     }
 
@@ -47,9 +47,8 @@ class AggregateRepositoryTest extends BaseTestCase
      */
     public function it_should_store_and_restore_aggregates()
     {
-        /** @var AggregateRepositoryInterface $repo */
+        /** @var EventAggregateRepositoryInterface $repo */
         foreach ($this->repos as $repo) {
-            $eventId = new EventId();
             $name = 'Doman\\Model\\SomeEvent';
             $body = [
                 'id' => 1,
@@ -57,7 +56,6 @@ class AggregateRepositoryTest extends BaseTestCase
                 'text' => 'Dolor lorem ipso facto dixit'
             ];
 
-            $eventId2 = new EventId();
             $name2 = 'Doman\\Model\\SomeEvent2';
             $body2 = [
                 'id' => 2,
@@ -65,21 +63,15 @@ class AggregateRepositoryTest extends BaseTestCase
                 'text' => 'Dolor lorem ipso facto dixit'
             ];
 
-            $aggregateId = new EventAggregateId();
-            $aggregate = new EventAggregate(
-                $aggregateId,
-                'Dummy EventAggregate'
-            );
+            $aggregate = new EventAggregate('Dummy EventAggregate');
             $aggregate->addEvent(
                 $event = new Event(
-                    $eventId,
                     $name,
                     $body
                 )
             );
             $aggregate->addEvent(
                 $event = new Event(
-                    $eventId2,
                     $name2,
                     $body2
                 )
@@ -87,7 +79,9 @@ class AggregateRepositoryTest extends BaseTestCase
 
             $repo->save($aggregate);
 
-            $aggregateAsArray = $repo->byId($aggregateId, AggregateRepositoryInterface::RETURN_AS_ARRAY);
+            $aggregateAsArray = $repo->byId($aggregate->id(), EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
+            $aggregateAsObject = $repo->byId($aggregate->id(), EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
+            $aggregateAsObjectByName = $repo->byName('Dummy EventAggregate', EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
 
             $this->assertNull($repo->byId(new EventAggregateId('432fdfdsfsdasd')));
             $this->assertFalse($repo->exists('not-existing-aggregate'));
@@ -96,8 +90,8 @@ class AggregateRepositoryTest extends BaseTestCase
             $this->assertArrayHasKey('name', $aggregateAsArray);
             $this->assertArrayHasKey('events', $aggregateAsArray);
             $this->assertCount(2, $aggregateAsArray['events']);
-            $this->assertEquals($aggregate, $repo->byId($aggregateId, AggregateRepositoryInterface::RETURN_AS_OBJECT));
-            $this->assertEquals($aggregate, $repo->byName('Dummy EventAggregate', AggregateRepositoryInterface::RETURN_AS_OBJECT));
+            $this->assertEquals($aggregate, $aggregateAsObject);
+            $this->assertEquals($aggregate, $aggregateAsObjectByName);
             $this->assertTrue($repo->exists('Dummy EventAggregate'));
             $this->assertNull($repo->byName('not existing aggregate'));
         }

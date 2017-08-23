@@ -12,7 +12,7 @@ use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\Event\EventQuery;
 
 use SimpleEventStoreManager\Application\Event\EventManager;
-use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
@@ -38,7 +38,6 @@ class EventQueryTest extends BaseTestCase
             ->setDriver('mongo')
             ->setConnection($this->mongo_parameters);
 
-        $eventId = new EventId();
         $name = 'Doman\\Model\\SomeEvent';
         $body = [
             'id' => 1,
@@ -46,7 +45,6 @@ class EventQueryTest extends BaseTestCase
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $eventId2 = new EventId();
         $name2 = 'Doman\\Model\\SomeEvent2';
         $body2 = [
             'id' => 2,
@@ -55,12 +53,10 @@ class EventQueryTest extends BaseTestCase
         ];
 
         $event = new Event(
-            $eventId,
             $name,
             $body
         );
         $event2 = new Event(
-            $eventId2,
             $name2,
             $body2
         );
@@ -79,8 +75,8 @@ class EventQueryTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_json_response()
     {
-        $emAsArray = $this->eventManager->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(AggregateRepositoryInterface::RETURN_AS_OBJECT);
+        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
+        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
 
         $eventQueryAsArray = new EventQuery(
             $emAsArray,
@@ -121,8 +117,8 @@ class EventQueryTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_xml_response()
     {
-        $emAsArray = $this->eventManager->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(AggregateRepositoryInterface::RETURN_AS_OBJECT);
+        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
+        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
 
         $eventQueryAsArray = new EventQuery(
             $emAsArray,
@@ -163,8 +159,8 @@ class EventQueryTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_yaml_response()
     {
-        $emAsArray = $this->eventManager->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(AggregateRepositoryInterface::RETURN_AS_OBJECT);
+        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
+        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
 
         $eventQueryAsArray = new EventQuery(
             $emAsArray,

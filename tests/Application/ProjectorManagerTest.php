@@ -27,7 +27,6 @@ class ProjectorManagerTest extends BaseTestCase
     {
         $userProjector = new UserProjectorWithNoSubcribedEvents();
         $userWasCreatedEvent = new UserWasCreated(
-            new EventId(),
             'UserWasCreated',
             [
                 'id' => 23,
@@ -36,10 +35,7 @@ class ProjectorManagerTest extends BaseTestCase
             ]
         );
 
-        $userEventAggregate = new EventAggregate(
-            new EventAggregateId(),
-            'user-23'
-        );
+        $userEventAggregate = new EventAggregate('user-23');
         $userEventAggregate->addEvent($userWasCreatedEvent);
 
         $projectorManger = new ProjectionManager();
@@ -56,7 +52,6 @@ class ProjectorManagerTest extends BaseTestCase
     {
         $userProjector = new UserProjectorWithNoApplyMethod();
         $userWasCreatedEvent = new UserWasCreated(
-            new EventId(),
             'UserWasCreated',
             [
                 'id' => 23,
@@ -65,10 +60,7 @@ class ProjectorManagerTest extends BaseTestCase
             ]
         );
 
-        $userEventAggregate = new EventAggregate(
-            new EventAggregateId(),
-            'user-23'
-        );
+        $userEventAggregate = new EventAggregate('user-23');
         $userEventAggregate->addEvent($userWasCreatedEvent);
 
         $projectorManger = new ProjectionManager();
@@ -83,7 +75,6 @@ class ProjectorManagerTest extends BaseTestCase
     {
         $userProjector = new UserProjector();
         $userWasCreatedEvent = new UserWasCreated(
-            new EventId(),
             'UserWasCreated',
             [
                 'id' => 23,
@@ -92,10 +83,7 @@ class ProjectorManagerTest extends BaseTestCase
             ]
         );
 
-        $userEventAggregate = new EventAggregate(
-            new EventAggregateId(),
-            'user-23'
-        );
+        $userEventAggregate = new EventAggregate('user-23');
         $userEventAggregate->addEvent($userWasCreatedEvent);
 
         $projectorManger = new ProjectionManager();

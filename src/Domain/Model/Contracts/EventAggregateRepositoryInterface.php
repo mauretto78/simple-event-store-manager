@@ -13,18 +13,18 @@ namespace SimpleEventStoreManager\Domain\Model\Contracts;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 
-interface AggregateRepositoryInterface
+interface EventAggregateRepositoryInterface
 {
     const RETURN_AS_ARRAY = 1;
     const RETURN_AS_OBJECT = 2;
 
     /**
-     * @param EventAggregateId $id
+     * @param EventAggregateId $eventAggregateId
      * @param int $returnType
      *
      * @return EventAggregate
      */
-    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY);
+    public function byId(EventAggregateId $eventAggregateId, $returnType = self::RETURN_AS_ARRAY);
 
     /**
      * @param $name

@@ -15,12 +15,12 @@ use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
-use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
-class MongoAggregateRepository implements AggregateRepositoryInterface
+class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
 {
     /**
      * @var Database
@@ -38,7 +38,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     private $aggregates;
 
     /**
-     * MongoAggregateRepository constructor.
+     * MongoEventAggregateRepository constructor.
      * @param Database $mongo
      */
     public function __construct(Database $mongo)
@@ -49,13 +49,13 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param EventAggregateId $id
+     * @param EventAggregateId $eventAggregateId
      *
      * @return EventAggregate
      */
-    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY)
+    public function byId(EventAggregateId $eventAggregateId, $returnType = self::RETURN_AS_ARRAY)
     {
-        if($document = $this->aggregates->findOne(['id' => $id->id()])){
+        if($document = $this->aggregates->findOne(['id' => (string) $eventAggregateId])){
             return $this->buildAggregate($document, $returnType);
         }
 
@@ -82,13 +82,11 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
      */
     private function buildAggregate($document, $returnType)
     {
-        switch ($returnType){
-            case self::RETURN_AS_ARRAY:
-                return $this->buildAggregateAsArray($document);
-
-            case self::RETURN_AS_OBJECT:
-                return $this->buildAggregateAsObject($document);
+        if($returnType === self::RETURN_AS_ARRAY){
+            return $this->buildAggregateAsArray($document);
         }
+
+        return $this->buildAggregateAsObject($document);
     }
 
     /**
@@ -194,17 +192,17 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     private function buildAggregateAsObject(BSONDocument $document)
     {
         $aggregate = new EventAggregate(
-            new EventAggregateId($document->id),
-            $document->name
+            $document->name,
+            new EventAggregateId($document->id)
         );
 
         $events = $this->events->find(['aggregate.id' => (string) $aggregate->id()])->toArray();
         foreach ($events as $event){
             $aggregate->addEvent(
                 new Event(
-                    new EventId($event->id),
                     $event->name,
                     unserialize($event->body),
+                    new EventId($event->id),
                     $event->occurred_on
                 )
             );
