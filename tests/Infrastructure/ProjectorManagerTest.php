@@ -16,14 +16,14 @@ use SimpleEventStoreManager\Infrastructure\Projection\ProjectionManager;
 use SimpleEventStoreManager\Infrastructure\Projection\Projector;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
-class ProjectorTest extends BaseTestCase
+class ProjectorManagerTest extends BaseTestCase
 {
     /**
      * @test
      * @expectedException \SimpleEventStoreManager\Infrastructure\Projection\Exceptions\ProjectorDoesNotExistsException
      * @expectedExceptionMessage No Projector found for event UserWasCreated.
      */
-    public function fdsfdsdfs()
+    public function it_throws_ProjectorDoesNotExistsException_if_projector_does_not_subscribe_the_event()
     {
         $userProjector = new UserProjectorWithNoSubcribedEvents();
         $userWasCreatedEvent = new UserWasCreated(
