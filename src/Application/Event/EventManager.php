@@ -12,6 +12,7 @@ namespace SimpleEventStoreManager\Application\Event;
 
 use Elasticsearch\ClientBuilder;
 use SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedDriverException;
+use SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedReturnTypeException;
 use SimpleEventStoreManager\Application\Event\Exceptions\NotValidEventException;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
@@ -114,9 +115,14 @@ class EventManager
     /**
      * @param int $returnType
      * @return $this
+     * @throws NotSupportedReturnTypeException
      */
     public function setReturnType($returnType = EventAggregateRepositoryInterface::RETURN_AS_ARRAY)
     {
+        if(!in_array($returnType, [EventAggregateRepositoryInterface::RETURN_AS_ARRAY, EventAggregateRepositoryInterface::RETURN_AS_OBJECT])){
+            throw new NotSupportedReturnTypeException($returnType . ' is not a valid returnType value.');
+        }
+
         $this->returnType = $returnType;
 
         return $this;
@@ -126,7 +132,7 @@ class EventManager
      * @param array $hosts
      * @return $this
      */
-    public function setElastic(array $hosts = [])
+    public function setElasticServer(array $hosts = [])
     {
         $this->elastic = new ElasticService(
             ClientBuilder::create()
@@ -147,13 +153,12 @@ class EventManager
     public function stream($aggregateName, $page = 1, $maxPerPage = 25)
     {
         if($this->streamCount($aggregateName)) {
-            switch ($this->returnType){
-                case EventAggregateRepositoryInterface::RETURN_AS_ARRAY:
-                    return array_slice($this->repo->byName($aggregateName, $this->returnType)['events'] , ($page - 1) * $maxPerPage, $maxPerPage);
+            if($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY){
+                return array_slice($this->repo->byName($aggregateName, $this->returnType)['events'] , ($page - 1) * $maxPerPage, $maxPerPage);
 
-                case EventAggregateRepositoryInterface::RETURN_AS_OBJECT:
-                    return array_slice($this->repo->byName($aggregateName, $this->returnType)->events(), ($page - 1) * $maxPerPage, $maxPerPage);
             }
+
+            return array_slice($this->repo->byName($aggregateName, $this->returnType)->events(), ($page - 1) * $maxPerPage, $maxPerPage);
         }
 
         return [];
@@ -167,13 +172,11 @@ class EventManager
     public function streamCount($aggregateName)
     {
         if($this->repo->exists($aggregateName)) {
-            switch ($this->returnType){
-                case EventAggregateRepositoryInterface::RETURN_AS_ARRAY:
-                    return count($this->repo->byName($aggregateName, $this->returnType)['events']);
-
-                case EventAggregateRepositoryInterface::RETURN_AS_OBJECT:
-                    return count($this->repo->byName($aggregateName, $this->returnType)->events());
+            if($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY){
+                return count($this->repo->byName($aggregateName, $this->returnType)['events']);
             }
+
+            return count($this->repo->byName($aggregateName, $this->returnType)->events());
         }
 
         return 0;

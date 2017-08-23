@@ -28,6 +28,17 @@ class EventManagerTest extends BaseTestCase
 
     /**
      * @test
+     * @expectedException \SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedReturnTypeException
+     * @expectedExceptionMessage not-allowed-return-type is not a valid returnType value.
+     */
+    public function it_should_throw_NotSupportedReturnTypeException_if_not_valid_returnType_is_passed()
+    {
+        EventManager::build()
+            ->setReturnType('not-allowed-return-type');
+    }
+
+    /**
+     * @test
      * @expectedException \SimpleEventStoreManager\Application\Event\Exceptions\NotValidEventException
      * @expectedExceptionMessage Not a valid instance of EventInterface was provided.
      */
@@ -78,7 +89,7 @@ class EventManagerTest extends BaseTestCase
         $eventManager = EventManager::build()
             ->setDriver('mongo')
             ->setConnection($this->mongo_parameters)
-            ->setElastic($this->elastic_parameters);
+            ->setElasticServer($this->elastic_parameters);
 
         $emAsArray = $eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
         $emAsObject = $eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
