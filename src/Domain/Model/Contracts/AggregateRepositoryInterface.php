@@ -10,8 +10,8 @@
 
 namespace SimpleEventStoreManager\Domain\Model\Contracts;
 
-use SimpleEventStoreManager\Domain\Model\Aggregate;
-use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 
 interface AggregateRepositoryInterface
 {
@@ -19,25 +19,25 @@ interface AggregateRepositoryInterface
     const RETURN_AS_OBJECT = 2;
 
     /**
-     * @param AggregateId $id
+     * @param EventAggregateId $id
      * @param int $returnType
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
-    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY);
+    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY);
 
     /**
      * @param $name
      * @param int $returnType
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY);
 
     /**
      * @return int
      */
-    public function eventsCount(Aggregate $aggregate);
+    public function eventsCount(EventAggregate $aggregate);
 
     /**
      * @param $name
@@ -47,9 +47,9 @@ interface AggregateRepositoryInterface
     public function exists($name);
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      *
      * @return mixed
      */
-    public function save(Aggregate $aggregate);
+    public function save(EventAggregate $aggregate);
 }

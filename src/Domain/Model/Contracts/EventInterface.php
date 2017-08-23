@@ -10,7 +10,7 @@
 
 namespace SimpleEventStoreManager\Domain\Model\Contracts;
 
-use SimpleEventStoreManager\Domain\Model\Aggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventId;
 
 interface EventInterface

@@ -41,7 +41,7 @@ class EventManagerTest extends BaseTestCase
             ->setConnection($this->mongo_parameters);
 
         $eventManager->storeEvents(
-            'Dummy Aggregate',
+            'Dummy EventAggregate',
             [
                 $notValidEvent
             ]
@@ -92,14 +92,14 @@ class EventManagerTest extends BaseTestCase
 
         foreach ($eventManagers as $eventManager){
             $eventManager->storeEvents(
-                'Dummy Aggregate',
+                'Dummy EventAggregate',
                 [
                     $event,
                     $event2
                 ]
             );
 
-            $stream = $eventManager->stream('Dummy Aggregate');
+            $stream = $eventManager->stream('Dummy EventAggregate');
             $this->assertCount(2, $stream);
 
             $stream = $eventManager->stream('Not existing aggregate');

@@ -11,8 +11,8 @@
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Cocur\Slugify\Slugify;
-use SimpleEventStoreManager\Domain\Model\Aggregate;
-use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
@@ -36,11 +36,11 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param AggregateId $id
+     * @param EventAggregateId $id
      * @param int $returnType
-     * @return array|null|Aggregate
+     * @return array|null|EventAggregate
      */
-    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY)
+    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY)
     {
         $aggregateId = (string) $id->id();
         $query = 'SELECT
@@ -68,7 +68,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param $name
      * @param int $returnType
-     * @return array|null|Aggregate
+     * @return array|null|EventAggregate
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
@@ -97,7 +97,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
 
     /**
      * @param array $rows
-     * @return Aggregate|array
+     * @return EventAggregate|array
      */
     private function buildAggregate(array $rows, $returnType)
     {
@@ -113,7 +113,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     /**
      * @return int
      */
-    public function eventsCount(Aggregate $aggregate)
+    public function eventsCount(EventAggregate $aggregate)
     {
         $aggregateId = $aggregate->id();
         $sql = 'SELECT id FROM `events` WHERE `aggregate_id` = :id';
@@ -140,10 +140,10 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      * @return mixed
      */
-    public function save(Aggregate $aggregate)
+    public function save(EventAggregate $aggregate)
     {
         $AggregateId = (string) $aggregate->id();
         $AggregateName = $aggregate->name();
@@ -165,7 +165,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
      *
      * @return mixed
      */
-    private function saveEvent(EventInterface $event, Aggregate $aggregate)
+    private function saveEvent(EventInterface $event, EventAggregate $aggregate)
     {
         $eventId = (string) $event->id();
         $eventAggregateId = (string) $aggregate->id();
@@ -188,7 +188,7 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param array $rows
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     private function buildAggregateAsArray(array $rows)
     {
@@ -210,12 +210,12 @@ class PdoAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param array $rows
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     private function buildAggregateAsObject(array $rows)
     {
-        $aggregate = new Aggregate(
-            new AggregateId($rows[0]['aggregate_id']),
+        $aggregate = new EventAggregate(
+            new EventAggregateId($rows[0]['aggregate_id']),
             $rows[0]['aggregate_name']
         );
 

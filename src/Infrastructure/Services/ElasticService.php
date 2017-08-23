@@ -11,7 +11,7 @@
 namespace SimpleEventStoreManager\Infrastructure\Services;
 
 use Elasticsearch\Client;
-use SimpleEventStoreManager\Domain\Model\Aggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Infrastructure\Persistence\Exceptions\AggregateNotPersistedInElasticIndexException;
 
@@ -34,10 +34,10 @@ class ElasticService
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      * @throws AggregateNotPersistedInElasticIndexException
      */
-    public function addAggregateToIndex(Aggregate $aggregate)
+    public function addAggregateToIndex(EventAggregate $aggregate)
     {
         $this->manageAggregateIndex($aggregate->name());
 

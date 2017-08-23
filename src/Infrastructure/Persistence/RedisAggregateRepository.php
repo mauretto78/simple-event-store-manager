@@ -13,8 +13,8 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 use Cocur\Slugify\Slugify;
 use Predis\Client;
 use Predis\Collection\Iterator\SetKey;
-use SimpleEventStoreManager\Domain\Model\Aggregate;
-use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
@@ -44,11 +44,11 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param AggregateId $id
+     * @param EventAggregateId $id
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
-    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY)
+    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY)
     {
         if ($aggregate = $this->client->hgetall('aggregate:'.$id)) {
             return $this->buildAggregate($aggregate, $returnType);
@@ -60,7 +60,7 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param $name
      * @param int $returnType
-     * @return array|null|Aggregate
+     * @return array|null|EventAggregate
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
@@ -75,7 +75,7 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
 
     /**
      * @param array $rows
-     * @return Aggregate|array
+     * @return EventAggregate|array
      */
     private function buildAggregate(array $rows, $returnType)
     {
@@ -91,7 +91,7 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
     /**
      * @return int
      */
-    public function eventsCount(Aggregate $aggregate)
+    public function eventsCount(EventAggregate $aggregate)
     {
         return count($this->client->hgetall('aggregate:'.$aggregate->id()));
     }
@@ -107,10 +107,10 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      * @return mixed
      */
-    public function save(Aggregate $aggregate)
+    public function save(EventAggregate $aggregate)
     {
         $aggregateId = $aggregate->id();
         $aggregateName = $aggregate->name();
@@ -129,9 +129,9 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
 
     /**
      * @param EventInterface $event
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      */
-    private function saveEvent(EventInterface $event, Aggregate $aggregate)
+    private function saveEvent(EventInterface $event, EventAggregate $aggregate)
     {
         $eventId = (string) $event->id();
         $eventAggregate = $aggregate;
@@ -153,7 +153,7 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param array $row
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     private function buildAggregateAsArray(array $row)
     {
@@ -177,12 +177,12 @@ class RedisAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param array $row
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     private function buildAggregateAsObject(array $row)
     {
-        $aggregate = new Aggregate(
-            new AggregateId($row['id']),
+        $aggregate = new EventAggregate(
+            new EventAggregateId($row['id']),
             $row['name']
         );
 

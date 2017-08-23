@@ -8,8 +8,8 @@
  * file that was distributed with this source code.
  */
 
-use SimpleEventStoreManager\Domain\Model\Aggregate;
-use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
@@ -65,10 +65,10 @@ class AggregateRepositoryTest extends BaseTestCase
                 'text' => 'Dolor lorem ipso facto dixit'
             ];
 
-            $aggregateId = new AggregateId();
-            $aggregate = new Aggregate(
+            $aggregateId = new EventAggregateId();
+            $aggregate = new EventAggregate(
                 $aggregateId,
-                'Dummy Aggregate'
+                'Dummy EventAggregate'
             );
             $aggregate->addEvent(
                 $event = new Event(
@@ -89,7 +89,7 @@ class AggregateRepositoryTest extends BaseTestCase
 
             $aggregateAsArray = $repo->byId($aggregateId, AggregateRepositoryInterface::RETURN_AS_ARRAY);
 
-            $this->assertNull($repo->byId(new AggregateId('432fdfdsfsdasd')));
+            $this->assertNull($repo->byId(new EventAggregateId('432fdfdsfsdasd')));
             $this->assertFalse($repo->exists('not-existing-aggregate'));
             $this->assertEquals(2, $repo->eventsCount($aggregate));
             $this->assertArrayHasKey('id', $aggregateAsArray);
@@ -97,8 +97,8 @@ class AggregateRepositoryTest extends BaseTestCase
             $this->assertArrayHasKey('events', $aggregateAsArray);
             $this->assertCount(2, $aggregateAsArray['events']);
             $this->assertEquals($aggregate, $repo->byId($aggregateId, AggregateRepositoryInterface::RETURN_AS_OBJECT));
-            $this->assertEquals($aggregate, $repo->byName('Dummy Aggregate', AggregateRepositoryInterface::RETURN_AS_OBJECT));
-            $this->assertTrue($repo->exists('Dummy Aggregate'));
+            $this->assertEquals($aggregate, $repo->byName('Dummy EventAggregate', AggregateRepositoryInterface::RETURN_AS_OBJECT));
+            $this->assertTrue($repo->exists('Dummy EventAggregate'));
             $this->assertNull($repo->byName('not existing aggregate'));
         }
     }

@@ -13,8 +13,8 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 use Cocur\Slugify\Slugify;
 use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
-use SimpleEventStoreManager\Domain\Model\Aggregate;
-use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
@@ -49,11 +49,11 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param AggregateId $id
+     * @param EventAggregateId $id
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
-    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY)
+    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY)
     {
         if($document = $this->aggregates->findOne(['id' => $id->id()])){
             return $this->buildAggregate($document, $returnType);
@@ -65,7 +65,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param $name
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
@@ -78,7 +78,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
 
     /**
      * @param $document
-     * @return Aggregate|array
+     * @return EventAggregate|array
      */
     private function buildAggregate($document, $returnType)
     {
@@ -94,7 +94,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     /**
      * @return int
      */
-    public function eventsCount(Aggregate $aggregate)
+    public function eventsCount(EventAggregate $aggregate)
     {
         return $this->events->count(['aggregate.id' => (string) $aggregate->id()]);
     }
@@ -109,10 +109,10 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      * @return mixed
      */
-    public function save(Aggregate $aggregate)
+    public function save(EventAggregate $aggregate)
     {
         if(false === $this->exists($aggregate->name())){
             $this->aggregates->insertOne([
@@ -134,7 +134,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
      *
      * @return mixed
      */
-    private function saveEvent(EventInterface $event, Aggregate $aggregate)
+    private function saveEvent(EventInterface $event, EventAggregate $aggregate)
     {
         $eventId = (string) $event->id();
         $eventName = $event->name();
@@ -166,7 +166,7 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param BSONDocument $document
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     private function buildAggregateAsArray(BSONDocument $document)
     {
@@ -189,12 +189,12 @@ class MongoAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param BSONDocument $document
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     private function buildAggregateAsObject(BSONDocument $document)
     {
-        $aggregate = new Aggregate(
-            new AggregateId($document->id),
+        $aggregate = new EventAggregate(
+            new EventAggregateId($document->id),
             $document->name
         );
 

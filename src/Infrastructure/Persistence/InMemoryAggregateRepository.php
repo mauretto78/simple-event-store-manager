@@ -11,8 +11,8 @@
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use Cocur\Slugify\Slugify;
-use SimpleEventStoreManager\Domain\Model\Aggregate;
-use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 
 class InMemoryAggregateRepository implements AggregateRepositoryInterface
@@ -31,11 +31,11 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param AggregateId $id
+     * @param EventAggregateId $id
      *
-     * @return Aggregate|array
+     * @return EventAggregate|array
      */
-    public function byId(AggregateId $id, $returnType = self::RETURN_AS_ARRAY)
+    public function byId(EventAggregateId $id, $returnType = self::RETURN_AS_ARRAY)
     {
         return (isset($this->aggregates[(string) $id])) ? $this->buildAggregate($this->aggregates[(string) $id], $returnType) : null;
     }
@@ -43,7 +43,7 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     /**
      * @param string $name
      *
-     * @return Aggregate|array
+     * @return EventAggregate|array
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
@@ -58,11 +58,11 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      * @param int $returnType
-     * @return Aggregate|array
+     * @return EventAggregate|array
      */
-    private function buildAggregate(Aggregate $aggregate, $returnType)
+    private function buildAggregate(EventAggregate $aggregate, $returnType)
     {
         switch ($returnType){
             case self::RETURN_AS_ARRAY:
@@ -74,11 +74,11 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      *
      * @return int
      */
-    public function eventsCount(Aggregate $aggregate)
+    public function eventsCount(EventAggregate $aggregate)
     {
         return count($aggregate->events());
     }
@@ -100,19 +100,19 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      * @return mixed
      */
-    public function save(Aggregate $aggregate)
+    public function save(EventAggregate $aggregate)
     {
         $this->aggregates[(string) $aggregate->id()] = $aggregate;
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param EventAggregate $aggregate
      * @return array
      */
-    private function buildAggregateAsArray(Aggregate $aggregate)
+    private function buildAggregateAsArray(EventAggregate $aggregate)
     {
         $returnArray['id'] = (string) $aggregate->id();
         $returnArray['name'] = $aggregate->name();
@@ -130,10 +130,10 @@ class InMemoryAggregateRepository implements AggregateRepositoryInterface
     }
 
     /**
-     * @param Aggregate $aggregate
-     * @return Aggregate
+     * @param EventAggregate $aggregate
+     * @return EventAggregate
      */
-    private function buildAggregateAsObject(Aggregate $aggregate)
+    private function buildAggregateAsObject(EventAggregate $aggregate)
     {
         return $aggregate;
     }

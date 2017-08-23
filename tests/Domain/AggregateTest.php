@@ -10,8 +10,8 @@
 
 use SimpleEventStoreManager\Domain\EventRecorder\EventRecorder;
 use SimpleEventStoreManager\Domain\EventRecorder\EventRecorderCapabilities;
-use SimpleEventStoreManager\Domain\Model\Aggregate;
-use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Tests\BaseTestCase;
@@ -31,9 +31,9 @@ class AggregateTest extends BaseTestCase
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $aggregate = new Aggregate(
-            new AggregateId(),
-            'Dummy Aggregate'
+        $aggregate = new EventAggregate(
+            new EventAggregateId(),
+            'Dummy EventAggregate'
         );
 
         $aggregate->addEvent(
@@ -50,7 +50,7 @@ class AggregateTest extends BaseTestCase
         $this->assertCount(1, $aggregate->events());
         $this->assertEquals($eventId, $eventId->id());
         $this->assertEquals($eventId, $event->id());
-        $this->assertEquals($aggregate->name(), 'dummy-aggregate');
+        $this->assertEquals($aggregate->name(), 'dummy-eventaggregate');
         $this->assertEquals($name, $event->name());
         $this->assertEquals($body, $event->body());
         $this->assertInstanceOf(DateTimeImmutable::class, $event->occurredOn());

@@ -66,7 +66,7 @@ class EventQueryTest extends BaseTestCase
         );
 
         $this->eventManager->storeEvents(
-            'Dummy Aggregate',
+            'Dummy EventAggregate',
             [
                 $event,
                 $event2
@@ -102,7 +102,7 @@ class EventQueryTest extends BaseTestCase
 
         /** @var EventQuery $eventQuery */
         foreach ($eventQueries as $eventQuery){
-            $response = $eventQuery->aggregate('Dummy Aggregate', 1, 1);
+            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = json_decode($response->getContent());
 
             $this->assertInstanceOf(Response::class, $response);
@@ -111,7 +111,7 @@ class EventQueryTest extends BaseTestCase
             $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
             $this->assertEquals(2, $content->_meta->total_count);
 
-            $response = $eventQuery->aggregate('Dummy Aggregate',5);
+            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
         }
     }
@@ -144,7 +144,7 @@ class EventQueryTest extends BaseTestCase
 
         /** @var EventQuery $eventQuery */
         foreach ($eventQueries as $eventQuery){
-            $response = $eventQuery->aggregate('Dummy Aggregate', 1, 1);
+            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = simplexml_load_string($response->getContent());
 
             $this->assertInstanceOf(Response::class, $response);
@@ -153,7 +153,7 @@ class EventQueryTest extends BaseTestCase
             $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
             $this->assertEquals(2, (string) $content->entry->total_count);
 
-            $response = $eventQuery->aggregate('Dummy Aggregate',5);
+            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
         }
     }
@@ -186,7 +186,7 @@ class EventQueryTest extends BaseTestCase
 
         /** @var EventQuery $eventQuery */
         foreach ($eventQueries as $eventQuery){
-            $response = $eventQuery->aggregate('Dummy Aggregate', 1, 1);
+            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = Yaml::parse($response->getContent());
 
             $this->assertInstanceOf(Response::class, $response);
@@ -198,7 +198,7 @@ class EventQueryTest extends BaseTestCase
             $this->assertEquals(2, $content['_meta']['total_pages']);
             $this->assertEquals(2, $content['_meta']['total_count']);
 
-            $response = $eventQuery->aggregate('Dummy Aggregate',5);
+            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
         }
     }

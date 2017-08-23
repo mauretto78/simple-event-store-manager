@@ -13,10 +13,10 @@ namespace SimpleEventStoreManager\Domain\Model;
 use Cocur\Slugify\Slugify;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 
-class Aggregate
+class EventAggregate
 {
     /**
-     * @var AggregateId
+     * @var EventAggregateId
      */
     private $id;
 
@@ -31,13 +31,13 @@ class Aggregate
     private $events;
 
     /**
-     * Aggregate constructor.
+     * EventAggregate constructor.
      *
-     * @param AggregateId $id
+     * @param EventAggregateId $id
      * @param $name
      */
     public function __construct(
-        AggregateId $id,
+        EventAggregateId $id,
         $name
     ) {
         $this->id = $id;
@@ -45,7 +45,7 @@ class Aggregate
     }
 
     /**
-     * @return AggregateId
+     * @return EventAggregateId
      */
     public function id()
     {

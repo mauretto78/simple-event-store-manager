@@ -13,8 +13,8 @@ namespace SimpleEventStoreManager\Application;
 use Elasticsearch\ClientBuilder;
 use SimpleEventStoreManager\Application\Exceptions\NotSupportedDriverException;
 use SimpleEventStoreManager\Application\Exceptions\NotValidEventException;
-use SimpleEventStoreManager\Domain\Model\Aggregate;
-use SimpleEventStoreManager\Domain\Model\AggregateId;
+use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Infrastructure\Services\ElasticService;
@@ -206,7 +206,7 @@ class EventManager
     /**
      * @param $aggregateName
      *
-     * @return Aggregate
+     * @return EventAggregate
      */
     private function getAggregateFromName($aggregateName)
     {
@@ -214,8 +214,8 @@ class EventManager
             return $this->repo->byName($aggregateName, AggregateRepositoryInterface::RETURN_AS_OBJECT);
         }
 
-        return new Aggregate(
-            new AggregateId(),
+        return new EventAggregate(
+            new EventAggregateId(),
             $aggregateName
         );
     }

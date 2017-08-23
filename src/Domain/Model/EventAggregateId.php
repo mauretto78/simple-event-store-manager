@@ -12,7 +12,7 @@ namespace SimpleEventStoreManager\Domain\Model;
 
 use Ramsey\Uuid\Uuid;
 
-class AggregateId
+class EventAggregateId
 {
     /**
      * @var string
