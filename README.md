@@ -274,7 +274,7 @@ $eventManager = EventManager::build()
     ->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY)
     ->setElastic($elastic);
 
-$eventQuery = new EventQuery(
+$eventRepresentation = new EventQuery(
     $eventManager,
     // here you can use:
     // - JsonEventDataTransformer
@@ -288,7 +288,7 @@ $eventQuery = new EventQuery(
 
 // send Response
 $page = (null !== $page = $request->query->get('page')) ? $page : 1;
-$response = $eventQuery->aggregate($request->query->get('aggregate'), $page);
+$response = $eventRepresentation->aggregate($request->query->get('aggregate'), $page);
 $response->send();
 
 ```

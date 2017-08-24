@@ -9,7 +9,7 @@
  */
 
 use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\Event\EventQueryToRefactor;
+use SimpleEventStoreManager\Application\Event\EventRepresentation;
 
 use SimpleEventStoreManager\Application\Event\EventManager;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Yaml\Yaml;
 
-class EventQueryToRefactorTest extends BaseTestCase
+class EventRepresentationTest extends BaseTestCase
 {
     /**
      * @var EventManager
@@ -70,13 +70,15 @@ class EventQueryToRefactorTest extends BaseTestCase
         );
     }
 
-
+    /**
+     * @test
+     */
     public function it_should_store_events_perform_queries_and_retrive_json_response()
     {
         $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
         $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
 
-        $eventQueryAsArray = new EventQueryToRefactor(
+        $eventQueryAsArray = new EventRepresentation(
             $emAsArray,
             new JsonEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -84,7 +86,7 @@ class EventQueryToRefactorTest extends BaseTestCase
             )
         );
 
-        $eventQueryAsObject = new EventQueryToRefactor(
+        $eventQueryAsObject = new EventRepresentation(
             $emAsObject,
             new JsonEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -94,7 +96,7 @@ class EventQueryToRefactorTest extends BaseTestCase
 
         $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
 
-        /** @var EventQueryToRefactor $eventQuery */
+        /** @var EventRepresentation $eventQuery */
         foreach ($eventQueries as $eventQuery){
             $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = json_decode($response->getContent());
@@ -110,13 +112,15 @@ class EventQueryToRefactorTest extends BaseTestCase
         }
     }
 
-
+    /**
+     * @test
+     */
     public function it_should_store_events_perform_queries_and_retrive_xml_response()
     {
         $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
         $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
 
-        $eventQueryAsArray = new EventQueryToRefactor(
+        $eventQueryAsArray = new EventRepresentation(
             $emAsArray,
             new XmlEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -124,7 +128,7 @@ class EventQueryToRefactorTest extends BaseTestCase
             )
         );
 
-        $eventQueryAsObject = new EventQueryToRefactor(
+        $eventQueryAsObject = new EventRepresentation(
             $emAsObject,
             new XmlEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -134,7 +138,7 @@ class EventQueryToRefactorTest extends BaseTestCase
 
         $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
 
-        /** @var EventQueryToRefactor $eventQuery */
+        /** @var EventRepresentation $eventQuery */
         foreach ($eventQueries as $eventQuery){
             $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = simplexml_load_string($response->getContent());
@@ -150,13 +154,15 @@ class EventQueryToRefactorTest extends BaseTestCase
         }
     }
 
-
+    /**
+     * @test
+     */
     public function it_should_store_events_perform_queries_and_retrive_yaml_response()
     {
         $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
         $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
 
-        $eventQueryAsArray = new EventQueryToRefactor(
+        $eventQueryAsArray = new EventRepresentation(
             $emAsArray,
             new YamlEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -164,7 +170,7 @@ class EventQueryToRefactorTest extends BaseTestCase
             )
         );
 
-        $eventQueryAsObject = new EventQueryToRefactor(
+        $eventQueryAsObject = new EventRepresentation(
             $emAsObject,
             new YamlEventDataTransformer(
                 SerializerBuilder::create()->build(),
@@ -174,7 +180,7 @@ class EventQueryToRefactorTest extends BaseTestCase
 
         $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
 
-        /** @var EventQueryToRefactor $eventQuery */
+        /** @var EventRepresentation $eventQuery */
         foreach ($eventQueries as $eventQuery){
             $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = Yaml::parse($response->getContent());

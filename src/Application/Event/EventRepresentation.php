@@ -13,7 +13,7 @@ namespace SimpleEventStoreManager\Application\Event;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
-class EventQueryToRefactor
+class EventRepresentation
 {
     /**
      * @var DataTransformerInterface
@@ -26,7 +26,12 @@ class EventQueryToRefactor
     private $eventManger;
 
     /**
-     * EventQueryToRefactor constructor.
+     * @var EventQuery
+     */
+    private $eventQuery;
+
+    /**
+     * EventRepresentation constructor.
      * @param EventManager $eventManger
      * @param DataTransformerInterface $dataTransformer
      */
@@ -35,6 +40,7 @@ class EventQueryToRefactor
         DataTransformerInterface $dataTransformer
     ) {
         $this->eventManger = $eventManger;
+        $this->eventQuery = new EventQuery($eventManger);
         $this->dataTransformer = $dataTransformer;
     }
 
@@ -47,10 +53,22 @@ class EventQueryToRefactor
     public function aggregate($aggregateName, $page = 1, $maxPerPage = 25)
     {
         return $this->dataTransformer->transform(
-            $this->eventManger->stream($aggregateName, $page, $maxPerPage),
-            $this->eventManger->streamCount($aggregateName),
+            $this->paginateAggregate($this->eventQuery->fromAggregate($aggregateName), $page, $maxPerPage),
+            $this->eventQuery->streamCount($aggregateName),
             $page,
             $maxPerPage
         );
+    }
+
+    /**
+     * @param $array
+     * @param $page
+     * @param $maxPerPage
+     *
+     * @return array
+     */
+    private function paginateAggregate($array, $page, $maxPerPage)
+    {
+        return array_slice($array, ($page - 1) * $maxPerPage, $maxPerPage);
     }
 }
