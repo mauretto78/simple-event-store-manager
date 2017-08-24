@@ -113,6 +113,14 @@ class EventManager
     }
 
     /**
+     * @return EventAggregateRepositoryInterface
+     */
+    public function getRepo()
+    {
+        return $this->repo;
+    }
+
+    /**
      * @param int $returnType
      * @return $this
      * @throws NotSupportedReturnTypeException
@@ -126,6 +134,14 @@ class EventManager
         $this->returnType = $returnType;
 
         return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getReturnType()
+    {
+        return $this->returnType;
     }
 
     /**
@@ -145,51 +161,12 @@ class EventManager
 
     /**
      * @param $aggregateName
-     * @param int $page
-     * @param int $maxPerPage
-     *
-     * @return array
-     */
-    public function stream($aggregateName, $page = 1, $maxPerPage = 25)
-    {
-        if($this->streamCount($aggregateName)) {
-            if($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY){
-                return array_slice($this->repo->byName($aggregateName, $this->returnType)['events'] , ($page - 1) * $maxPerPage, $maxPerPage);
-
-            }
-
-            return array_slice($this->repo->byName($aggregateName, $this->returnType)->events(), ($page - 1) * $maxPerPage, $maxPerPage);
-        }
-
-        return [];
-    }
-
-    /**
-     * @param $aggregateName
-     *
-     * @return int
-     */
-    public function streamCount($aggregateName)
-    {
-        if($this->repo->exists($aggregateName)) {
-            if($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY){
-                return count($this->repo->byName($aggregateName, $this->returnType)['events']);
-            }
-
-            return count($this->repo->byName($aggregateName, $this->returnType)->events());
-        }
-
-        return 0;
-    }
-
-    /**
-     * @param $aggregateName
      * @param array EventInterface[] $events
      * @throws NotValidEventException
      */
     public function storeEvents($aggregateName, array $events = [])
     {
-        $aggregate = $this->getAggregateFromName($aggregateName);
+        $aggregate = $this->checkIfAggregateExistsOrReturnNewInstance($aggregateName);
         foreach ($events as $event){
             if(!$event instanceof EventInterface){
                 throw new NotValidEventException('Not a valid instance of EventInterface was provided.');
@@ -210,7 +187,7 @@ class EventManager
      *
      * @return EventAggregate
      */
-    private function getAggregateFromName($aggregateName)
+    private function checkIfAggregateExistsOrReturnNewInstance($aggregateName)
     {
         if($this->repo->exists($aggregateName)){
             return $this->repo->byName($aggregateName, EventAggregateRepositoryInterface::RETURN_AS_OBJECT);

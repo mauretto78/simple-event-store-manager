@@ -8,47 +8,80 @@
  * file that was distributed with this source code.
  */
 
-use JMS\Serializer\SerializerBuilder;
-use SimpleEventStoreManager\Application\Event\EventQuery;
-
 use SimpleEventStoreManager\Application\Event\EventManager;
+use SimpleEventStoreManager\Application\Event\EventQuery;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventId;
-use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
-use SimpleEventStoreManager\Infrastructure\DataTransformers\XmlEventDataTransformer;
-use SimpleEventStoreManager\Infrastructure\DataTransformers\YamlEventDataTransformer;
 use SimpleEventStoreManager\Tests\BaseTestCase;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Yaml\Yaml;
 
 class EventQueryTest extends BaseTestCase
 {
     /**
-     * @var EventManager
+     * @test
+     * @expectedException \SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedDriverException
+     * @expectedExceptionMessage not-allowed-driver is not a supported driver.
      */
-    private $eventManager;
-
-    public function setUp()
+    public function it_should_throw_NotSupportedDriverException_if_not_supported_driver_is_passed()
     {
-        parent::setUp();
+        EventManager::build()
+            ->setDriver('not-allowed-driver');
+    }
 
-        $this->eventManager = EventManager::build()
+    /**
+     * @test
+     * @expectedException \SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedReturnTypeException
+     * @expectedExceptionMessage not-allowed-return-type is not a valid returnType value.
+     */
+    public function it_should_throw_NotSupportedReturnTypeException_if_not_valid_returnType_is_passed()
+    {
+        EventManager::build()
+            ->setReturnType('not-allowed-return-type');
+    }
+
+    /**
+     * @test
+     * @expectedException \SimpleEventStoreManager\Application\Event\Exceptions\NotValidEventException
+     * @expectedExceptionMessage Not a valid instance of EventInterface was provided.
+     */
+    public function it_should_throw_NotValidEventException_if_not_valid_event_is_passed()
+    {
+        $notValidEvent = new NotValidEvent(1, 'Lorem Ipsum');
+
+        $eventManager = EventManager::build()
             ->setDriver('mongo')
             ->setConnection($this->mongo_parameters);
 
+        $eventManager->storeEvents(
+            'Dummy EventAggregate',
+            [
+                $notValidEvent
+            ]
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function it_should_store_and_query_events_and_send_them_to_elastic()
+    {
         $name = 'Doman\\Model\\SomeEvent';
         $body = [
             'id' => 1,
-            'title' => 'Lorem Ipsum',
+            'title' => 'Lorem Ipsum1',
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $name2 = 'Doman\\Model\\SomeEvent2';
+        $name2 = 'Doman\\Model\\SomeEvent';
         $body2 = [
             'id' => 2,
-            'title' => 'Lorem Ipsum',
+            'title' => 'Lorem Ipsum2',
+            'text' => 'Dolor lorem ipso facto dixit'
+        ];
+
+        $name3 = 'Doman\\Model\\AnotherEvent';
+        $body3 = [
+            'id' => 3,
+            'title' => 'Lorem Ipsum3',
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
@@ -60,142 +93,70 @@ class EventQueryTest extends BaseTestCase
             $name2,
             $body2
         );
-
-        $this->eventManager->storeEvents(
-            'Dummy EventAggregate',
-            [
-                $event,
-                $event2
-            ]
-        );
-    }
-
-    /**
-     * @test
-     */
-    public function it_should_store_events_perform_queries_and_retrive_json_response()
-    {
-        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
-
-        $eventQueryAsArray = new EventQuery(
-            $emAsArray,
-            new JsonEventDataTransformer(
-                SerializerBuilder::create()->build(),
-                Request::createFromGlobals()
-            )
+        $event3 = new Event(
+            $name3,
+            $body3
         );
 
-        $eventQueryAsObject = new EventQuery(
-            $emAsObject,
-            new JsonEventDataTransformer(
-                SerializerBuilder::create()->build(),
-                Request::createFromGlobals()
-            )
-        );
+        $returnTypes = [EventAggregateRepositoryInterface::RETURN_AS_ARRAY, EventAggregateRepositoryInterface::RETURN_AS_OBJECT];
 
-        $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
+        foreach ($returnTypes as $returnType){
+            $eventManager = EventManager::build()
+                ->setDriver('mongo')
+                ->setConnection($this->mongo_parameters)
+                ->setElasticServer($this->elastic_parameters)
+                ->setReturnType($returnType);
 
-        /** @var EventQuery $eventQuery */
-        foreach ($eventQueries as $eventQuery){
-            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
-            $content = json_decode($response->getContent());
+            $eventManager->storeEvents(
+                'Dummy EventAggregate',
+                [
+                    $event,
+                    $event2
+                ]
+            );
+            $eventManager->storeEvents(
+                'Another EventAggregate',
+                [
+                    $event3
+                ]
+            );
 
-            $this->assertInstanceOf(Response::class, $response);
-            $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-            $this->assertEquals($response->headers->get('content-type'), 'application/json');
-            $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
-            $this->assertEquals(2, $content->_meta->total_count);
+            $eventQuery = new EventQuery($eventManager);
 
-            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
-            $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+            $stream = $eventQuery->fromAggregate('Not existing aggregate');
+            $this->assertCount(0, $stream);
+
+            $stream = $eventQuery->fromAggregate('Dummy EventAggregate');
+            $this->assertEquals(2, $eventQuery->streamCount('Dummy EventAggregate'));
+            $this->assertCount(2, $stream);
+
+            $stream2 = $eventQuery->fromAggregate('Another EventAggregate');
+            $this->assertEquals(1, $eventQuery->streamCount('Another EventAggregate'));
+            $this->assertCount(1, $stream2);
+
+            $streams = $eventQuery->fromAggregates([
+                'Dummy EventAggregate',
+                'Another EventAggregate'
+            ]);
+            $this->assertCount(3, $streams);
+
+            $queriedEvents = $eventQuery->query($streams, [
+                'name' => 'Doman\\Model\\SomeEvent'
+            ]);
+            $this->assertCount(2, $queriedEvents);
         }
     }
+}
 
-    /**
-     * @test
-     */
-    public function it_should_store_events_perform_queries_and_retrive_xml_response()
+class NotValidEvent
+{
+    private $id;
+
+    private $name;
+
+    public function __construct($id, $name)
     {
-        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
-
-        $eventQueryAsArray = new EventQuery(
-            $emAsArray,
-            new XmlEventDataTransformer(
-                SerializerBuilder::create()->build(),
-                Request::createFromGlobals()
-            )
-        );
-
-        $eventQueryAsObject = new EventQuery(
-            $emAsObject,
-            new XmlEventDataTransformer(
-                SerializerBuilder::create()->build(),
-                Request::createFromGlobals()
-            )
-        );
-
-        $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
-
-        /** @var EventQuery $eventQuery */
-        foreach ($eventQueries as $eventQuery){
-            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
-            $content = simplexml_load_string($response->getContent());
-
-            $this->assertInstanceOf(Response::class, $response);
-            $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-            $this->assertEquals($response->headers->get('content-type'), 'text/xml');
-            $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
-            $this->assertEquals(2, (string) $content->entry->total_count);
-
-            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
-            $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
-        }
-    }
-
-    /**
-     * @test
-     */
-    public function it_should_store_events_perform_queries_and_retrive_yaml_response()
-    {
-        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
-
-        $eventQueryAsArray = new EventQuery(
-            $emAsArray,
-            new YamlEventDataTransformer(
-                SerializerBuilder::create()->build(),
-                Request::createFromGlobals()
-            )
-        );
-
-        $eventQueryAsObject = new EventQuery(
-            $emAsObject,
-            new YamlEventDataTransformer(
-                SerializerBuilder::create()->build(),
-                Request::createFromGlobals()
-            )
-        );
-
-        $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
-
-        /** @var EventQuery $eventQuery */
-        foreach ($eventQueries as $eventQuery){
-            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
-            $content = Yaml::parse($response->getContent());
-
-            $this->assertInstanceOf(Response::class, $response);
-            $this->assertEquals(Response::HTTP_OK, $response->getStatusCode());
-            $this->assertEquals($response->headers->get('content-type'), 'text/yaml');
-            $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
-            $this->assertEquals(1, $content['_meta']['page']);
-            $this->assertEquals(1, $content['_meta']['records_per_page']);
-            $this->assertEquals(2, $content['_meta']['total_pages']);
-            $this->assertEquals(2, $content['_meta']['total_count']);
-
-            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
-            $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
-        }
+        $this->id = $id;
+        $this->name = $name;
     }
 }

@@ -10,47 +10,102 @@
 
 namespace SimpleEventStoreManager\Application\Event;
 
-use SimpleEventStoreManager\Infrastructure\DataTransformers\Contracts\DataTransformerInterface;
-use Symfony\Component\HttpFoundation\Response;
+use ArrayQuery\QueryBuilder;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 
 class EventQuery
 {
-    /**
-     * @var DataTransformerInterface
-     */
-    private $dataTransformer;
-
     /**
      * @var EventManager
      */
     private $eventManger;
 
     /**
-     * EventQuery constructor.
-     * @param EventManager $eventManger
-     * @param DataTransformerInterface $dataTransformer
+     * @var EventAggregateRepositoryInterface
      */
-    public function __construct(
-        EventManager $eventManger,
-        DataTransformerInterface $dataTransformer
-    ) {
+    private $repo;
+
+    /**
+     * @var int
+     */
+    private $returnType;
+
+    /**
+     * EventQuery constructor.
+     *
+     * @param EventManager $eventManger
+     */
+    public function __construct(EventManager $eventManger)
+    {
         $this->eventManger = $eventManger;
-        $this->dataTransformer = $dataTransformer;
+        $this->repo = $eventManger->getRepo();
+        $this->returnType = $eventManger->getReturnType();
     }
 
     /**
-     * @param int $page
-     * @param int $maxPerPage
+     * @param $aggregateName
      *
-     * @return Response
+     * @return array|EventInterface[]
      */
-    public function aggregate($aggregateName, $page = 1, $maxPerPage = 25)
+    public function fromAggregate($aggregateName)
     {
-        return $this->dataTransformer->transform(
-            $this->eventManger->stream($aggregateName, $page, $maxPerPage),
-            $this->eventManger->streamCount($aggregateName),
-            $page,
-            $maxPerPage
-        );
+        $stream = $this->repo->byName($aggregateName, $this->returnType);
+
+        if($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY){
+            return (isset($stream['events'])) ? $stream['events'] : [];
+        }
+
+        return ($stream) ? $stream->events() : [];
+    }
+
+    /**
+     * @param array $aggregates
+     * @return array
+     */
+    public function fromAggregates(array $aggregates)
+    {
+        $streams = [];
+
+        foreach ($aggregates as $aggregate){
+            $streams = array_merge($streams, $this->fromAggregate($aggregate));
+        }
+
+        return $streams;
+    }
+
+    /**
+     * @param array $stream
+     * @param array $filters
+     *
+     * @return array
+     */
+    public function query(array $stream, array $filters = [])
+    {
+        $qb = QueryBuilder::create((array)$stream);
+
+        foreach ($filters as $key => $value){
+            $qb->addCriterion($key, $value);
+        }
+
+        $qb->sortedBy('occurred_on', 'ASC');
+
+        return $qb->getResults();
+    }
+
+    /**
+     * @param $aggregateName
+     *
+     * @return int
+     */
+    public function streamCount($aggregateName)
+    {
+        $stream = $this->repo->byName($aggregateName, $this->returnType);
+
+        if($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY){
+            return count($stream['events']);
+        }
+
+        return count($stream->events());
     }
 }
