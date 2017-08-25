@@ -55,8 +55,9 @@ class DummyEntity
 class DummyEntityWasCreated implements EventInterface
 {
     private $id;
-    
+    private $name;
     private $body;
+    private $occurred_on;
         
     public function __construct(
         $body
