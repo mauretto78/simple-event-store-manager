@@ -11,8 +11,6 @@
 use SimpleEventStoreManager\Application\Projector\Projector;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
-use SimpleEventStoreManager\Domain\Model\EventAggregateId;
-use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Application\Projector\ProjectionManager;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 

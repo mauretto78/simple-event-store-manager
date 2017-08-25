@@ -1,13 +1,12 @@
-<?php
-/**
- * This file is part of the EventStoreManager package.
- *
- * (c) Mauro Cassani<https://github.com/mauretto78>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+[Back to index](https://github.com/mauretto78/simple-event-store-manager/blob/master/README.md)
 
+## Event Representation
+
+You can use `EventRepresentation` class to create a representation of stored events, so you can easily create a simple API endpoint to get event streams.
+
+In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tree/master/examples) you will find a simple example of an API implementation. Here is the full code:
+
+```php
 use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\Event\EventManager;
 use SimpleEventStoreManager\Application\Event\EventRepresentation;
@@ -39,3 +38,9 @@ $eventRepresentation = new EventRepresentation(
 $page = (null !== $page = $request->query->get('page')) ? $page : 1;
 $response = $eventRepresentation->aggregate($request->query->get('aggregate'), $page);
 $response->send();
+
+```
+
+When a page is full, an **infinite cache** is automatically set.
+
+Please note you can choose JSON, XML or YAML format for data representation.
