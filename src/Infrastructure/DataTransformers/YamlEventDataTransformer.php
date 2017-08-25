@@ -41,7 +41,7 @@ class YamlEventDataTransformer extends AbstractEventDataTransformer implements D
                     '_links' => [
                         $this->calculateLinks($page, $numberOfPages)
                     ],
-                    'events' => $this->convertEventsDataToArray($events)
+                    'events' => (is_array($events)) ? $events : $this->convertEventsDataToArray($events)
                 ], 'yml'),
             $this->getHttpStatusCode($pageCount)
         );

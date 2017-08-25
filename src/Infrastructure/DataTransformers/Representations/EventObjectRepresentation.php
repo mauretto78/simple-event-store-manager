@@ -19,7 +19,26 @@ class EventObjectRepresentation
     private $body;
     private $occurred_on;
 
-    public function __construct(EventInterface $event)
+    public function __construct($event)
+    {
+        if(is_array($event)){
+            $this->fromArray($event);
+        }
+
+        if($event instanceof EventInterface){
+            $this->fromEventInterface($event);
+        }
+    }
+
+    private function fromArray(array $event)
+    {
+        $this->id = $event['id'];
+        $this->name = $event['name'];
+        $this->body = $event['body'];
+        $this->occurred_on = $event['occurred_on'];
+    }
+
+    private function fromEventInterface(EventInterface $event)
     {
         $this->id = $event->id();
         $this->name = $event->name();
