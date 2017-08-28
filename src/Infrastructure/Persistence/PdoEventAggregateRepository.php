@@ -10,15 +10,15 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
-use Cocur\Slugify\Slugify;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Infrastructure\Services\HashGeneratorService;
 
-class PdoEventAggregateRepository implements EventAggregateRepositoryInterface
+class PdoEventAggregateRepository  implements EventAggregateRepositoryInterface
 {
     /**
      * @var \PDO
@@ -72,7 +72,8 @@ class PdoEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
-        $name = (new Slugify())->slugify($name);
+        $name = HashGeneratorService::computeStringHash($name);
+
         $query = 'SELECT 
             `event_aggregates`.id AS `aggregate_id`,
             `event_aggregates`.name AS `aggregate_name`,
@@ -128,7 +129,7 @@ class PdoEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function exists($name)
     {
-        $name = (new Slugify())->slugify($name);
+        $name = HashGeneratorService::computeStringHash($name);
         $sql = 'SELECT id FROM `event_aggregates` WHERE `name` = :name';
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':name', $name);

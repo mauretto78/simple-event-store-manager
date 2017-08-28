@@ -108,14 +108,14 @@ class EventQueryTest extends BaseTestCase
                 ->setReturnType($returnType);
 
             $eventManager->storeEvents(
-                'Dummy EventAggregate',
+                'EventAggregate-1',
                 [
                     $event,
                     $event2
                 ]
             );
             $eventManager->storeEvents(
-                'Another EventAggregate',
+                'EventAggregate-2',
                 [
                     $event3
                 ]
@@ -126,17 +126,17 @@ class EventQueryTest extends BaseTestCase
             $stream = $eventQuery->fromAggregate('Not existing aggregate');
             $this->assertCount(0, $stream);
 
-            $stream = $eventQuery->fromAggregate('Dummy EventAggregate');
-            $this->assertEquals(2, $eventQuery->streamCount('Dummy EventAggregate'));
+            $stream = $eventQuery->fromAggregate('EventAggregate-1');
+            $this->assertEquals(2, $eventQuery->streamCount('EventAggregate-1'));
             $this->assertCount(2, $stream);
 
-            $stream2 = $eventQuery->fromAggregate('Another EventAggregate');
-            $this->assertEquals(1, $eventQuery->streamCount('Another EventAggregate'));
+            $stream2 = $eventQuery->fromAggregate('EventAggregate-2');
+            $this->assertEquals(1, $eventQuery->streamCount('EventAggregate-2'));
             $this->assertCount(1, $stream2);
 
             $streams = $eventQuery->fromAggregates([
-                'Dummy EventAggregate',
-                'Another EventAggregate'
+                'EventAggregate-1',
+                'EventAggregate-2'
             ]);
             $this->assertCount(3, $streams);
 

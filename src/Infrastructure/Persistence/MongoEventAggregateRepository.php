@@ -10,7 +10,6 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
-use Cocur\Slugify\Slugify;
 use MongoDB\Database;
 use MongoDB\Model\BSONDocument;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
@@ -19,6 +18,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInter
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Infrastructure\Services\HashGeneratorService;
 
 class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
 {
@@ -64,12 +64,13 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
 
     /**
      * @param $name
+     * @param int $returnType
      *
-     * @return EventAggregate
+     * @return array|null|EventAggregate
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
-        if($document = $this->aggregates->findOne(['name' => (new Slugify())->slugify($name)])){
+        if($document = $this->aggregates->findOne(['name' => HashGeneratorService::computeStringHash($name)])){
             return $this->buildAggregate($document, $returnType);
         }
 
@@ -103,7 +104,7 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function exists($name)
     {
-        return ($this->aggregates->findOne(['name' => (new Slugify())->slugify($name)])) ? true : false;
+        return ($this->aggregates->findOne(['name' => HashGeneratorService::computeStringHash($name)])) ? true : false;
     }
 
     /**

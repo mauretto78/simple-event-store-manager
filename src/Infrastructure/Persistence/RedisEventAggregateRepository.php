@@ -10,15 +10,14 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
-use Cocur\Slugify\Slugify;
 use Predis\Client;
-use Predis\Collection\Iterator\SetKey;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Infrastructure\Services\HashGeneratorService;
 
 class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
 {
@@ -50,7 +49,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function byId(EventAggregateId $eventAggregateId, $returnType = self::RETURN_AS_ARRAY)
     {
-        if ($aggregateEvents = $this->client->lrange($this->computeEventsHash($eventAggregateId), 0, -1)) {
+        if ($aggregateEvents = $this->client->lrange(HashGeneratorService::computeEventsHash($eventAggregateId), 0, -1)) {
             return $this->buildAggregate($eventAggregateId, $aggregateEvents, $returnType);
         }
 
@@ -64,7 +63,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
-        $aggregateId = $this->client->get($this->computeAggregateNameHash($name));
+        $aggregateId = $this->client->get(HashGeneratorService::computeAggregateNameHash($name));
 
         return $this->byId(new EventAggregateId($aggregateId), $returnType);
     }
@@ -88,7 +87,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function eventsCount(EventAggregate $aggregate)
     {
-        return count($this->client->lrange($this->computeEventsHash($aggregate->id()), 0, -1));
+        return count($this->client->lrange(HashGeneratorService::computeEventsHash($aggregate->id()), 0, -1));
     }
 
     /**
@@ -107,8 +106,8 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function save(EventAggregate $aggregate)
     {
-        $this->client->set($this->computeAggregateHash($aggregate->id()), $aggregate->name());
-        $this->client->set($this->computeAggregateNameHash($aggregate->name()), $aggregate->id());
+        $this->client->set(HashGeneratorService::computeAggregateHash($aggregate->id()), $aggregate->name());
+        $this->client->set(HashGeneratorService::computeAggregateNameHash($aggregate->name()), $aggregate->id());
 
         /** @var Event $event */
         foreach ($aggregate->events() as $event){
@@ -117,32 +116,12 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
     }
 
     /**
-     * @param EventAggregateId $eventAggregateId
-     *
-     * @return string
-     */
-    private function computeAggregateHash(EventAggregateId $eventAggregateId)
-    {
-        return sprintf('aggregate:%s', (string) $eventAggregateId);
-    }
-
-    /**
-     * @param $aggregateName
-     *
-     * @return string
-     */
-    private function computeAggregateNameHash($aggregateName)
-    {
-        return sprintf('aggregate-name:%s', (new Slugify())->slugify($aggregateName));
-    }
-
-    /**
      * @param EventInterface $event
      * @param EventAggregate $aggregate
      */
     private function saveEvent(EventInterface $event, EventAggregate $aggregate)
     {
-        $this->client->rpush($this->computeEventsHash($aggregate->id()),
+        $this->client->rpush(HashGeneratorService::computeEventsHash($aggregate->id()),
             [
                 serialize([
                     'id' => (string) $event->id(),
@@ -155,15 +134,6 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
     }
 
     /**
-     * @param EventAggregateId $eventAggregateId
-     * @return string
-     */
-    private function computeEventsHash(EventAggregateId $eventAggregateId)
-    {
-        return sprintf('events:%s', (string) $eventAggregateId);
-    }
-
-    /**
      * @param $eventAggregateId
      * @param array $aggregateEvents
      *
@@ -172,7 +142,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
     private function buildAggregateAsArray($eventAggregateId, array $aggregateEvents)
     {
         $returnArray['id'] = $eventAggregateId;
-        $returnArray['name'] = $this->client->get($this->computeAggregateHash($eventAggregateId));
+        $returnArray['name'] = $this->client->get(HashGeneratorService::computeAggregateHash($eventAggregateId));
 
         foreach ($aggregateEvents as $event){
             $event = unserialize($event);
@@ -196,7 +166,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
     private function buildAggregateAsObject($eventAggregateId, array $aggregateEvents)
     {
         $aggregate = new EventAggregate(
-            $this->client->get($this->computeAggregateHash($eventAggregateId)),
+            $this->client->get(HashGeneratorService::computeAggregateHash($eventAggregateId)),
             new EventAggregateId($eventAggregateId)
         );
 

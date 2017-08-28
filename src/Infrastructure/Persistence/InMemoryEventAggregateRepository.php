@@ -10,10 +10,10 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
-use Cocur\Slugify\Slugify;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
+use SimpleEventStoreManager\Infrastructure\Services\HashGeneratorService;
 
 class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterface
 {
@@ -47,7 +47,8 @@ class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterf
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
-        $aggregateName = (new Slugify())->slugify($name);
+        $aggregateName = HashGeneratorService::computeStringHash($name);
+
         foreach ($this->aggregates as $aggregate){
             if($aggregate->name() === $aggregateName){
                 return $this->buildAggregate($aggregate, $returnType);
@@ -56,7 +57,7 @@ class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterf
 
         return null;
     }
-
+    
     /**
      * @param EventAggregate $aggregate
      * @param int $returnType
@@ -87,7 +88,8 @@ class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterf
      */
     public function exists($name)
     {
-        $aggregateName = (new Slugify())->slugify($name);
+        $aggregateName = HashGeneratorService::computeStringHash($name);
+
         foreach ($this->aggregates as $aggregate){
             if($aggregate->name() === $aggregateName){
                 return true;
