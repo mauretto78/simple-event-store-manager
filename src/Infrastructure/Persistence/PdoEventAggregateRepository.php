@@ -18,7 +18,7 @@ use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventId;
 use SimpleEventStoreManager\Infrastructure\Services\HashGeneratorService;
 
-class PdoEventAggregateRepository  implements EventAggregateRepositoryInterface
+class PdoEventAggregateRepository implements EventAggregateRepositoryInterface
 {
     /**
      * @var \PDO
@@ -102,7 +102,7 @@ class PdoEventAggregateRepository  implements EventAggregateRepositoryInterface
      */
     private function buildAggregate(array $rows, $returnType)
     {
-        if($returnType === self::RETURN_AS_ARRAY){
+        if ($returnType === self::RETURN_AS_ARRAY) {
             return $this->buildAggregateAsArray($rows);
         }
 
@@ -154,7 +154,7 @@ class PdoEventAggregateRepository  implements EventAggregateRepositoryInterface
         $stmt->execute();
 
         /** @var Event $event */
-        foreach ($aggregate->events() as $event){
+        foreach ($aggregate->events() as $event) {
             $this->saveEvent($event, $aggregate);
         }
     }
@@ -194,7 +194,7 @@ class PdoEventAggregateRepository  implements EventAggregateRepositoryInterface
         $returnArray['id'] = (string) $rows[0]['aggregate_id'];
         $returnArray['name'] = $rows[0]['aggregate_name'];
 
-        foreach ($rows as $row){
+        foreach ($rows as $row) {
             $returnArray['events'][] = [
                 'id' => (string) $row['event_id'],
                 'name' => $row['event_name'],
@@ -218,7 +218,7 @@ class PdoEventAggregateRepository  implements EventAggregateRepositoryInterface
             new EventAggregateId($rows[0]['aggregate_id'])
         );
 
-        foreach ($rows as $row){
+        foreach ($rows as $row) {
             $aggregate->addEvent(
                 new Event(
                     $row['event_name'],

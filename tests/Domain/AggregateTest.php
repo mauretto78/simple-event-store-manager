@@ -68,7 +68,7 @@ class AggregateTest extends BaseTestCase
 
         $this->assertCount(1, $releasedEvents);
 
-        foreach ($releasedEvents as $event){
+        foreach ($releasedEvents as $event) {
             $this->assertInstanceOf(DummyEntityWasCreated::class, $event);
             $this->assertInstanceOf(DummyEntity::class, $event->body());
         }
@@ -85,8 +85,7 @@ class DummyEntity
     public function __construct(
         $name,
         $email
-    )
-    {
+    ) {
         $this->name = $name;
         $this->email = $email;
 

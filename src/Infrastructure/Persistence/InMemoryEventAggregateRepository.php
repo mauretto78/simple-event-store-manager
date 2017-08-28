@@ -49,8 +49,8 @@ class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterf
     {
         $aggregateName = HashGeneratorService::computeStringHash($name);
 
-        foreach ($this->aggregates as $aggregate){
-            if($aggregate->name() === $aggregateName){
+        foreach ($this->aggregates as $aggregate) {
+            if ($aggregate->name() === $aggregateName) {
                 return $this->buildAggregate($aggregate, $returnType);
             }
         }
@@ -65,7 +65,7 @@ class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterf
      */
     private function buildAggregate(EventAggregate $aggregate, $returnType)
     {
-        if($returnType === self::RETURN_AS_ARRAY){
+        if ($returnType === self::RETURN_AS_ARRAY) {
             return $this->buildAggregateAsArray($aggregate);
         }
 
@@ -90,8 +90,8 @@ class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterf
     {
         $aggregateName = HashGeneratorService::computeStringHash($name);
 
-        foreach ($this->aggregates as $aggregate){
-            if($aggregate->name() === $aggregateName){
+        foreach ($this->aggregates as $aggregate) {
+            if ($aggregate->name() === $aggregateName) {
                 return true;
             }
         }
@@ -117,7 +117,7 @@ class InMemoryEventAggregateRepository implements EventAggregateRepositoryInterf
         $returnArray['id'] = (string) $aggregate->id();
         $returnArray['name'] = $aggregate->name();
 
-        foreach ($aggregate->events() as $event){
+        foreach ($aggregate->events() as $event) {
             $returnArray['events'][] = [
                 'id' => (string) $event->id(),
                 'name' => $event->name(),

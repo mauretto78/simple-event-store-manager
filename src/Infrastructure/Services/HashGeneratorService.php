@@ -20,7 +20,7 @@ class HashGeneratorService
      */
     const HASH_SEPARATOR = '-';
     const LOWERCASE = true;
-    const REGEXP_PATTERN = '/([^A-Za-z0-9]|-)+/';
+    const REGEXP_PATTERN = '/([^A-Za-z0-9*]|-)+/';
     const RULESET = 'default';
 
     /**

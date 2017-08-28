@@ -129,7 +129,7 @@ abstract class BaseTestCase extends TestCase
         }
 
         // Elastic connection
-        if(self::$elastic == null){
+        if (self::$elastic == null) {
             try {
                 $hosts = $this->elastic_parameters ?: [];
                 self::$elastic = ClientBuilder::create()
@@ -139,7 +139,6 @@ abstract class BaseTestCase extends TestCase
                 die('Redis Error: ' . $e->getMessage());
             }
         }
-
     }
 
     /**
@@ -188,7 +187,7 @@ abstract class BaseTestCase extends TestCase
             'index' => 'events'
         ];
 
-        if(self::$elastic->indices()->exists($params)){
+        if (self::$elastic->indices()->exists($params)) {
             self::$elastic->indices()->delete($params);
         }
     }

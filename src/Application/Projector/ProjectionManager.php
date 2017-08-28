@@ -25,7 +25,7 @@ class ProjectionManager
      */
     public function register(Projector $projector)
     {
-        foreach ($projector->subcribedEvents() as $subcribedEvent){
+        foreach ($projector->subcribedEvents() as $subcribedEvent) {
             $this->projectors[$subcribedEvent] = $projector;
         }
     }
@@ -36,8 +36,8 @@ class ProjectionManager
      */
     public function projectFromAnEventAggregate(EventAggregate $aggregate)
     {
-        foreach ($aggregate->events() as $event){
-            if (!isset($this->projectors[get_class($event)])){
+        foreach ($aggregate->events() as $event) {
+            if (!isset($this->projectors[get_class($event)])) {
                 throw new ProjectorDoesNotExistsException('No Projector found for event ' . get_class($event) . '.');
             }
 

@@ -21,11 +21,11 @@ class EventObjectRepresentation
 
     public function __construct($event)
     {
-        if(is_array($event)){
+        if (is_array($event)) {
             $this->fromArray($event);
         }
 
-        if($event instanceof EventInterface){
+        if ($event instanceof EventInterface) {
             $this->fromEventInterface($event);
         }
     }

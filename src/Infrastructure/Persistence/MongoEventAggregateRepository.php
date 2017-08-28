@@ -55,7 +55,7 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function byId(EventAggregateId $eventAggregateId, $returnType = self::RETURN_AS_ARRAY)
     {
-        if($document = $this->aggregates->findOne(['id' => (string) $eventAggregateId])){
+        if ($document = $this->aggregates->findOne(['id' => (string) $eventAggregateId])) {
             return $this->buildAggregate($document, $returnType);
         }
 
@@ -70,7 +70,7 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function byName($name, $returnType = self::RETURN_AS_ARRAY)
     {
-        if($document = $this->aggregates->findOne(['name' => HashGeneratorService::computeStringHash($name)])){
+        if ($document = $this->aggregates->findOne(['name' => HashGeneratorService::computeStringHash($name)])) {
             return $this->buildAggregate($document, $returnType);
         }
 
@@ -83,7 +83,7 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     private function buildAggregate($document, $returnType)
     {
-        if($returnType === self::RETURN_AS_ARRAY){
+        if ($returnType === self::RETURN_AS_ARRAY) {
             return $this->buildAggregateAsArray($document);
         }
 
@@ -113,7 +113,7 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     public function save(EventAggregate $aggregate)
     {
-        if(false === $this->exists($aggregate->name())){
+        if (false === $this->exists($aggregate->name())) {
             $this->aggregates->insertOne([
                 'id' => (string) $aggregate->id(),
                 'name' => $aggregate->name()
@@ -121,8 +121,8 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
         }
 
         /** @var Event $event */
-        foreach ($aggregate->events() as $event){
-            if(false === $this->existsEvent($event)){
+        foreach ($aggregate->events() as $event) {
+            if (false === $this->existsEvent($event)) {
                 $this->saveEvent($event, $aggregate);
             }
         }
@@ -173,7 +173,7 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
         $returnArray['name'] = $document->name;
 
         $events = $this->events->find(['aggregate.id' => (string) $document->id])->toArray();
-        foreach ($events as $event){
+        foreach ($events as $event) {
             $returnArray['events'][] = [
                 'id' => (string) $event->id,
                 'name' => $event->name,
@@ -198,7 +198,7 @@ class MongoEventAggregateRepository implements EventAggregateRepositoryInterface
         );
 
         $events = $this->events->find(['aggregate.id' => (string) $aggregate->id()])->toArray();
-        foreach ($events as $event){
+        foreach ($events as $event) {
             $aggregate->addEvent(
                 new Event(
                     $event->name,

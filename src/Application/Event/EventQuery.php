@@ -52,7 +52,7 @@ class EventQuery
     {
         $stream = $this->repo->byName($aggregateName, $this->returnType);
 
-        if($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY){
+        if ($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY) {
             return (isset($stream['events'])) ? $stream['events'] : [];
         }
 
@@ -67,7 +67,7 @@ class EventQuery
     {
         $streams = [];
 
-        foreach ($aggregates as $aggregate){
+        foreach ($aggregates as $aggregate) {
             $streams = array_merge($streams, $this->fromAggregate($aggregate));
         }
 
@@ -84,7 +84,7 @@ class EventQuery
     {
         $qb = QueryBuilder::create((array)$stream);
 
-        foreach ($filters as $key => $value){
+        foreach ($filters as $key => $value) {
             $qb->addCriterion($key, $value);
         }
 
@@ -102,7 +102,7 @@ class EventQuery
     {
         $stream = $this->repo->byName($aggregateName, $this->returnType);
 
-        if($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY){
+        if ($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY) {
             return count($stream['events']);
         }
 

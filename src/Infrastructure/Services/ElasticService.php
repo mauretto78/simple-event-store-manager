@@ -41,7 +41,7 @@ class ElasticService
     {
         $this->manageAggregateIndex($aggregate->name());
 
-        foreach ($aggregate->events() as $event){
+        foreach ($aggregate->events() as $event) {
             $params = [
                 'index' => self::EVENTS_INDEX,
                 'type' => $aggregate->name(),
@@ -51,7 +51,7 @@ class ElasticService
 
             try {
                 $this->elastic->index($params);
-            } catch (\Exception $e){
+            } catch (\Exception $e) {
                 throw new AggregateNotPersistedInElasticIndexException($e->getMessage());
             }
         }
@@ -62,7 +62,7 @@ class ElasticService
      */
     private function manageAggregateIndex($aggregate)
     {
-        if(false === $this->elastic->indices()->exists(['index' => self::EVENTS_INDEX])){
+        if (false === $this->elastic->indices()->exists(['index' => self::EVENTS_INDEX])) {
             $params = [
                 'index' => self::EVENTS_INDEX,
                 'body' => [

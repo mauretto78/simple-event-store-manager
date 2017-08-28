@@ -127,7 +127,7 @@ class EventManager
      */
     public function setReturnType($returnType = EventAggregateRepositoryInterface::RETURN_AS_ARRAY)
     {
-        if(!in_array($returnType, [EventAggregateRepositoryInterface::RETURN_AS_ARRAY, EventAggregateRepositoryInterface::RETURN_AS_OBJECT])){
+        if (!in_array($returnType, [EventAggregateRepositoryInterface::RETURN_AS_ARRAY, EventAggregateRepositoryInterface::RETURN_AS_OBJECT])) {
             throw new NotSupportedReturnTypeException($returnType . ' is not a valid returnType value.');
         }
 
@@ -167,8 +167,8 @@ class EventManager
     public function storeEvents($aggregateName, array $events = [])
     {
         $aggregate = $this->checkIfAggregateExistsOrReturnNewInstance($aggregateName);
-        foreach ($events as $event){
-            if(!$event instanceof EventInterface){
+        foreach ($events as $event) {
+            if (!$event instanceof EventInterface) {
                 throw new NotValidEventException('Not a valid instance of EventInterface was provided.');
             }
 
@@ -177,7 +177,7 @@ class EventManager
 
         $this->repo->save($aggregate);
 
-        if($this->elastic){
+        if ($this->elastic) {
             $this->elastic->addAggregateToIndex($aggregate);
         }
     }
@@ -189,7 +189,7 @@ class EventManager
      */
     private function checkIfAggregateExistsOrReturnNewInstance($aggregateName)
     {
-        if($this->repo->exists($aggregateName)){
+        if ($this->repo->exists($aggregateName)) {
             return $this->repo->byName($aggregateName, EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
         }
 

@@ -25,16 +25,22 @@ use Symfony\Component\Yaml\Yaml;
 
 class EventRepresentationTest extends BaseTestCase
 {
+
     /**
      * @var EventManager
      */
-    private $eventManager;
+    private $emAsArray;
+
+    /**
+     * @var EventManager
+     */
+    private $emAsObject;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->eventManager = EventManager::build()
+        $eventManager = EventManager::build()
             ->setDriver('mongo')
             ->setConnection($this->mongo_parameters);
 
@@ -61,13 +67,16 @@ class EventRepresentationTest extends BaseTestCase
             $body2
         );
 
-        $this->eventManager->storeEvents(
+        $eventManager->storeEvents(
             'Dummy EventAggregate',
             [
                 $event,
                 $event2
             ]
         );
+
+        $this->emAsArray = $eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
+        $this->emAsObject = $eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
     }
 
     /**
@@ -75,11 +84,8 @@ class EventRepresentationTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_json_response()
     {
-        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
-
         $eventQueryAsArray = new EventRepresentation(
-            $emAsArray,
+            $this->emAsArray,
             new JsonEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
@@ -87,7 +93,7 @@ class EventRepresentationTest extends BaseTestCase
         );
 
         $eventQueryAsObject = new EventRepresentation(
-            $emAsObject,
+            $this->emAsObject,
             new JsonEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
@@ -97,7 +103,7 @@ class EventRepresentationTest extends BaseTestCase
         $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
 
         /** @var EventRepresentation $eventQuery */
-        foreach ($eventQueries as $eventQuery){
+        foreach ($eventQueries as $eventQuery) {
             $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = json_decode($response->getContent());
 
@@ -107,7 +113,7 @@ class EventRepresentationTest extends BaseTestCase
             $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
             $this->assertEquals(2, $content->_meta->total_count);
 
-            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
+            $response = $eventQuery->aggregate('Dummy EventAggregate', 5);
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
         }
     }
@@ -117,11 +123,8 @@ class EventRepresentationTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_xml_response()
     {
-        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
-
         $eventQueryAsArray = new EventRepresentation(
-            $emAsArray,
+            $this->emAsArray,
             new XmlEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
@@ -129,7 +132,7 @@ class EventRepresentationTest extends BaseTestCase
         );
 
         $eventQueryAsObject = new EventRepresentation(
-            $emAsObject,
+            $this->emAsObject,
             new XmlEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
@@ -139,7 +142,7 @@ class EventRepresentationTest extends BaseTestCase
         $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
 
         /** @var EventRepresentation $eventQuery */
-        foreach ($eventQueries as $eventQuery){
+        foreach ($eventQueries as $eventQuery) {
             $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = simplexml_load_string($response->getContent());
 
@@ -149,7 +152,7 @@ class EventRepresentationTest extends BaseTestCase
             $this->assertEquals($response->headers->get('cache-control'), 'max-age=31536000, public, s-maxage=31536000');
             $this->assertEquals(2, (string) $content->entry->total_count);
 
-            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
+            $response = $eventQuery->aggregate('Dummy EventAggregate', 5);
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
         }
     }
@@ -159,11 +162,8 @@ class EventRepresentationTest extends BaseTestCase
      */
     public function it_should_store_events_perform_queries_and_retrive_yaml_response()
     {
-        $emAsArray = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $emAsObject = $this->eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
-
         $eventQueryAsArray = new EventRepresentation(
-            $emAsArray,
+            $this->emAsArray,
             new YamlEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
@@ -171,7 +171,7 @@ class EventRepresentationTest extends BaseTestCase
         );
 
         $eventQueryAsObject = new EventRepresentation(
-            $emAsObject,
+            $this->emAsObject,
             new YamlEventDataTransformer(
                 SerializerBuilder::create()->build(),
                 Request::createFromGlobals()
@@ -181,7 +181,7 @@ class EventRepresentationTest extends BaseTestCase
         $eventQueries = [$eventQueryAsArray, $eventQueryAsObject];
 
         /** @var EventRepresentation $eventQuery */
-        foreach ($eventQueries as $eventQuery){
+        foreach ($eventQueries as $eventQuery) {
             $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
             $content = Yaml::parse($response->getContent());
 
@@ -194,7 +194,7 @@ class EventRepresentationTest extends BaseTestCase
             $this->assertEquals(2, $content['_meta']['total_pages']);
             $this->assertEquals(2, $content['_meta']['total_count']);
 
-            $response = $eventQuery->aggregate('Dummy EventAggregate',5);
+            $response = $eventQuery->aggregate('Dummy EventAggregate', 5);
             $this->assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
         }
     }

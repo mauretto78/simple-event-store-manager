@@ -75,7 +75,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
      */
     private function buildAggregate($eventAggregateId, array $aggregateEvents, $returnType)
     {
-        if($returnType === self::RETURN_AS_ARRAY){
+        if ($returnType === self::RETURN_AS_ARRAY) {
             return $this->buildAggregateAsArray($eventAggregateId, $aggregateEvents);
         }
 
@@ -110,7 +110,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
         $this->client->set(HashGeneratorService::computeAggregateNameHash($aggregate->name()), $aggregate->id());
 
         /** @var Event $event */
-        foreach ($aggregate->events() as $event){
+        foreach ($aggregate->events() as $event) {
             $this->saveEvent($event, $aggregate);
         }
     }
@@ -144,7 +144,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
         $returnArray['id'] = $eventAggregateId;
         $returnArray['name'] = $this->client->get(HashGeneratorService::computeAggregateHash($eventAggregateId));
 
-        foreach ($aggregateEvents as $event){
+        foreach ($aggregateEvents as $event) {
             $event = unserialize($event);
             $returnArray['events'][] = [
                 'id' => (string) $event['id'],
@@ -170,7 +170,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
             new EventAggregateId($eventAggregateId)
         );
 
-        foreach ($aggregateEvents as $event){
+        foreach ($aggregateEvents as $event) {
             $event = unserialize($event);
             $aggregate->addEvent(
                 new Event(

@@ -100,7 +100,7 @@ class EventQueryTest extends BaseTestCase
 
         $returnTypes = [EventAggregateRepositoryInterface::RETURN_AS_ARRAY, EventAggregateRepositoryInterface::RETURN_AS_OBJECT];
 
-        foreach ($returnTypes as $returnType){
+        foreach ($returnTypes as $returnType) {
             $eventManager = EventManager::build()
                 ->setDriver('mongo')
                 ->setConnection($this->mongo_parameters)
