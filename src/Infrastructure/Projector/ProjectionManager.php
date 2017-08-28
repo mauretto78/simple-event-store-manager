@@ -8,10 +8,11 @@
  * file that was distributed with this source code.
  */
 
-namespace SimpleEventStoreManager\Application\Projector;
+namespace SimpleEventStoreManager\Infrastructure\Projector;
 
+use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
-use SimpleEventStoreManager\Application\Projector\Exceptions\ProjectorDoesNotExistsException;
+use SimpleEventStoreManager\Infrastructure\Projector\Exceptions\ProjectorDoesNotExistsException;
 
 class ProjectionManager
 {
@@ -31,17 +32,26 @@ class ProjectionManager
     }
 
     /**
+     * @param EventInterface $event
+     * @throws ProjectorDoesNotExistsException
+     */
+    public function project(EventInterface $event)
+    {
+        if (!isset($this->projectors[get_class($event)])) {
+            throw new ProjectorDoesNotExistsException('No Projector found for event ' . get_class($event) . '.');
+        }
+
+        $this->projectors[get_class($event)]->handle($event);
+    }
+
+    /**
      * @param EventAggregate $aggregate
      * @throws ProjectorDoesNotExistsException
      */
     public function projectFromAnEventAggregate(EventAggregate $aggregate)
     {
         foreach ($aggregate->events() as $event) {
-            if (!isset($this->projectors[get_class($event)])) {
-                throw new ProjectorDoesNotExistsException('No Projector found for event ' . get_class($event) . '.');
-            }
-
-            $this->projectors[get_class($event)]->handle($event);
+            $this->project($event);
         }
     }
 }

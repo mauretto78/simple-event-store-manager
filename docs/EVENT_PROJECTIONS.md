@@ -7,7 +7,7 @@
 Create a Projector and extend `Projector` abstract class. You must implement `subcribedEvents` method to subscribe for events to handle. Please note that you must implement `applyNameOfEvent` method for handling subscribed events:
 
 ```php
-use SimpleEventStoreManager\Application\Projector\Projector;
+use SimpleEventStoreManager\Infrastructure\Projector\Projector;
 
 class UserProjector extends Projector
 {
@@ -41,6 +41,27 @@ class UserProjector extends Projector
 class UserWasCreated extends Event
 {
 }
+```
+
+### Projecting Events from an Event
+
+You can project events from an entire aggregate:
+
+```php
+$userProjector = new UserProjector();
+$userWasCreatedEvent = new UserWasCreated(
+    'UserWasCreated',
+    [
+        'id' => 23,
+        'name' => 'Mauro Cassani',
+        'email' => 'mauro@gmail.com',
+    ]
+);
+
+$projectorManger = new ProjectionManager();
+$projectorManger->register($userProjector);
+$projectorManger->project($userWasCreatedEvent);
+
 ```
 
 ### Projecting Events from an Aggregate
