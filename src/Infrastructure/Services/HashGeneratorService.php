@@ -15,9 +15,13 @@ use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 
 class HashGeneratorService
 {
+    /**
+     * SETTINGS
+     */
     const HASH_SEPARATOR = '-';
     const LOWERCASE = true;
     const REGEXP_PATTERN = '/([^A-Za-z0-9]|-)+/';
+    const RULESET = 'english';
 
     /**
      * @var Slugify
@@ -34,6 +38,7 @@ class HashGeneratorService
                 'lowercase' => self::LOWERCASE,
                 'separator' => self::HASH_SEPARATOR,
                 'regexp' => self::REGEXP_PATTERN,
+                'ruleset' => self::RULESET,
             ]
         );
     }
@@ -63,7 +68,7 @@ class HashGeneratorService
      */
     public static function computeAggregateNameHash($aggregateName)
     {
-        return sprintf('aggregate-name:%s', self::build()->slugify->slugify($aggregateName));
+        return sprintf('aggregate-name:%s', self::computeStringHash($aggregateName));
     }
 
     /**
