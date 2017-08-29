@@ -4,7 +4,15 @@
 
 ### Extending Projector Class
 
-Create a Projector and extend `Projector` abstract class. You must implement `subcribedEvents` method to subscribe for events to handle. Please note that you must implement `applyNameOfEvent` method for handling subscribed events, and `rollbackNameOfEvent` method for rollback events:
+Create a Projector and extend `Projector` abstract class. 
+
+You must implement three methods:
+ 
+ * `subcribedEvents` method to subscribe for events to handle
+ * `applyNameOfEvent` method for handling subscribed events
+ * `rollbackNameOfEvent` method for rollback changes made by subscribed events
+
+Consider this example:
 
 ```php
 use SimpleEventStoreManager\Infrastructure\Projector\Projector;
@@ -36,6 +44,13 @@ class UserProjector extends Projector
     
         $this->repo->save($user);
     }
+    
+    public function rollbackUserWasCreated(UserWasCreated $event)
+        {
+            $userData = $event->body();
+        
+            $this->repo->delete($userData['id']);
+        }
 }
 
 class UserWasCreated extends Event
