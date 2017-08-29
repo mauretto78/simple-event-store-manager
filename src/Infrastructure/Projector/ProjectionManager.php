@@ -51,7 +51,35 @@ class ProjectionManager
     public function projectFromAnEventAggregate(EventAggregate $aggregate)
     {
         foreach ($aggregate->events() as $event) {
-            $this->project($event);
+            try {
+                $this->project($event);
+            } catch (ProjectorDoesNotExistsException $e) {
+                $this->rollbackAnEventAggregate($aggregate);
+            }
+        }
+    }
+
+    /**
+     * @param EventInterface $event
+     * @throws ProjectorDoesNotExistsException
+     */
+    public function rollback(EventInterface $event)
+    {
+        if (!isset($this->projectors[get_class($event)])) {
+            throw new ProjectorDoesNotExistsException('No Projector found for event ' . get_class($event) . '.');
+        }
+
+        $this->projectors[get_class($event)]->rollback($event);
+    }
+
+    /**
+     * @param EventAggregate $aggregate
+     * @throws ProjectorDoesNotExistsException
+     */
+    public function rollbackAnEventAggregate(EventAggregate $aggregate)
+    {
+        foreach ($aggregate->events() as $event) {
+            $this->rollback($event);
         }
     }
 }

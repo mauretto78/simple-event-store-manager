@@ -12,6 +12,7 @@ namespace SimpleEventStoreManager\Infrastructure\Projector;
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Infrastructure\Projector\Exceptions\ProjectorHandleMethodDoesNotExistsException;
+use SimpleEventStoreManager\Infrastructure\Projector\Exceptions\ProjectorRollbackMethodDoesNotExistsException;
 
 abstract class Projector
 {
@@ -27,7 +28,7 @@ abstract class Projector
     {
         $method = $this->getHandleMethod($event);
         if (! method_exists($this, $method)) {
-            throw new ProjectorHandleMethodDoesNotExistsException(get_class($event) . ' does not implement ' . $method . ' method.');
+            throw new ProjectorHandleMethodDoesNotExistsException(get_class($this) . ' does not implement ' . $method . ' method.');
         }
 
         $this->$method($event);
@@ -39,8 +40,39 @@ abstract class Projector
      */
     private function getHandleMethod($event)
     {
-        $classParts = explode('\\', get_class($event));
+        return 'apply' . $this->getLastClassParts($event);
+    }
 
-        return 'apply' . end($classParts);
+    /**
+     * @param $class
+     * @return array
+     */
+    private function getLastClassParts($class)
+    {
+        $classParts = explode('\\', get_class($class));
+
+        return end($classParts);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function rollback(EventInterface $event)
+    {
+        $method = $this->getRollbackMethod($event);
+        if (! method_exists($this, $method)) {
+            throw new ProjectorRollbackMethodDoesNotExistsException(get_class($this) . ' does not implement ' . $method . ' method.');
+        }
+
+        $this->$method($event);
+    }
+
+    /**
+     * @param $event
+     * @return string
+     */
+    private function getRollbackMethod($event)
+    {
+        return 'rollback' . $this->getLastClassParts($event);
     }
 }

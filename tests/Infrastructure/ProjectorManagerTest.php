@@ -44,7 +44,7 @@ class ProjectorManagerTest extends BaseTestCase
     /**
      * @test
      * @expectedException \SimpleEventStoreManager\Infrastructure\Projector\Exceptions\ProjectorHandleMethodDoesNotExistsException
-     * @expectedExceptionMessage UserWasCreated does not implement applyUserWasCreated method.
+     * @expectedExceptionMessage UserProjectorWithNoApplyMethod does not implement applyUserWasCreated method.
      */
     public function it_throws_ProjectorHandleMethodDoesNotExistsException_if_projector_does_not_implement_expeceted_apply_method()
     {
@@ -68,6 +68,32 @@ class ProjectorManagerTest extends BaseTestCase
 
     /**
      * @test
+     * @expectedException \SimpleEventStoreManager\Infrastructure\Projector\Exceptions\ProjectorRollbackMethodDoesNotExistsException
+     * @expectedExceptionMessage UserProjectorWithNoRollbackMethod does not implement rollbackUserWasCreated method.
+     */
+    public function it_throws_ProjectorHandleMethodDoesNotExistsException_if_projector_does_not_implement_expeceted_rollback_method()
+    {
+        $userProjector = new UserProjectorWithNoRollbackMethod();
+        $userWasCreatedEvent = new UserWasCreated(
+            'UserWasCreated',
+            [
+                'id' => 23,
+                'name' => 'Mauro Cassani',
+                'email' => 'mauro@gmail.com',
+            ]
+        );
+
+        $userEventAggregate = new EventAggregate('user-23');
+        $userEventAggregate->addEvent($userWasCreatedEvent);
+
+        $projectorManger = new ProjectionManager();
+        $projectorManger->register($userProjector);
+        $projectorManger->projectFromAnEventAggregate($userEventAggregate);
+        $projectorManger->rollbackAnEventAggregate($userEventAggregate);
+    }
+
+    /**
+     * @test
      */
     public function it_should_correcly_handle_events_from_the_event_aggregate()
     {
@@ -86,13 +112,13 @@ class ProjectorManagerTest extends BaseTestCase
 
         $projectorManger = new ProjectionManager();
         $projectorManger->register($userProjector);
-        $projectorManger->project($userWasCreatedEvent);
         $projectorManger->projectFromAnEventAggregate($userEventAggregate);
 
-        $this->assertCount(2, $userProjector->getUsers());
-        $this->assertArrayHasKey('id', $userProjector->getUsers()[0]);
-        $this->assertArrayHasKey('name', $userProjector->getUsers()[0]);
-        $this->assertArrayHasKey('email', $userProjector->getUsers()[0]);
+        $this->assertCount(1, $userProjector->getUsers());
+
+        $projectorManger->rollbackAnEventAggregate($userEventAggregate);
+
+        $this->assertCount(0, $userProjector->getUsers());
     }
 }
 
@@ -109,7 +135,40 @@ class UserProjector extends Projector
 
     public function applyUserWasCreated(UserWasCreated $event)
     {
-        $this->users[] = $event->body();
+        $eventId = (string) $event->id();
+
+        $this->users[$eventId] = $event->body();
+    }
+
+    public function rollbackUserWasCreated(UserWasCreated $event)
+    {
+        $eventId = (string) $event->id();
+
+        unset($this->users[$eventId]);
+    }
+
+    public function getUsers()
+    {
+        return $this->users;
+    }
+}
+
+class UserProjectorWithNoRollbackMethod extends Projector
+{
+    private $users = [];
+
+    public function subcribedEvents()
+    {
+        return [
+            UserWasCreated::class
+        ];
+    }
+
+    public function applyUserWasCreated(UserWasCreated $event)
+    {
+        $eventId = (string) $event->id();
+
+        $this->users[$eventId] = $event->body();
     }
 
     public function getUsers()
@@ -129,7 +188,16 @@ class UserProjectorWithNoSubcribedEvents extends Projector
 
     public function applyUserWasCreated(UserWasCreated $event)
     {
-        $this->users[] = $event->body();
+        $eventId = (string) $event->id();
+
+        $this->users[$eventId] = $event->body();
+    }
+
+    public function rollbackUserWasCreated(UserWasCreated $event)
+    {
+        $eventId = (string) $event->id();
+
+        unset($this->users[$eventId]);
     }
 
     public function getUsers()

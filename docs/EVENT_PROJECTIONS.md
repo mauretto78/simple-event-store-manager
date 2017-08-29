@@ -4,7 +4,7 @@
 
 ### Extending Projector Class
 
-Create a Projector and extend `Projector` abstract class. You must implement `subcribedEvents` method to subscribe for events to handle. Please note that you must implement `applyNameOfEvent` method for handling subscribed events:
+Create a Projector and extend `Projector` abstract class. You must implement `subcribedEvents` method to subscribe for events to handle. Please note that you must implement `applyNameOfEvent` method for handling subscribed events, and `rollbackNameOfEvent` method for rollback events:
 
 ```php
 use SimpleEventStoreManager\Infrastructure\Projector\Projector;
@@ -85,5 +85,16 @@ $userEventAggregate = $eventQuery->fromAggregate('user-23');
 $projectorManger = new ProjectionManager();
 $projectorManger->register($userProjector);
 $projectorManger->projectFromAnEventAggregate($userEventAggregate);
+
+```
+
+### Rollback Events from an Aggregate
+
+You can rollback the changes made from aggregate events on your read model:
+
+```php
+// .. 
+
+$projectorManger->rollbackAnEventAggregate($userEventAggregate);
 
 ```
