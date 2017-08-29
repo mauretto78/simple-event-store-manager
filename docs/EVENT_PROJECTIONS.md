@@ -9,8 +9,8 @@ Create a Projector and extend `Projector` abstract class.
 You must implement three methods:
  
  * `subcribedEvents` method to subscribe for events to handle
- * `applyNameOfEvent` method for handling subscribed events
- * `rollbackNameOfEvent` method for rollback changes made by subscribed events
+ * `applyNameOfEvent` method for handling a subscribed event
+ * `rollbackNameOfEvent` method for rollback changes made by s subscribed event
 
 Consider this example:
 
@@ -46,11 +46,11 @@ class UserProjector extends Projector
     }
     
     public function rollbackUserWasCreated(UserWasCreated $event)
-        {
-            $userData = $event->body();
-        
-            $this->repo->delete($userData['id']);
-        }
+    {
+        $userData = $event->body();
+    
+        $this->repo->delete($userData['id']);
+    }
 }
 
 class UserWasCreated extends Event
