@@ -86,10 +86,12 @@ class MongoDriver implements DriverInterface
     public function connect()
     {
         $connectionString = 'mongodb://';
-        $connectionString .= ($this->config['username']  && $this->config['password']) ? $this->config['username'].':'.$this->config['password'].'@' : '';
+        $connectionString .= (isset($this->config['username'])  && isset($this->config['password'])) ? $this->config['username'].':'.$this->config['password'].'@' : '';
         $connectionString .= $this->config['host'].':'.$this->config['port'];
 
-        $this->instance = (new Client($connectionString))->selectDatabase($this->config['database']);
+        $database = (isset($this->config['database'])) ? $this->config['database'] : 'eventstore';
+
+        $this->instance = (new Client($connectionString))->selectDatabase($database);
 
         return true;
     }
