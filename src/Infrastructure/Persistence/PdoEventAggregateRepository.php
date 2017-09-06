@@ -20,6 +20,8 @@ use SimpleEventStoreManager\Infrastructure\Services\HashGeneratorService;
 
 class PdoEventAggregateRepository implements EventAggregateRepositoryInterface
 {
+    const EVENTSTORE_TABLE_NAME = 'eventstore';
+
     /**
      * @var \PDO
      */
@@ -60,37 +62,6 @@ class PdoEventAggregateRepository implements EventAggregateRepositoryInterface
         $row = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         if (!empty($row)) {
             return $this->buildAggregate($row, $returnType);
-        }
-
-        return null;
-    }
-
-    /**
-     * @param $name
-     * @param int $returnType
-     * @return array|null|EventAggregate
-     */
-    public function byName($name, $returnType = self::RETURN_AS_ARRAY)
-    {
-        $name = HashGeneratorService::computeStringHash($name);
-
-        $query = 'SELECT 
-            `event_aggregates`.id AS `aggregate_id`,
-            `event_aggregates`.name AS `aggregate_name`,
-            `events`.id AS `event_id`,
-            `events`.name AS `event_name`,
-            `events`.body AS `event_body`,
-            `events`.occurred_on AS `event_occurred_on`
-            FROM `event_aggregates` INNER JOIN `events` 
-            ON `event_aggregates`.id = `events`.aggregate_id 
-            WHERE `event_aggregates`.name = :name';
-        $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':name', $name);
-        $stmt->execute();
-
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        if (!empty($rows)) {
-            return $this->buildAggregate($rows, $returnType);
         }
 
         return null;

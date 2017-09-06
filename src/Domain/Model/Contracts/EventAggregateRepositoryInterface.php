@@ -27,14 +27,6 @@ interface EventAggregateRepositoryInterface
     public function byId(EventAggregateId $eventAggregateId, $returnType = self::RETURN_AS_ARRAY);
 
     /**
-     * @param $name
-     * @param int $returnType
-     *
-     * @return EventAggregate
-     */
-    public function byName($name, $returnType = self::RETURN_AS_ARRAY);
-
-    /**
      * @return int
      */
     public function eventsCount(EventAggregate $aggregate);
