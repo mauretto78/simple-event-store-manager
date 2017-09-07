@@ -16,40 +16,37 @@ use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventUuid;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
-class AggregateTest extends BaseTestCase
+class EventTest extends BaseTestCase
 {
     /**
      * @test
      */
     public function create_an_aggregate_with_some_events_and_record_them_with_EventRecorder()
     {
-        $name = 'Doman\\Model\\SomeEvent';
-        $body = [
+        $eventUuid = new EventUuid();
+        $eventName = 'Doman\\Model\\SomeEvent';
+        $eventBody = [
             'id' => 1,
             'title' => 'Lorem Ipsum',
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $aggregate = new EventAggregate('Dummy EventAggregate');
-        $aggregate->addEvent(
-            $event = new Event(
-                $name,
-                $body
-            )
+        $event = new Event(
+            $eventName,
+            $eventBody,
+            $eventUuid
         );
 
         $eventRecorder = new EventRecorder();
         $eventRecorder->record($event);
 
-        $this->assertCount(1, $aggregate->events());
-        $this->assertEquals($aggregate->name(), 'dummy-eventaggregate');
-        $this->assertEquals($name, $event->name());
-        $this->assertEquals($body, $event->body());
+        $this->assertEquals($eventName, $event->type());
+        $this->assertEquals($eventBody, $event->body());
         $this->assertInstanceOf(DateTimeImmutable::class, $event->occurredOn());
         $this->assertCount(1, $eventRecorder->releaseEvents());
 
         $eventRecorder->record($event);
-        $eventRecorder->delete($event->id());
+        $eventRecorder->delete($event->uuid());
 
         $this->assertCount(0, $eventRecorder->releaseEvents());
     }

@@ -21,10 +21,10 @@ interface EventRecorderInterface
     public function clear();
 
     /**
-     * @param EventUuid $eventId
+     * @param EventUuid $eventUuid
      * @return mixed
      */
-    public function delete(EventUuid $eventId);
+    public function delete(EventUuid $eventUuid);
 
     /**
      * @param Event $event

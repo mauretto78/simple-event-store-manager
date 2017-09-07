@@ -34,8 +34,8 @@ trait EventRecorderCapabilities
      */
     public function record(EventInterface $event)
     {
-        $eventId = $event->id();
-        $this->recordedEvents[(string) $eventId] = $event;
+        $eventUuid = $event->uuid();
+        $this->recordedEvents[(string) $eventUuid] = $event;
     }
 
     /**

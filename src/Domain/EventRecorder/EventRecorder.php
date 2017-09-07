@@ -30,12 +30,12 @@ class EventRecorder implements EventRecorderInterface
     }
 
     /**
-     * @param EventUuid $eventId
+     * @param EventUuid $eventUuid
      * @return mixed
      */
-    public function delete(EventUuid $eventId)
+    public function delete(EventUuid $eventUuid)
     {
-        unset($this->recordedEvents[(string) $eventId]);
+        unset($this->recordedEvents[(string) $eventUuid]);
     }
 
     /**
@@ -45,8 +45,8 @@ class EventRecorder implements EventRecorderInterface
      */
     public function record(Event $event)
     {
-        $eventId = $event->id();
-        $this->recordedEvents[(string) $eventId] = $event;
+        $eventUuid = $event->uuid();
+        $this->recordedEvents[(string) $eventUuid] = $event;
     }
 
     /**
