@@ -34,26 +34,24 @@ class ElasticService
     }
 
     /**
-     * @param EventAggregate $aggregate
+     * @param EventInterface $event
      * @throws AggregateNotPersistedInElasticIndexException
      */
-    public function addAggregateToIndex(EventAggregate $aggregate)
+    public function addAggregateToIndex(EventInterface $event)
     {
-        $this->manageAggregateIndex($aggregate->name());
+        $this->manageAggregateIndex($event->type());
 
-        foreach ($aggregate->events() as $event) {
-            $params = [
-                'index' => self::EVENTS_INDEX,
-                'type' => $aggregate->name(),
-                'id' => (string) $event->id(),
-                'body' => $this->buildEventBody($event)
-            ];
+        $params = [
+            'index' => self::EVENTS_INDEX,
+            'type' => $event->type(),
+            'id' => (string) $event->uuid(),
+            'body' => $this->buildEventBody($event)
+        ];
 
-            try {
-                $this->elastic->index($params);
-            } catch (\Exception $e) {
-                throw new AggregateNotPersistedInElasticIndexException($e->getMessage());
-            }
+        try {
+            $this->elastic->index($params);
+        } catch (\Exception $e) {
+            throw new AggregateNotPersistedInElasticIndexException($e->getMessage());
         }
     }
 
