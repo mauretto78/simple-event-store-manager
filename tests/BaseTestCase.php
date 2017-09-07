@@ -16,6 +16,7 @@ use MongoDB\Client as MongoClient;
 use MongoDB\Database;
 use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
+use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 
 abstract class BaseTestCase extends TestCase
 {
@@ -146,10 +147,10 @@ abstract class BaseTestCase extends TestCase
      */
     public function tearDown()
     {
-        $this->destroyMySQLSchema();
-        $this->destroyMongoDb();
-        $this->destroyRedis();
-        $this->destroyElastic();
+//        $this->destroyMySQLSchema();
+//        $this->destroyMongoDb();
+//        $this->destroyRedis();
+//        $this->destroyElastic();
     }
 
     /**
@@ -157,8 +158,7 @@ abstract class BaseTestCase extends TestCase
      */
     private function destroyMySQLSchema()
     {
-        self::$pdo->query('DROP TABLE `events`;');
-        self::$pdo->query('DROP TABLE `event_aggregates`;');
+        self::$pdo->query('DROP TABLE `'.PdoDriver::EVENTSTORE_TABLE_NAME.'`;');
     }
 
     /**
@@ -167,7 +167,6 @@ abstract class BaseTestCase extends TestCase
     private function destroyMongoDb()
     {
         self::$mongo->events->drop();
-        self::$mongo->event_aggregates->drop();
     }
 
     /**

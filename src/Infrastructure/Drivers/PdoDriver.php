@@ -16,6 +16,8 @@ use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\NotInstalledDriver
 
 class PdoDriver implements DriverInterface
 {
+    const EVENTSTORE_TABLE_NAME = 'eventstore';
+
     /**
      * @var
      */
@@ -99,7 +101,7 @@ class PdoDriver implements DriverInterface
      */
     private function createSchema()
     {
-        $query = "CREATE TABLE IF NOT EXISTS `eventstore` (
+        $query = "CREATE TABLE IF NOT EXISTS `".self::EVENTSTORE_TABLE_NAME."` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `uuid` char(36) COLLATE utf8_unicode_ci NOT NULL COMMENT '(DC2Type:guid)',
           `version` int(10) unsigned NOT NULL,

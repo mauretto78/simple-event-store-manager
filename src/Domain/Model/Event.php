@@ -15,14 +15,19 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 class Event implements EventInterface
 {
     /**
-     * @var EventId
+     * @var EventUuid
      */
-    private $id;
+    private $uuid;
 
     /**
      * @var string
      */
-    private $name;
+    private $type;
+
+    /**
+     * @var int
+     */
+    private $version;
 
     /**
      * @var mixed
@@ -37,37 +42,47 @@ class Event implements EventInterface
     /**
      * Event constructor.
      *
-     * @param $name
+     * @param $type
      * @param $body
-     * @param EventId|null $eventId
+     * @param EventUuid|null $eventId
      * @param null $occurred_on
      */
     public function __construct(
-        $name,
+        $type,
         $body,
-        EventId $eventId = null,
+        EventUuid $eventId = null,
+        $version = null,
         $occurred_on = null
     ) {
-        $this->id = ($eventId) ? $eventId : new EventId();
-        $this->name = $name;
+        $this->uuid = ($eventId) ? $eventId : new EventUuid();
+        $this->type = $type;
         $this->body = $body;
+        $this->version = ($version) ?: 0;
         $this->occurred_on = ($occurred_on) ? new \DateTimeImmutable($occurred_on) : new \DateTimeImmutable();
     }
 
     /**
-     * @return EventId
+     * @return EventUuid
      */
-    public function id()
+    public function uuid()
     {
-        return $this->id;
+        return $this->uuid;
     }
 
     /**
      * @return string
      */
-    public function name()
+    public function type()
     {
-        return $this->name;
+        return $this->type;
+    }
+
+    /**
+     * @return string
+     */
+    public function version()
+    {
+        return $this->version;
     }
 
     /**

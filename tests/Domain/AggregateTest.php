@@ -13,7 +13,7 @@ use SimpleEventStoreManager\Domain\EventRecorder\EventRecorderCapabilities;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Domain\Model\EventUuid;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class AggregateTest extends BaseTestCase

@@ -16,7 +16,7 @@ use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Domain\Model\EventUuid;
 use SimpleEventStoreManager\Infrastructure\Services\HashGeneratorService;
 
 class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
@@ -176,7 +176,7 @@ class RedisEventAggregateRepository implements EventAggregateRepositoryInterface
                 new Event(
                     $event['name'],
                     unserialize($event['body']),
-                    new EventId($event['id']),
+                    new EventUuid($event['id']),
                     $event['occurred_on']
                 )
             );

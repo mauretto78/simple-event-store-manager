@@ -11,19 +11,24 @@
 namespace SimpleEventStoreManager\Domain\Model\Contracts;
 
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
-use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Domain\Model\EventUuid;
 
 interface EventInterface
 {
     /**
-     * @return EventId
+     * @return EventUuid
      */
-    public function id();
+    public function uuid();
 
     /**
      * @return string
      */
-    public function name();
+    public function type();
+
+    /**
+     * @return int
+     */
+    public function version();
 
     /**
      * @return mixed

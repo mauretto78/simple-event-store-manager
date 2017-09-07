@@ -14,7 +14,7 @@ use SimpleEventStoreManager\Application\Event\EventRepresentation;
 use SimpleEventStoreManager\Application\Event\EventManager;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Domain\Model\EventUuid;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\XmlEventDataTransformer;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\YamlEventDataTransformer;
