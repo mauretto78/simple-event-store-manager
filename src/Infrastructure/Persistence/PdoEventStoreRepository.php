@@ -12,6 +12,7 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
+use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventUuid;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 
@@ -32,7 +33,12 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
         $this->pdo = $pdo;
     }
 
-
+    /**
+     * @param EventUuid $eventUuid
+     * @param int $returnType
+     *
+     * @return array|null
+     */
     public function byUuid(EventUuid $eventUuid, $returnType = self::RETURN_AS_ARRAY)
     {
         $eventUuid = (string) $eventUuid;
@@ -58,7 +64,12 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
         return null;
     }
 
-
+    /**
+     * @param array $rows
+     * @param $returnType
+     *
+     * @return array
+     */
     private function buildEventAggregate(array $rows, $returnType)
     {
         if ($returnType === self::RETURN_AS_ARRAY) {
@@ -66,6 +77,48 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
         }
 
         return $this->buildEventAggregateAsObject($rows);
+    }
+
+    /**
+     * @param array $rows
+     * @return array
+     */
+    private function buildEventAggregateAsArray(array $rows)
+    {
+        $returnArray = [];
+
+        foreach ($rows as $row) {
+            $returnArray[] = [
+                'uuid' => $row['uuid'],
+                'version' => $row['version'],
+                'type' => $row['type'],
+                'body' => unserialize($row['body']),
+                'occurred_on' => $row['occurred_on'],
+            ];
+        }
+
+        return $returnArray;
+    }
+
+    /**
+     * @param array $rows
+     * @return array
+     */
+    private function buildEventAggregateAsObject(array $rows)
+    {
+        $returnObject = [];
+
+        foreach ($rows as $row) {
+            $returnObject[] = new Event(
+                $row['type'],
+                unserialize($row['body']),
+                new EventUuid($row['uuid']),
+                $row['version'],
+                $row['occurred_on']
+            );
+        }
+
+        return $returnObject;
     }
 
     /**
@@ -114,31 +167,5 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
         $stmt->bindParam(':body', $body);
         $stmt->bindParam(':occurred_on', $occurredOn);
         $stmt->execute();
-    }
-
-    /**
-     * @param array $rows
-     * @return array
-     */
-    private function buildEventAggregateAsArray(array $rows)
-    {
-        $returnArray = [];
-
-        foreach ($rows as $row) {
-            $returnArray['events'][] = [
-                'uuid' => $row['uuid'],
-                'version' => $row['version'],
-                'type' => $row['type'],
-                'body' => unserialize($row['body']),
-                'occurred_on' => $row['occurred_on'],
-            ];
-        }
-
-        return $returnArray;
-    }
-
-    private function buildEventAggregateAsObject(array $rows)
-    {
-        return [];
     }
 }

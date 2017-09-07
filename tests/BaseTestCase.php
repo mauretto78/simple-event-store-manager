@@ -147,10 +147,10 @@ abstract class BaseTestCase extends TestCase
      */
     public function tearDown()
     {
-//        $this->destroyMySQLSchema();
-//        $this->destroyMongoDb();
-//        $this->destroyRedis();
-//        $this->destroyElastic();
+        $this->destroyMySQLSchema();
+        $this->destroyMongoDb();
+        $this->destroyRedis();
+        $this->destroyElastic();
     }
 
     /**

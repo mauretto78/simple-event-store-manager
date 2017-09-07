@@ -9,16 +9,13 @@
  */
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
-use SimpleEventStoreManager\Domain\Model\EventAggregate;
-use SimpleEventStoreManager\Domain\Model\EventAggregateId;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\EventUuid;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
-use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventAggregateRepository;
+use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventStoreRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\MongoEventAggregateRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\PdoEventStoreRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\RedisEventAggregateRepository;
@@ -36,7 +33,7 @@ class EventStoreRepositoryTest extends BaseTestCase
         parent::setUp();
 
         $this->repos = [
-            //new InMemoryEventAggregateRepository((new InMemoryDriver())->instance()),
+            new InMemoryEventStoreRepository((new InMemoryDriver())->instance()),
             //new MongoEventAggregateRepository((new MongoDriver($this->mongo_parameters))->instance()),
             new PdoEventStoreRepository((new PdoDriver($this->pdo_parameters))->instance()),
             //new RedisEventAggregateRepository((new RedisDriver($this->redis_parameters))->instance()),
@@ -46,7 +43,7 @@ class EventStoreRepositoryTest extends BaseTestCase
     /**
      * @test
      */
-    public function it_should_store_and_restore_aggregates()
+    public function it_should_store_and_restore_event_aggregates()
     {
         /** @var EventStoreRepositoryInterface $repo */
         foreach ($this->repos as $repo) {
@@ -88,10 +85,14 @@ class EventStoreRepositoryTest extends BaseTestCase
 
             $this->assertNull($repo->byUuid(new EventUuid('432fdfdsfsdasd')));
             $this->assertEquals(3, $repo->count($eventUuid));
-            $this->assertArrayHasKey('events', $eventAggregateAsArray);
-            $this->assertCount(3, $eventAggregateAsArray['events']);
-//            $this->assertEquals($aggregate, $aggregateAsObject);
-//            $this->assertEquals($aggregate, $aggregateAsObjectByName);
+            $this->assertCount(3, $eventAggregateAsArray);
+            $this->assertCount(3, $eventAggregateAsObject);
+            $this->assertEquals(0, $eventAggregateAsArray[0]['version']);
+            $this->assertEquals(1, $eventAggregateAsArray[1]['version']);
+            $this->assertEquals(2, $eventAggregateAsArray[2]['version']);
+            $this->assertEquals(0, $eventAggregateAsObject[0]->version());
+            $this->assertEquals(1, $eventAggregateAsObject[1]->version());
+            $this->assertEquals(2, $eventAggregateAsObject[2]->version());
         }
     }
 }
