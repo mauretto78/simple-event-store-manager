@@ -12,9 +12,9 @@ use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\Event\EventRepresentation;
 
 use SimpleEventStoreManager\Application\Event\EventManager;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\XmlEventDataTransformer;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\YamlEventDataTransformer;
@@ -36,6 +36,8 @@ class EventRepresentationTest extends BaseTestCase
      */
     private $emAsObject;
 
+    private $uuid;
+
     public function setUp()
     {
         parent::setUp();
@@ -44,14 +46,16 @@ class EventRepresentationTest extends BaseTestCase
             ->setDriver('mongo')
             ->setConnection($this->mongo_parameters);
 
-        $name = 'Doman\\Model\\SomeEvent';
+        $this->uuid = new AggregateUuid();
+
+        $type = 'Doman\\Model\\SomeEvent';
         $body = [
             'id' => 1,
             'title' => 'Lorem Ipsum',
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $name2 = 'Doman\\Model\\SomeEvent2';
+        $type2 = 'Doman\\Model\\SomeEvent2';
         $body2 = [
             'id' => 2,
             'title' => 'Lorem Ipsum',
@@ -59,24 +63,25 @@ class EventRepresentationTest extends BaseTestCase
         ];
 
         $event = new Event(
-            $name,
+            $this->uuid,
+            $type,
             $body
         );
         $event2 = new Event(
-            $name2,
+            $this->uuid,
+            $type2,
             $body2
         );
 
         $eventManager->storeEvents(
-            'Dummy EventAggregate',
             [
                 $event,
                 $event2
             ]
         );
 
-        $this->emAsArray = $eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY);
-        $this->emAsObject = $eventManager->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
+        $this->emAsArray = $eventManager->setReturnType(EventStoreRepositoryInterface::RETURN_AS_ARRAY);
+        $this->emAsObject = $eventManager->setReturnType(EventStoreRepositoryInterface::RETURN_AS_OBJECT);
     }
 
     /**
@@ -104,7 +109,7 @@ class EventRepresentationTest extends BaseTestCase
 
         /** @var EventRepresentation $eventQuery */
         foreach ($eventQueries as $eventQuery) {
-            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
+            $response = $eventQuery->aggregate((string) $this->uuid, 1, 1);
             $content = json_decode($response->getContent());
 
             $this->assertInstanceOf(Response::class, $response);
@@ -143,7 +148,7 @@ class EventRepresentationTest extends BaseTestCase
 
         /** @var EventRepresentation $eventQuery */
         foreach ($eventQueries as $eventQuery) {
-            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
+            $response = $eventQuery->aggregate((string) $this->uuid, 1, 1);
             $content = simplexml_load_string($response->getContent());
 
             $this->assertInstanceOf(Response::class, $response);
@@ -182,7 +187,7 @@ class EventRepresentationTest extends BaseTestCase
 
         /** @var EventRepresentation $eventQuery */
         foreach ($eventQueries as $eventQuery) {
-            $response = $eventQuery->aggregate('Dummy EventAggregate', 1, 1);
+            $response = $eventQuery->aggregate((string) $this->uuid, 1, 1);
             $content = Yaml::parse($response->getContent());
 
             $this->assertInstanceOf(Response::class, $response);

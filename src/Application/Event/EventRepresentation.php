@@ -50,11 +50,11 @@ class EventRepresentation
      *
      * @return Response
      */
-    public function aggregate($aggregateName, $page = 1, $maxPerPage = 25)
+    public function aggregate($uuid, $page = 1, $maxPerPage = 25)
     {
         return $this->dataTransformer->transform(
-            $this->paginateAggregate($this->eventQuery->fromAggregate($aggregateName), $page, $maxPerPage),
-            $this->eventQuery->streamCount($aggregateName),
+            $this->paginateAggregate($this->eventQuery->fromAggregate($uuid), $page, $maxPerPage),
+            $this->eventQuery->streamCount($uuid),
             $page,
             $maxPerPage
         );

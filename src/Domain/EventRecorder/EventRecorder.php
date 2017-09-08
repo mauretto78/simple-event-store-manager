@@ -11,7 +11,7 @@
 namespace SimpleEventStoreManager\Domain\EventRecorder;
 
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Domain\EventRecorder\Contracts\EventRecorderInterface;
 
 class EventRecorder implements EventRecorderInterface
@@ -30,10 +30,10 @@ class EventRecorder implements EventRecorderInterface
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $eventUuid
      * @return mixed
      */
-    public function delete(EventUuid $eventUuid)
+    public function delete(AggregateUuid $eventUuid)
     {
         unset($this->recordedEvents[(string) $eventUuid]);
     }

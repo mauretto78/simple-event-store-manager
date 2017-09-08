@@ -10,7 +10,9 @@
 
 use SimpleEventStoreManager\Application\Event\EventManager;
 use SimpleEventStoreManager\Application\Event\EventQuery;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
@@ -52,7 +54,6 @@ class EventQueryTest extends BaseTestCase
             ->setConnection($this->mongo_parameters);
 
         $eventManager->storeEvents(
-            'Dummy EventAggregate',
             [
                 $notValidEvent
             ]
@@ -64,21 +65,24 @@ class EventQueryTest extends BaseTestCase
      */
     public function it_should_store_and_query_events_and_send_them_to_elastic()
     {
-        $name = 'Doman\\Model\\SomeEvent';
+        $uuid = new AggregateUuid();
+        $uuid2 = new AggregateUuid();
+
+        $type = 'Doman\\Model\\SomeEvent';
         $body = [
             'id' => 1,
             'title' => 'Lorem Ipsum1',
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $name2 = 'Doman\\Model\\SomeEvent';
+        $type2 = 'Doman\\Model\\SomeEvent';
         $body2 = [
             'id' => 2,
             'title' => 'Lorem Ipsum2',
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
-        $name3 = 'Doman\\Model\\AnotherEvent';
+        $type3 = 'Doman\\Model\\AnotherEvent';
         $body3 = [
             'id' => 3,
             'title' => 'Lorem Ipsum3',
@@ -86,19 +90,22 @@ class EventQueryTest extends BaseTestCase
         ];
 
         $event = new Event(
-            $name,
+            $uuid,
+            $type,
             $body
         );
         $event2 = new Event(
-            $name2,
+            $uuid,
+            $type2,
             $body2
         );
         $event3 = new Event(
-            $name3,
+            $uuid2,
+            $type3,
             $body3
         );
 
-        $returnTypes = [EventAggregateRepositoryInterface::RETURN_AS_ARRAY, EventAggregateRepositoryInterface::RETURN_AS_OBJECT];
+        $returnTypes = [EventStoreRepositoryInterface::RETURN_AS_ARRAY, EventStoreRepositoryInterface::RETURN_AS_OBJECT];
 
         foreach ($returnTypes as $returnType) {
             $eventManager = EventManager::build()
@@ -108,15 +115,9 @@ class EventQueryTest extends BaseTestCase
                 ->setReturnType($returnType);
 
             $eventManager->storeEvents(
-                'EventAggregate-1',
                 [
                     $event,
-                    $event2
-                ]
-            );
-            $eventManager->storeEvents(
-                'EventAggregate-2',
-                [
+                    $event2,
                     $event3
                 ]
             );
@@ -126,24 +127,26 @@ class EventQueryTest extends BaseTestCase
             $stream = $eventQuery->fromAggregate('Not existing aggregate');
             $this->assertCount(0, $stream);
 
-            $stream = $eventQuery->fromAggregate('EventAggregate-1');
-            $this->assertEquals(2, $eventQuery->streamCount('EventAggregate-1'));
-            $this->assertCount(2, $stream);
+            $stream = $eventQuery->fromAggregate((string) $uuid);
+            $stream2 = $eventQuery->fromAggregate((string) $uuid2);
 
-            $stream2 = $eventQuery->fromAggregate('EventAggregate-2');
-            $this->assertEquals(1, $eventQuery->streamCount('EventAggregate-2'));
+            $this->assertEquals(2, $eventQuery->streamCount((string) $uuid));
+            $this->assertCount(2, $stream);
+            $this->assertEquals(1, $eventQuery->streamCount((string) $uuid2));
             $this->assertCount(1, $stream2);
 
             $streams = $eventQuery->fromAggregates([
-                'EventAggregate-1',
-                'EventAggregate-2'
+                (string) $uuid,
+                (string) $uuid2
             ]);
             $this->assertCount(3, $streams);
 
             $queriedEvents = $eventQuery->query($streams, [
-                'name' => 'Doman\\Model\\SomeEvent'
+                'type' => 'Doman\\Model\\SomeEvent'
             ]);
             $this->assertCount(2, $queriedEvents);
+
+            $this->tearDown();
         }
     }
 }

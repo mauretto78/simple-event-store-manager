@@ -15,7 +15,7 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 class Event implements EventInterface
 {
     /**
-     * @var EventUuid
+     * @var AggregateUuid
      */
     private $uuid;
 
@@ -42,19 +42,20 @@ class Event implements EventInterface
     /**
      * Event constructor.
      *
+     * @param AggregateUuid $eventId
      * @param $type
      * @param $body
-     * @param EventUuid|null $eventId
+     * @param null $version
      * @param null $occurred_on
      */
     public function __construct(
+        AggregateUuid $eventId,
         $type,
         $body,
-        EventUuid $eventId = null,
         $version = null,
         $occurred_on = null
     ) {
-        $this->uuid = ($eventId) ? $eventId : new EventUuid();
+        $this->uuid = $eventId;
         $this->type = $type;
         $this->body = $body;
         $this->version = ($version) ?: 0;
@@ -62,7 +63,7 @@ class Event implements EventInterface
     }
 
     /**
-     * @return EventUuid
+     * @return AggregateUuid
      */
     public function uuid()
     {

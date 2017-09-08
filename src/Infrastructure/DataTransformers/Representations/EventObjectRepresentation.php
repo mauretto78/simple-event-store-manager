@@ -14,11 +14,15 @@ use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 
 class EventObjectRepresentation
 {
-    private $id;
-    private $name;
+    private $uuid;
+    private $type;
     private $body;
     private $occurred_on;
 
+    /**
+     * EventObjectRepresentation constructor.
+     * @param $event
+     */
     public function __construct($event)
     {
         if (is_array($event)) {
@@ -30,18 +34,26 @@ class EventObjectRepresentation
         }
     }
 
+    /**
+     * @param array $event
+     */
     private function fromArray(array $event)
     {
-        $this->id = $event['id'];
-        $this->name = $event['name'];
+        $this->uuid = $event['uuid'];
+        $this->version = $event['version'];
+        $this->type = $event['type'];
         $this->body = $event['body'];
         $this->occurred_on = $event['occurred_on'];
     }
 
+    /**
+     * @param EventInterface $event
+     */
     private function fromEventInterface(EventInterface $event)
     {
-        $this->id = $event->id();
-        $this->name = $event->name();
+        $this->uuid = $event->uuid();
+        $this->version = $event->version();
+        $this->type = $event->type();
         $this->body = $event->body();
         $this->occurred_on = $event->occurredOn();
     }

@@ -8,14 +8,27 @@
  * file that was distributed with this source code.
  */
 
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
+use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventStoreRepository;
 use SimpleEventStoreManager\Infrastructure\Projector\Projector;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Infrastructure\Projector\ProjectionManager;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class ProjectorManagerTest extends BaseTestCase
 {
+    /**
+     * @var EventStoreRepositoryInterface
+     */
+    private $repo;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->repo = new InMemoryEventStoreRepository();
+    }
+
     /**
      * @test
      * @expectedException \SimpleEventStoreManager\Infrastructure\Projector\Exceptions\ProjectorDoesNotExistsException
@@ -25,6 +38,7 @@ class ProjectorManagerTest extends BaseTestCase
     {
         $userProjector = new UserProjectorWithNoSubcribedEvents();
         $userWasCreatedEvent = new UserWasCreated(
+            $eventUuid = new AggregateUuid(),
             'UserWasCreated',
             [
                 'id' => 23,
@@ -33,12 +47,11 @@ class ProjectorManagerTest extends BaseTestCase
             ]
         );
 
-        $userEventAggregate = new EventAggregate('user-23');
-        $userEventAggregate->addEvent($userWasCreatedEvent);
+        $this->repo->save($userWasCreatedEvent);
 
-        $projectorManger = new ProjectionManager();
+        $projectorManger = new ProjectionManager($this->repo);
         $projectorManger->register($userProjector);
-        $projectorManger->projectFromAnEventAggregate($userEventAggregate);
+        $projectorManger->projectFromAnEventAggregate($eventUuid);
     }
 
     /**
@@ -50,6 +63,7 @@ class ProjectorManagerTest extends BaseTestCase
     {
         $userProjector = new UserProjectorWithNoApplyMethod();
         $userWasCreatedEvent = new UserWasCreated(
+            $eventUuid = new AggregateUuid(),
             'UserWasCreated',
             [
                 'id' => 23,
@@ -58,12 +72,11 @@ class ProjectorManagerTest extends BaseTestCase
             ]
         );
 
-        $userEventAggregate = new EventAggregate('user-23');
-        $userEventAggregate->addEvent($userWasCreatedEvent);
+        $this->repo->save($userWasCreatedEvent);
 
-        $projectorManger = new ProjectionManager();
+        $projectorManger = new ProjectionManager($this->repo);
         $projectorManger->register($userProjector);
-        $projectorManger->projectFromAnEventAggregate($userEventAggregate);
+        $projectorManger->projectFromAnEventAggregate($eventUuid);
     }
 
     /**
@@ -75,6 +88,7 @@ class ProjectorManagerTest extends BaseTestCase
     {
         $userProjector = new UserProjectorWithNoRollbackMethod();
         $userWasCreatedEvent = new UserWasCreated(
+            $eventUuid = new AggregateUuid(),
             'UserWasCreated',
             [
                 'id' => 23,
@@ -83,13 +97,12 @@ class ProjectorManagerTest extends BaseTestCase
             ]
         );
 
-        $userEventAggregate = new EventAggregate('user-23');
-        $userEventAggregate->addEvent($userWasCreatedEvent);
+        $this->repo->save($userWasCreatedEvent);
 
-        $projectorManger = new ProjectionManager();
+        $projectorManger = new ProjectionManager($this->repo);
         $projectorManger->register($userProjector);
-        $projectorManger->projectFromAnEventAggregate($userEventAggregate);
-        $projectorManger->rollbackAnEventAggregate($userEventAggregate);
+        $projectorManger->projectFromAnEventAggregate($eventUuid);
+        $projectorManger->rollbackAnEventAggregate($eventUuid);
     }
 
     /**
@@ -99,6 +112,7 @@ class ProjectorManagerTest extends BaseTestCase
     {
         $userProjector = new UserProjector();
         $userWasCreatedEvent = new UserWasCreated(
+            $eventUuid = new AggregateUuid(),
             'UserWasCreated',
             [
                 'id' => 23,
@@ -107,16 +121,15 @@ class ProjectorManagerTest extends BaseTestCase
             ]
         );
 
-        $userEventAggregate = new EventAggregate('user-23');
-        $userEventAggregate->addEvent($userWasCreatedEvent);
+        $this->repo->save($userWasCreatedEvent);
 
-        $projectorManger = new ProjectionManager();
+        $projectorManger = new ProjectionManager($this->repo);
         $projectorManger->register($userProjector);
-        $projectorManger->projectFromAnEventAggregate($userEventAggregate);
+        $projectorManger->projectFromAnEventAggregate($eventUuid);
 
         $this->assertCount(1, $userProjector->getUsers());
 
-        $projectorManger->rollbackAnEventAggregate($userEventAggregate);
+        $projectorManger->rollbackAnEventAggregate($eventUuid);
 
         $this->assertCount(0, $userProjector->getUsers());
     }
@@ -135,14 +148,14 @@ class UserProjector extends Projector
 
     public function applyUserWasCreated(UserWasCreated $event)
     {
-        $eventId = (string) $event->id();
+        $eventId = (string) $event->uuid();
 
         $this->users[$eventId] = $event->body();
     }
 
     public function rollbackUserWasCreated(UserWasCreated $event)
     {
-        $eventId = (string) $event->id();
+        $eventId = (string) $event->uuid();
 
         unset($this->users[$eventId]);
     }
@@ -166,7 +179,7 @@ class UserProjectorWithNoRollbackMethod extends Projector
 
     public function applyUserWasCreated(UserWasCreated $event)
     {
-        $eventId = (string) $event->id();
+        $eventId = (string) $event->uuid();
 
         $this->users[$eventId] = $event->body();
     }
@@ -188,14 +201,14 @@ class UserProjectorWithNoSubcribedEvents extends Projector
 
     public function applyUserWasCreated(UserWasCreated $event)
     {
-        $eventId = (string) $event->id();
+        $eventId = (string) $event->uuid();
 
         $this->users[$eventId] = $event->body();
     }
 
     public function rollbackUserWasCreated(UserWasCreated $event)
     {
-        $eventId = (string) $event->id();
+        $eventId = (string) $event->uuid();
 
         unset($this->users[$eventId]);
     }

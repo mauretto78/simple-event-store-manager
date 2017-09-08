@@ -12,7 +12,7 @@ namespace SimpleEventStoreManager\Domain\Model;
 
 use Ramsey\Uuid\Uuid;
 
-class EventUuid
+class AggregateUuid
 {
     /**
      * @var string
@@ -20,7 +20,7 @@ class EventUuid
     private $id;
 
     /**
-     * EventUuid constructor.
+     * AggregateUuid constructor.
      *
      * @param null $id
      */

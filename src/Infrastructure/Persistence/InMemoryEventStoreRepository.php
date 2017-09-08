@@ -13,7 +13,7 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 
 class InMemoryEventStoreRepository implements EventStoreRepositoryInterface
 {
@@ -31,42 +31,42 @@ class InMemoryEventStoreRepository implements EventStoreRepositoryInterface
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      * @param int $returnType
      *
      * @return array|mixed|null
      */
-    public function byUuid(EventUuid $eventUuid, $returnType = self::RETURN_AS_ARRAY)
+    public function byUuid(AggregateUuid $uuid, $returnType = self::RETURN_AS_ARRAY)
     {
-        return (isset($this->events[(string) $eventUuid])) ? $this->buildEventAggregate($eventUuid, $returnType) : null;
+        return (isset($this->events[(string) $uuid])) ? $this->buildEventAggregate($uuid, $returnType) : null;
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      * @param $returnType
      *
      * @return array|mixed
      */
-    private function buildEventAggregate(EventUuid $eventUuid, $returnType)
+    private function buildEventAggregate(AggregateUuid $uuid, $returnType)
     {
         if ($returnType === self::RETURN_AS_ARRAY) {
-            return $this->buildEventAggregateAsArray($eventUuid);
+            return $this->buildEventAggregateAsArray($uuid);
         }
 
-        return $this->buildEventAggregateAsObject($eventUuid);
+        return $this->buildEventAggregateAsObject($uuid);
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      *
      * @return array
      */
-    private function buildEventAggregateAsArray(EventUuid $eventUuid)
+    private function buildEventAggregateAsArray(AggregateUuid $uuid)
     {
         $returnArray = [];
 
         /** @var Event $event */
-        foreach ($this->events[(string) $eventUuid] as $event) {
+        foreach ($this->events[(string) $uuid] as $event) {
             $returnArray[] = [
                 'uuid' => $event->uuid(),
                 'version' => $event->version(),
@@ -80,23 +80,23 @@ class InMemoryEventStoreRepository implements EventStoreRepositoryInterface
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      *
      * @return mixed
      */
-    private function buildEventAggregateAsObject(EventUuid $eventUuid)
+    private function buildEventAggregateAsObject(AggregateUuid $uuid)
     {
-        return $this->events[(string) $eventUuid];
+        return $this->events[(string) $uuid];
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      *
      * @return int
      */
-    public function count(EventUuid $eventUuid)
+    public function count(AggregateUuid $uuid)
     {
-        return (isset($this->events[(string) $eventUuid])) ? count($this->events[(string) $eventUuid]) : 0;
+        return (isset($this->events[(string) $uuid])) ? count($this->events[(string) $uuid]) : 0;
     }
 
     /**
@@ -107,9 +107,9 @@ class InMemoryEventStoreRepository implements EventStoreRepositoryInterface
     public function save(EventInterface $event)
     {
         $this->events[(string) $event->uuid()][] = new Event(
+            $event->uuid(),
             $event->type(),
             $event->body(),
-            $event->uuid(),
             $this->count($event->uuid()),
             $event->occurredOn()->format('Y-m-d H:i:s.u')
         );

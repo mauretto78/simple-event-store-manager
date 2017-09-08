@@ -56,8 +56,9 @@ abstract class AbstractEventDataTransformer
         return array_map(
             function (EventInterface $event) {
                 return [
-                    'id' => $event->id(),
-                    'name' => $event->name(),
+                    'uuid' => $event->uuid(),
+                    'version' => $event->version(),
+                    'type' => $event->type(),
                     'body' => $event->body(),
                     'occurred_on' => $event->occurredOn(),
                 ];

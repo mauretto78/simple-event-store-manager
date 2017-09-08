@@ -15,7 +15,7 @@ use MongoDB\Model\BSONDocument;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 
 class MongoEventStoreRepository implements EventStoreRepositoryInterface
 {
@@ -40,14 +40,14 @@ class MongoEventStoreRepository implements EventStoreRepositoryInterface
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      * @param int $returnType
      *
      * @return array|null
      */
-    public function byUuid(EventUuid $eventUuid, $returnType = self::RETURN_AS_ARRAY)
+    public function byUuid(AggregateUuid $uuid, $returnType = self::RETURN_AS_ARRAY)
     {
-        if ($document = $this->events->find(['uuid' => (string) $eventUuid])->toArray()) {
+        if ($document = $this->events->find(['uuid' => (string) $uuid])->toArray()) {
             return $this->buildEventAggregate($document, $returnType);
         }
 
@@ -102,9 +102,9 @@ class MongoEventStoreRepository implements EventStoreRepositoryInterface
 
         foreach ($document as $event) {
             $returnObject[] = new Event(
+                new AggregateUuid($event->uuid),
                 $event->type,
                 unserialize($event->body),
-                new EventUuid($event->uuid),
                 $event->version,
                 $event->occurred_on
             );
@@ -114,13 +114,13 @@ class MongoEventStoreRepository implements EventStoreRepositoryInterface
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      *
      * @return int
      */
-    public function count(EventUuid $eventUuid)
+    public function count(AggregateUuid $uuid)
     {
-        return $this->events->count(['uuid' => (string) $eventUuid]);
+        return $this->events->count(['uuid' => (string) $uuid]);
     }
 
     /**

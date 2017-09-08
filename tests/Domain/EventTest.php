@@ -13,7 +13,7 @@ use SimpleEventStoreManager\Domain\EventRecorder\EventRecorderCapabilities;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
 use SimpleEventStoreManager\Domain\Model\EventAggregateId;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
 class EventTest extends BaseTestCase
@@ -23,25 +23,25 @@ class EventTest extends BaseTestCase
      */
     public function create_an_aggregate_with_some_events_and_record_them_with_EventRecorder()
     {
-        $eventUuid = new EventUuid();
-        $eventName = 'Doman\\Model\\SomeEvent';
-        $eventBody = [
+        $uuid = new AggregateUuid();
+        $type= 'Doman\\Model\\SomeEvent';
+        $body = [
             'id' => 1,
             'title' => 'Lorem Ipsum',
             'text' => 'Dolor lorem ipso facto dixit'
         ];
 
         $event = new Event(
-            $eventName,
-            $eventBody,
-            $eventUuid
+            $uuid,
+            $type,
+            $body
         );
 
         $eventRecorder = new EventRecorder();
         $eventRecorder->record($event);
 
-        $this->assertEquals($eventName, $event->type());
-        $this->assertEquals($eventBody, $event->body());
+        $this->assertEquals($type, $event->type());
+        $this->assertEquals($body, $event->body());
         $this->assertInstanceOf(DateTimeImmutable::class, $event->occurredOn());
         $this->assertCount(1, $eventRecorder->releaseEvents());
 
@@ -88,6 +88,7 @@ class DummyEntity
 
         $this->record(
             new DummyEntityWasCreated(
+                new AggregateUuid(),
                 'DummyEntityWasCreated',
                 $this
             )

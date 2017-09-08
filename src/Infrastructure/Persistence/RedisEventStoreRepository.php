@@ -14,7 +14,7 @@ use Predis\Client;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 
 class RedisEventStoreRepository implements EventStoreRepositoryInterface
 {
@@ -40,15 +40,15 @@ class RedisEventStoreRepository implements EventStoreRepositoryInterface
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      * @param int $returnType
      * @return array|null
      */
-    public function byUuid(EventUuid $eventUuid, $returnType = self::RETURN_AS_ARRAY)
+    public function byUuid(AggregateUuid $uuid, $returnType = self::RETURN_AS_ARRAY)
     {
         $events = array_map(function($event){
             return unserialize($event);
-        }, $this->client->hgetall((string) $eventUuid));
+        }, $this->client->hgetall((string) $uuid));
 
         if (!empty($events)) {
             ksort($events);
@@ -115,13 +115,13 @@ class RedisEventStoreRepository implements EventStoreRepositoryInterface
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      *
      * @return int
      */
-    public function count(EventUuid $eventUuid)
+    public function count(AggregateUuid $uuid)
     {
-        return count($this->client->hgetall((string) $eventUuid));
+        return count($this->client->hgetall((string) $uuid));
     }
 
     /**
@@ -134,9 +134,9 @@ class RedisEventStoreRepository implements EventStoreRepositoryInterface
             $this->count($event->uuid()),
             serialize(
                 new Event(
+                    $event->uuid(),
                     $event->type(),
                     $event->body(),
-                    $event->uuid(),
                     $this->count($event->uuid()),
                     $event->occurredOn()->format('Y-m-d H:i:s.u')
                 )

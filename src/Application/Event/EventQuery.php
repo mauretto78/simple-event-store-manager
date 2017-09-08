@@ -11,8 +11,8 @@
 namespace SimpleEventStoreManager\Application\Event;
 
 use ArrayQuery\QueryBuilder;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 
 class EventQuery
 {
@@ -22,7 +22,7 @@ class EventQuery
     private $eventManger;
 
     /**
-     * @var EventAggregateRepositoryInterface
+     * @var EventStoreRepositoryInterface
      */
     private $repo;
 
@@ -44,31 +44,28 @@ class EventQuery
     }
 
     /**
-     * @param $aggregateName
+     * @param $uuid
      *
-     * @return array|EventInterface[]
+     * @return array
      */
-    public function fromAggregate($aggregateName)
+    public function fromAggregate($uuid)
     {
-        $stream = $this->repo->byName($aggregateName, $this->returnType);
+        $stream = $this->repo->byUuid(new AggregateUuid($uuid), $this->returnType);
 
-        if ($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY) {
-            return (isset($stream['events'])) ? $stream['events'] : [];
-        }
-
-        return ($stream) ? $stream->events() : [];
+        return ($stream) ?: [];
     }
 
     /**
-     * @param array $aggregates
+     * @param array $uuids
+     *
      * @return array
      */
-    public function fromAggregates(array $aggregates)
+    public function fromAggregates(array $uuids)
     {
         $streams = [];
 
-        foreach ($aggregates as $aggregate) {
-            $streams = array_merge($streams, $this->fromAggregate($aggregate));
+        foreach ($uuids as $uuid) {
+            $streams = array_merge($streams, $this->fromAggregate($uuid));
         }
 
         return $streams;
@@ -94,18 +91,12 @@ class EventQuery
     }
 
     /**
-     * @param $aggregateName
+     * @param $uuid
      *
-     * @return int
+     * @return mixed
      */
-    public function streamCount($aggregateName)
+    public function streamCount($uuid)
     {
-        $stream = $this->repo->byName($aggregateName, $this->returnType);
-
-        if ($this->returnType === EventAggregateRepositoryInterface::RETURN_AS_ARRAY) {
-            return count($stream['events']);
-        }
-
-        return count($stream->events());
+        return $this->repo->count(new AggregateUuid($uuid));
     }
 }

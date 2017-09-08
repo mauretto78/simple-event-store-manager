@@ -11,12 +11,12 @@
 namespace SimpleEventStoreManager\Domain\Model\Contracts;
 
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 
 interface EventInterface
 {
     /**
-     * @return EventUuid
+     * @return AggregateUuid
      */
     public function uuid();
 

@@ -13,7 +13,7 @@ namespace SimpleEventStoreManager\Infrastructure\Persistence;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 
 class PdoEventStoreRepository implements EventStoreRepositoryInterface
@@ -34,14 +34,14 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
     }
 
     /**
-     * @param EventUuid $eventUuid
+     * @param AggregateUuid $uuid
      * @param int $returnType
      *
      * @return array|null
      */
-    public function byUuid(EventUuid $eventUuid, $returnType = self::RETURN_AS_ARRAY)
+    public function byUuid(AggregateUuid $uuid, $returnType = self::RETURN_AS_ARRAY)
     {
-        $eventUuid = (string) $eventUuid;
+        $uuid = (string) $uuid;
         $query = 'SELECT
                   `uuid`,
                   `version`,
@@ -52,7 +52,7 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
                 WHERE `uuid` = :uuid
                 ORDER BY `occurred_on` ASC';
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindParam(':uuid', $eventUuid);
+        $stmt->bindParam(':uuid', $uuid);
         $stmt->execute();
 
         $row = $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -110,9 +110,9 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
 
         foreach ($rows as $row) {
             $returnObject[] = new Event(
+                new AggregateUuid($row['uuid']),
                 $row['type'],
                 unserialize($row['body']),
-                new EventUuid($row['uuid']),
                 $row['version'],
                 $row['occurred_on']
             );
@@ -124,11 +124,11 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
     /**
      * @return int
      */
-    public function count(EventUuid $eventUuid)
+    public function count(AggregateUuid $uuid)
     {
         $sql = 'SELECT id FROM `'.PdoDriver::EVENTSTORE_TABLE_NAME.'` WHERE `uuid` = :uuid';
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':uuid', $eventUuid);
+        $stmt->bindParam(':uuid', $uuid);
         $stmt->execute();
 
         return $stmt->rowCount();

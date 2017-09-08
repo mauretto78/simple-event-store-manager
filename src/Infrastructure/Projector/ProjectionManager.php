@@ -11,7 +11,9 @@
 namespace SimpleEventStoreManager\Infrastructure\Projector;
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Infrastructure\Projector\Exceptions\ProjectorDoesNotExistsException;
 
 class ProjectionManager
@@ -20,6 +22,20 @@ class ProjectionManager
      * @var Projector[]
      */
     private $projectors;
+
+    /**
+     * @var EventStoreRepositoryInterface
+     */
+    private $repo;
+
+    /**
+     * ProjectionManager constructor.
+     * @param EventStoreRepositoryInterface $repo
+     */
+    public function __construct(EventStoreRepositoryInterface $repo)
+    {
+        $this->repo = $repo;
+    }
 
     /**
      * @param Projector $projector
@@ -45,16 +61,15 @@ class ProjectionManager
     }
 
     /**
-     * @param EventAggregate $aggregate
-     * @throws ProjectorDoesNotExistsException
+     * @param AggregateUuid $eventUuid
      */
-    public function projectFromAnEventAggregate(EventAggregate $aggregate)
+    public function projectFromAnEventAggregate(AggregateUuid $eventUuid)
     {
-        foreach ($aggregate->events() as $event) {
+        foreach ($this->repo->byUuid($eventUuid, EventStoreRepositoryInterface::RETURN_AS_OBJECT) as $event) {
             try {
                 $this->project($event);
             } catch (ProjectorDoesNotExistsException $e) {
-                $this->rollbackAnEventAggregate($aggregate);
+                $this->rollbackAnEventAggregate($eventUuid);
             }
         }
     }
@@ -73,12 +88,11 @@ class ProjectionManager
     }
 
     /**
-     * @param EventAggregate $aggregate
-     * @throws ProjectorDoesNotExistsException
+     * @param AggregateUuid $eventUuid
      */
-    public function rollbackAnEventAggregate(EventAggregate $aggregate)
+    public function rollbackAnEventAggregate(AggregateUuid $eventUuid)
     {
-        foreach ($aggregate->events() as $event) {
+        foreach ($this->repo->byUuid($eventUuid, EventStoreRepositoryInterface::RETURN_AS_OBJECT) as $event) {
             $this->rollback($event);
         }
     }

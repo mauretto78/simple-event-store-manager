@@ -14,8 +14,7 @@ use Elasticsearch\ClientBuilder;
 use SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedDriverException;
 use SimpleEventStoreManager\Application\Event\Exceptions\NotSupportedReturnTypeException;
 use SimpleEventStoreManager\Application\Event\Exceptions\NotValidEventException;
-use SimpleEventStoreManager\Domain\Model\EventAggregate;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 use SimpleEventStoreManager\Infrastructure\Services\ElasticService;
 
@@ -32,7 +31,7 @@ class EventManager
     private $connectionParams;
 
     /**
-     * @var EventAggregateRepositoryInterface
+     * @var EventStoreRepositoryInterface
      */
     private $repo;
 
@@ -94,7 +93,7 @@ class EventManager
      */
     private function setRepo()
     {
-        $aggregateRepo = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($this->driver).'EventAggregateRepository';
+        $aggregateRepo = 'SimpleEventStoreManager\Infrastructure\Persistence\\'.$this->normalizeDriverName($this->driver).'EventStoreRepository';
         $driver = 'SimpleEventStoreManager\Infrastructure\Drivers\\'.$this->normalizeDriverName($this->driver).'Driver';
         $instance = (new $driver($this->connectionParams))->instance();
         $this->repo = new $aggregateRepo($instance);
@@ -113,7 +112,7 @@ class EventManager
     }
 
     /**
-     * @return EventAggregateRepositoryInterface
+     * @return EventStoreRepositoryInterface
      */
     public function getRepo()
     {
@@ -125,15 +124,26 @@ class EventManager
      * @return $this
      * @throws NotSupportedReturnTypeException
      */
-    public function setReturnType($returnType = EventAggregateRepositoryInterface::RETURN_AS_ARRAY)
+    public function setReturnType($returnType = EventStoreRepositoryInterface::RETURN_AS_ARRAY)
     {
-        if (!in_array($returnType, [EventAggregateRepositoryInterface::RETURN_AS_ARRAY, EventAggregateRepositoryInterface::RETURN_AS_OBJECT])) {
+        if (false === $this->checkReturnType($returnType)) {
             throw new NotSupportedReturnTypeException($returnType . ' is not a valid returnType value.');
         }
 
         $this->returnType = $returnType;
 
         return $this;
+    }
+
+    /**
+     * @param $returnType
+     * @return bool
+     */
+    private function checkReturnType($returnType)
+    {
+        $allowedReturnTypeArray = [EventStoreRepositoryInterface::RETURN_AS_ARRAY, EventStoreRepositoryInterface::RETURN_AS_OBJECT];
+
+        return in_array($returnType, $allowedReturnTypeArray);
     }
 
     /**
@@ -160,39 +170,22 @@ class EventManager
     }
 
     /**
-     * @param $aggregateName
-     * @param array EventInterface[] $events
+     * @param array $events
      * @throws NotValidEventException
      */
-    public function storeEvents($aggregateName, array $events = [])
+    public function storeEvents(array $events = [])
     {
-        $aggregate = $this->checkIfAggregateExistsOrReturnNewInstance($aggregateName);
+        /** @var EventInterface $event */
         foreach ($events as $event) {
             if (!$event instanceof EventInterface) {
                 throw new NotValidEventException('Not a valid instance of EventInterface was provided.');
             }
 
-            $aggregate->addEvent($event);
+            $this->repo->save($event);
+
+            if ($this->elastic) {
+                $this->elastic->addAggregateToIndex($event);
+            }
         }
-
-        $this->repo->save($aggregate);
-
-        if ($this->elastic) {
-            $this->elastic->addAggregateToIndex($aggregate);
-        }
-    }
-
-    /**
-     * @param $aggregateName
-     *
-     * @return EventAggregate
-     */
-    private function checkIfAggregateExistsOrReturnNewInstance($aggregateName)
-    {
-        if ($this->repo->exists($aggregateName)) {
-            return $this->repo->byName($aggregateName, EventAggregateRepositoryInterface::RETURN_AS_OBJECT);
-        }
-
-        return new EventAggregate($aggregateName);
     }
 }

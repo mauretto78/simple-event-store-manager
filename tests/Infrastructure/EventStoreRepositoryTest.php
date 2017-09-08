@@ -10,7 +10,7 @@
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
@@ -47,33 +47,33 @@ class EventStoreRepositoryTest extends BaseTestCase
     {
         /** @var EventStoreRepositoryInterface $repo */
         foreach ($this->repos as $repo) {
-            $eventUuid = new EventUuid();
+            $eventUuid = new AggregateUuid();
             $event1 = new Event(
+                $eventUuid,
                 'Doman\\Model\\SomeEvent',
                 [
                     'id' => 1,
                     'title' => 'Lorem Ipsum',
                     'text' => 'Dolor lorem ipso facto dixit'
-                ],
-                $eventUuid
+                ]
             );
             $event2 = new Event(
+                $eventUuid,
                 'Doman\\Model\\SomeEvent2',
                 [
                     'id' => 1,
                     'title' => 'Lorem Ipsum',
                     'text' => 'Dolor lorem ipso facto dixit'
-                ],
-                $eventUuid
+                ]
             );
             $event3 = new Event(
+                $eventUuid,
                 'Doman\\Model\\SomeEvent3',
                 [
                     'id' => 1,
                     'title' => 'Lorem Ipsum',
                     'text' => 'Dolor lorem ipso facto dixit'
-                ],
-                $eventUuid
+                ]
             );
 
             $repo->save($event1);
@@ -83,7 +83,7 @@ class EventStoreRepositoryTest extends BaseTestCase
             $eventAggregateAsArray = $repo->byUuid($eventUuid, EventStoreRepositoryInterface::RETURN_AS_ARRAY);
             $eventAggregateAsObject = $repo->byUuid($eventUuid, EventStoreRepositoryInterface::RETURN_AS_OBJECT);
 
-            $this->assertNull($repo->byUuid(new EventUuid('432fdfdsfsdasd')));
+            $this->assertNull($repo->byUuid(new AggregateUuid('432fdfdsfsdasd')));
             $this->assertEquals(3, $repo->count($eventUuid));
             $this->assertCount(3, $eventAggregateAsArray);
             $this->assertCount(3, $eventAggregateAsObject);

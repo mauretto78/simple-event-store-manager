@@ -11,16 +11,16 @@
 namespace SimpleEventStoreManager\Domain\Model\Contracts;
 
 use SimpleEventStoreManager\Domain\Model\EventAggregate;
-use SimpleEventStoreManager\Domain\Model\EventUuid;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 
 interface EventStoreRepositoryInterface
 {
-    const RETURN_AS_OBJECT = 0;
-    const RETURN_AS_ARRAY = 1;
+    const RETURN_AS_OBJECT = 1;
+    const RETURN_AS_ARRAY = 2;
 
-    public function byUuid(EventUuid $eventUuid, $returnType = self::RETURN_AS_ARRAY);
+    public function byUuid(AggregateUuid $eventUuid, $returnType = self::RETURN_AS_ARRAY);
 
-    public function count(EventUuid $eventUuid);
+    public function count(AggregateUuid $eventUuid);
 
     public function save(EventInterface $event);
 }
