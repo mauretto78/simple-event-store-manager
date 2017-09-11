@@ -58,6 +58,7 @@ abstract class AbstractEventDataTransformer
                 return [
                     'uuid' => $event->uuid(),
                     'version' => $event->version(),
+                    'payload' => $event->payload(),
                     'type' => $event->type(),
                     'body' => $event->body(),
                     'occurred_on' => $event->occurredOn(),
