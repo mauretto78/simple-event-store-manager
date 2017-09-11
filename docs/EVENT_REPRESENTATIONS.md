@@ -10,7 +10,7 @@ In [examples folder](https://github.com/mauretto78/simple-event-store-manager/tr
 use JMS\Serializer\SerializerBuilder;
 use SimpleEventStoreManager\Application\Event\EventManager;
 use SimpleEventStoreManager\Application\Event\EventRepresentation;
-use SimpleEventStoreManager\Domain\Model\Contracts\EventAggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Infrastructure\DataTransformers\JsonEventDataTransformer;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -22,7 +22,7 @@ $request = Request::createFromGlobals();
 $eventManager = EventManager::build()
     ->setDriver('mongo')
     ->setConnection($config['mongo'])
-    ->setReturnType(EventAggregateRepositoryInterface::RETURN_AS_ARRAY)
+    ->setReturnType(EventStoreRepositoryInterface::RETURN_AS_ARRAY)
     ->setElasticServer($config['elastic']);
 
 // instantiate $eventRepresentation

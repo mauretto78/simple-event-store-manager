@@ -45,6 +45,7 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
         $query = 'SELECT
                   `uuid`,
                   `version`,
+                  `payload`,
                   `type`,
                   `body`,
                   `occurred_on`
@@ -91,6 +92,7 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
             $returnArray[] = [
                 'uuid' => $row['uuid'],
                 'version' => $row['version'],
+                'payload' => $row['payload'],
                 'type' => $row['type'],
                 'body' => unserialize($row['body']),
                 'occurred_on' => $row['occurred_on'],
@@ -144,18 +146,21 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
         $uuid = (string) $event->uuid();
         $version = ($this->count($event->uuid())) ?: 0;
         $type = $event->type();
+        $payload = $event->payload();
         $body = serialize($event->body());
         $occurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
 
         $sql = 'INSERT INTO `'.PdoDriver::EVENTSTORE_TABLE_NAME.'` (
                     `uuid`,
                     `version`,
+                    `payload`,
                     `type`,
                     `body`,
                     `occurred_on`
                   ) VALUES (
                     :uuid,
                     :version, 
+                    :payload, 
                     :type,
                     :body, 
                     :occurred_on
@@ -163,6 +168,7 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':uuid', $uuid);
         $stmt->bindParam(':version', $version);
+        $stmt->bindParam(':payload', $payload);
         $stmt->bindParam(':type', $type);
         $stmt->bindParam(':body', $body);
         $stmt->bindParam(':occurred_on', $occurredOn);

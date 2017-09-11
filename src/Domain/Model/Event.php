@@ -30,6 +30,11 @@ class Event implements EventInterface
     private $version;
 
     /**
+     * @var string
+     */
+    private $payload;
+
+    /**
      * @var mixed
      */
     private $body;
@@ -58,6 +63,7 @@ class Event implements EventInterface
         $this->uuid = $eventId;
         $this->type = $type;
         $this->body = $body;
+        $this->payload = get_class($this);
         $this->version = ($version) ?: 0;
         $this->occurred_on = ($occurred_on) ? new \DateTimeImmutable($occurred_on) : new \DateTimeImmutable();
     }
@@ -84,6 +90,14 @@ class Event implements EventInterface
     public function version()
     {
         return $this->version;
+    }
+
+    /**
+     * @return string
+     */
+    public function payload()
+    {
+        return $this->payload;
     }
 
     /**

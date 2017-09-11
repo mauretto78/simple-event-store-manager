@@ -10,7 +10,8 @@ Use `record` method to register your Events, and then release them with `release
 // ..
 
 $event = new Event(
-    $name,
+    $uuid,
+    $type,
     $body
 );
 
@@ -52,41 +53,8 @@ class DummyEntity
 }
 
 // ...
-class DummyEntityWasCreated implements EventInterface
+class DummyEntityWasCreated extends Event
 {
-    private $id;
-    private $name;
-    private $body;
-    private $occurred_on;
-        
-    public function __construct(
-        $body
-    ) {
-        $this->id = new EventId();
-        $this->name = get_class($this);
-        $this->body = $body;
-        $this->occurred_on = ($occurred_on) ? new \DateTimeImmutable($occurred_on) : new \DateTimeImmutable();
-    }
-    
-    public function id()
-    {
-        return $this->id;
-    }
-
-    public function name()
-    {
-        return $this->name;
-    }
-
-    public function body()
-    {
-        return $this->body;
-    }
-
-    public function occurredOn()
-    {
-        return $this->occurred_on;
-    }
 }
 ```
 
@@ -95,6 +63,7 @@ Finally, to release events:
 ```php
 
 $dummyEntity = new DummyEntity(
+    23,
     'John Doe',
     'johndoe@gmail.com'
 );

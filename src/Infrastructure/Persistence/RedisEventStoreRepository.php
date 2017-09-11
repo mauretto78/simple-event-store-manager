@@ -88,6 +88,7 @@ class RedisEventStoreRepository implements EventStoreRepositoryInterface
             $returnArray[] = [
                 'uuid' => (string) $event->uuid(),
                 'version' => $event->version(),
+                'payload' => $event->payload(),
                 'type' => $event->type(),
                 'body' => $event->body(),
                 'occurred_on' => $event->occurredOn()->format('Y-m-d H:i:s.u')
@@ -133,7 +134,7 @@ class RedisEventStoreRepository implements EventStoreRepositoryInterface
             (string) $event->uuid(),
             $this->count($event->uuid()),
             serialize(
-                new Event(
+                new $event(
                     $event->uuid(),
                     $event->type(),
                     $event->body(),

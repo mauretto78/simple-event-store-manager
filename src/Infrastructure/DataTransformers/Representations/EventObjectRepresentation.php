@@ -10,13 +10,39 @@
 
 namespace SimpleEventStoreManager\Infrastructure\DataTransformers\Representations;
 
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
 
 class EventObjectRepresentation
 {
+    /**
+     * @var AggregateUuid
+     */
     private $uuid;
+
+    /**
+     * @var string
+     */
+    private $version;
+
+    /**
+     * @var string
+     */
+    private $payload;
+
+    /**
+     * @var string
+     */
     private $type;
+
+    /**
+     * @var string
+     */
     private $body;
+
+    /**
+     * @var \DateTimeImmutable
+     */
     private $occurred_on;
 
     /**
@@ -41,6 +67,7 @@ class EventObjectRepresentation
     {
         $this->uuid = $event['uuid'];
         $this->version = $event['version'];
+        $this->payload = $event['payload'];
         $this->type = $event['type'];
         $this->body = $event['body'];
         $this->occurred_on = $event['occurred_on'];
@@ -53,6 +80,7 @@ class EventObjectRepresentation
     {
         $this->uuid = $event->uuid();
         $this->version = $event->version();
+        $this->payload = $event->payload();
         $this->type = $event->type();
         $this->body = $event->body();
         $this->occurred_on = $event->occurredOn();

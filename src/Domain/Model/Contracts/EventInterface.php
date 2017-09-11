@@ -31,6 +31,11 @@ interface EventInterface
     public function version();
 
     /**
+     * @return string
+     */
+    public function payload();
+
+    /**
      * @return mixed
      */
     public function body();

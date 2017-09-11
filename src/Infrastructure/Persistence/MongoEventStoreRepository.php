@@ -82,6 +82,7 @@ class MongoEventStoreRepository implements EventStoreRepositoryInterface
             $returnArray[] = [
                 'uuid' => (string) $event->uuid,
                 'version' => $event->version,
+                'payload' => $event->payload,
                 'type' => $event->type,
                 'body' => unserialize($event->body),
                 'occurred_on' => $event->occurred_on
@@ -130,6 +131,7 @@ class MongoEventStoreRepository implements EventStoreRepositoryInterface
     {
         $uuid = (string) $event->uuid();
         $version = ($this->count($event->uuid())) ?: 0;
+        $payload = $event->payload();
         $type = $event->type();
         $body = serialize($event->body());
         $occurredOn = $event->occurredOn()->format('Y-m-d H:i:s.u');
@@ -137,6 +139,7 @@ class MongoEventStoreRepository implements EventStoreRepositoryInterface
         $this->events->insertOne([
             'uuid' => $uuid,
             'version' => $version,
+            'payload' => $payload,
             'type' => $type,
             'body' => $body,
             'occurred_on' => $occurredOn

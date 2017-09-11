@@ -10,13 +10,13 @@
 
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\AggregateUuid;
+use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventStoreRepository;
 use SimpleEventStoreManager\Infrastructure\Projector\Projector;
-use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Infrastructure\Projector\ProjectionManager;
 use SimpleEventStoreManager\Tests\BaseTestCase;
 
-class ProjectorManagerTest extends BaseTestCase
+class ProjectionManagerTest extends BaseTestCase
 {
     /**
      * @var EventStoreRepositoryInterface
@@ -38,7 +38,7 @@ class ProjectorManagerTest extends BaseTestCase
     {
         $userProjector = new UserProjectorWithNoSubcribedEvents();
         $userWasCreatedEvent = new UserWasCreated(
-            $eventUuid = new AggregateUuid(),
+            $uuid = new AggregateUuid(),
             'UserWasCreated',
             [
                 'id' => 23,
@@ -51,7 +51,7 @@ class ProjectorManagerTest extends BaseTestCase
 
         $projectorManger = new ProjectionManager($this->repo);
         $projectorManger->register($userProjector);
-        $projectorManger->projectFromAnEventAggregate($eventUuid);
+        $projectorManger->projectFromAnEventAggregate($uuid);
     }
 
     /**

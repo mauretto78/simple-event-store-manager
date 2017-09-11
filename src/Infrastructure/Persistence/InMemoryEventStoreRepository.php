@@ -70,6 +70,7 @@ class InMemoryEventStoreRepository implements EventStoreRepositoryInterface
             $returnArray[] = [
                 'uuid' => $event->uuid(),
                 'version' => $event->version(),
+                'payload' => $event->payload(),
                 'type' => $event->type(),
                 'body' => $event->body(),
                 'occurred_on' => $event->occurredOn(),
@@ -106,7 +107,7 @@ class InMemoryEventStoreRepository implements EventStoreRepositoryInterface
      */
     public function save(EventInterface $event)
     {
-        $this->events[(string) $event->uuid()][] = new Event(
+        $this->events[(string) $event->uuid()][] = new $event(
             $event->uuid(),
             $event->type(),
             $event->body(),

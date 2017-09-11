@@ -90,9 +90,15 @@ class EventStoreRepositoryTest extends BaseTestCase
             $this->assertEquals(0, $eventAggregateAsArray[0]['version']);
             $this->assertEquals(1, $eventAggregateAsArray[1]['version']);
             $this->assertEquals(2, $eventAggregateAsArray[2]['version']);
+            $this->assertEquals('SimpleEventStoreManager\Domain\Model\Event', $eventAggregateAsArray[0]['payload']);
+            $this->assertEquals('SimpleEventStoreManager\Domain\Model\Event', $eventAggregateAsArray[1]['payload']);
+            $this->assertEquals('SimpleEventStoreManager\Domain\Model\Event', $eventAggregateAsArray[2]['payload']);
             $this->assertEquals(0, $eventAggregateAsObject[0]->version());
             $this->assertEquals(1, $eventAggregateAsObject[1]->version());
             $this->assertEquals(2, $eventAggregateAsObject[2]->version());
+            $this->assertEquals('SimpleEventStoreManager\Domain\Model\Event', $eventAggregateAsObject[0]->payload());
+            $this->assertEquals('SimpleEventStoreManager\Domain\Model\Event', $eventAggregateAsObject[1]->payload());
+            $this->assertEquals('SimpleEventStoreManager\Domain\Model\Event', $eventAggregateAsObject[2]->payload());
         }
     }
 }

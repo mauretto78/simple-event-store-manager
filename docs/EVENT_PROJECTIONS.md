@@ -60,11 +60,13 @@ class UserWasCreated extends Event
 
 ### Projecting Events from an Event
 
-You can project events from an entire aggregate:
+You can project events from an entire aggregate using `ProjectionManager` class:
 
 ```php
+// ..
 $userProjector = new UserProjector();
 $userWasCreatedEvent = new UserWasCreated(
+    new AggregateUuid(), 
     'UserWasCreated',
     [
         'id' => 23,
@@ -73,7 +75,9 @@ $userWasCreatedEvent = new UserWasCreated(
     ]
 );
 
-$projectorManger = new ProjectionManager();
+$repo = new InMemoryEventStoreRepository();
+
+$projectorManger = new ProjectionManager($repo);
 $projectorManger->register($userProjector);
 $projectorManger->project($userWasCreatedEvent);
 
@@ -84,8 +88,11 @@ $projectorManger->project($userWasCreatedEvent);
 You can project events from an entire aggregate:
 
 ```php
+$uuid = new AggregateUuid();
+
 $userProjector = new UserProjector();
 $userWasCreatedEvent = new UserWasCreated(
+    $uuid, 
     'UserWasCreated',
     [
         'id' => 23,
@@ -95,7 +102,7 @@ $userWasCreatedEvent = new UserWasCreated(
 );
 
 // .. 
-$userEventAggregate = $eventQuery->fromAggregate('user-23');
+$userEventAggregate = $eventQuery->fromAggregate($uuid);
 
 $projectorManger = new ProjectionManager();
 $projectorManger->register($userProjector);

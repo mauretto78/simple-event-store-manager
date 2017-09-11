@@ -8,12 +8,12 @@ To use `EventManager`:
 
 ```php
 use SimpleEventStoreManager\Application\Event\EventManager;
-use SimpleEventStoreManager\Domain\Model\Contracts\AggregateRepositoryInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 
 $eventManager = EventManager::build()
     ->setDriver('mongo')
     ->setConnection($params)
-    ->setReturnType(AggregateRepositoryInterface::RETURN_AS_OBJECT);
+    ->setReturnType(EventStoreRepositoryInterface::RETURN_AS_OBJECT);
     
 ```
 
@@ -36,33 +36,36 @@ Consider this full example:
 
 ```php
 use SimpleEventStoreManager\Application\Event\EventManager;
-use SimpleEventStoreManager\Domain\Model\EventId;
+use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Domain\Model\Event;
 
-$myEvent = new Event(
-    'Fully\\Qualified\\Event\\Name',
+$uuid = new AggregateUuid();
+
+$event = new Event(
+    $uuid,
+    'Doman\\Model\\SomeEvent',
     [
-        'key' => 'value',
-        'key2' => 'value2',
-        'key3' => 'value3',
+        'id' => 1,
+        'title' => 'Lorem Ipsum',
+        'text' => 'Dolor lorem ipso facto dixit'
     ]
 );
 
-$myEvent2 = new Event(
-    'Fully\\Qualified\\Event\\Name2',
+$event2 = new Event(
+    $uuid,
+    'Doman\\Model\\SomeEvent',
     [
-        'key' => 'value',
-        'key2' => 'value2',
-        'key3' => 'value3',
+        'id' => 1,
+        'title' => 'Lorem Ipsum',
+        'text' => 'Dolor lorem ipso facto dixit'
     ]
 );
 
 // ..
 $eventManager->storeEvents(
-    'Your Aggregate Name',
     [
-        $myEvent,
-        $myEvent2
+        $event,
+        $event2
     ]
 );
 
@@ -78,7 +81,7 @@ Take a look at this example:
 $eventManager = EventManager::build()
     ->setDriver('mongo')
     ->setConnection($params)
-    ->setReturnType(AggregateRepositoryInterface::RETURN_AS_ARRAY)
+    ->setReturnType(EventStoreRepositoryInterface::RETURN_AS_ARRAY)
     ->setElasticServer([
          'host' => 'localhost',
          'port' => '9200'
@@ -87,10 +90,9 @@ $eventManager = EventManager::build()
 
 // ..
 $eventManager->storeEvents(
-    'Your Aggregate Name',
     [
-        $myEvent,
-        $myEvent2
+        $event,
+        $event2
     ]
 );
 
@@ -103,7 +105,7 @@ Events are indexed this way, look at the example:
 ```php
 Array
 (
-    'index' => 'aggregate-name' // Aggregate name
+    'index' => 'aggregate-uuid' // Aggregate uuid
     'type' => 'UserWasCreated', // Event class
     'id' => 'c4a760a8-dbcf-5254-a0d9-6a4474bd1b62', // eventId
     'body' => [

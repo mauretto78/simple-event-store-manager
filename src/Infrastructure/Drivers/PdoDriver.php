@@ -105,6 +105,7 @@ class PdoDriver implements DriverInterface
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `uuid` char(36) COLLATE utf8_unicode_ci NOT NULL COMMENT '(DC2Type:guid)',
           `version` int(10) unsigned NOT NULL,
+          `payload` varchar(255) DEFAULT NULL,
           `type` varchar(255) DEFAULT NULL,
           `body` longtext,
           `occurred_on` datetime(6),

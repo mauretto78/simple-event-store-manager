@@ -11,7 +11,7 @@ use SimpleEventStoreManager\Application\Event\EventQuery;
 
 $eventQuery = new EventQuery($eventManger);
 
-$stream = $eventQuery->fromAggregate('Your Aggregate Name');
+$stream = $eventQuery->fromAggregate('your-aggregate-uuid');
 foreach($stream as $event){
     // ..
 }
@@ -25,9 +25,10 @@ You can get an event stream from an array of aggregates:
 ```php
 // ..
 $stream = $eventQuery->fromAggregates([
-    'Your Aggregate Name',
-    'Another Aggregate Name'
+    'your-aggregate-uuid',
+    'another-aggregate-uuid'
 ]);
+
 foreach($stream as $event){
     // ..
 }
@@ -40,9 +41,9 @@ You can perform queries on events from one or more aggregates:
 
 ```php
 // ..
-$stream = $eventQuery->fromAggregate('Your Aggregate Name');
+$stream = $eventQuery->fromAggregate('your-aggregate-uuid');
 $query = $eventQuery->query($stream, [
-    'name' => 'Fully\\Qualified\\Event\\Name',
+    'type' => 'Fully\\Qualified\\Event\\Name',
     'body.title' => 'Event Name',
 ]);
 

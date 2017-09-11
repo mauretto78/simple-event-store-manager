@@ -61,15 +61,16 @@ class ProjectionManager
     }
 
     /**
-     * @param AggregateUuid $eventUuid
+     * @param AggregateUuid $uuid
      */
-    public function projectFromAnEventAggregate(AggregateUuid $eventUuid)
+    public function projectFromAnEventAggregate(AggregateUuid $uuid)
     {
-        foreach ($this->repo->byUuid($eventUuid, EventStoreRepositoryInterface::RETURN_AS_OBJECT) as $event) {
+        /** @var EventInterface $event */
+        foreach ($this->repo->byUuid($uuid, EventStoreRepositoryInterface::RETURN_AS_OBJECT) as $event) {
             try {
                 $this->project($event);
             } catch (ProjectorDoesNotExistsException $e) {
-                $this->rollbackAnEventAggregate($eventUuid);
+                $this->rollbackAnEventAggregate($uuid);
             }
         }
     }
