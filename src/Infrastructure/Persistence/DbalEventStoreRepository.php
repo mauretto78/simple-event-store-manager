@@ -10,34 +10,33 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Persistence;
 
-use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
+use Doctrine\DBAL\Connection;
 use SimpleEventStoreManager\Domain\Model\Contracts\EventInterface;
+use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\AggregateUuid;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 
-class PdoEventStoreRepository implements EventStoreRepositoryInterface
+class DbalEventStoreRepository implements EventStoreRepositoryInterface
 {
     /**
-     * @var \PDO
+     * @var Connection
      */
-    private $pdo;
+    private $connection;
 
     /**
-     * PdoEventRepository constructor.
-     *
-     * @param \PDO $pdo
+     * InMemoryEventRepository constructor.
      */
-    public function __construct(\PDO $pdo)
+    public function __construct(Connection $connection)
     {
-        $this->pdo = $pdo;
+        $this->connection = $connection;
     }
 
     /**
      * @param AggregateUuid $uuid
      * @param int $returnType
      *
-     * @return array|null
+     * @return array|mixed|null
      */
     public function byUuid(AggregateUuid $uuid, $returnType = self::RETURN_AS_ARRAY)
     {
@@ -52,7 +51,7 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
                 FROM `'.PdoDriver::EVENTSTORE_TABLE_NAME.'` 
                 WHERE `uuid` = :uuid
                 ORDER BY `occurred_on` ASC';
-        $stmt = $this->pdo->prepare($query);
+        $stmt = $this->connection->prepare($query);
         $stmt->bindParam(':uuid', $uuid);
         $stmt->execute();
 
@@ -124,12 +123,14 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
     }
 
     /**
+     * @param AggregateUuid $uuid
+     *
      * @return int
      */
     public function count(AggregateUuid $uuid)
     {
         $sql = 'SELECT id FROM `'.PdoDriver::EVENTSTORE_TABLE_NAME.'` WHERE `uuid` = :uuid';
-        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         $stmt->bindParam(':uuid', $uuid);
         $stmt->execute();
 
@@ -166,7 +167,7 @@ class PdoEventStoreRepository implements EventStoreRepositoryInterface
                     :occurred_on
             )';
 
-        $stmt = $this->pdo->prepare($sql);
+        $stmt = $this->connection->prepare($sql);
         $stmt->bindParam(':uuid', $uuid);
         $stmt->bindParam(':version', $version);
         $stmt->bindParam(':payload', $payload);

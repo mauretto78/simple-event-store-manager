@@ -11,6 +11,7 @@
 namespace SimpleEventStoreManager\Infrastructure\Drivers;
 
 use SimpleEventStoreManager\Infrastructure\Drivers\Contracts\DriverInterface;
+use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\MalformedDriverConfigException;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\ManageAggregateIndexException;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\NotInstalledDriverCheckException;
 use Predis\Client as Redis;
@@ -44,10 +45,11 @@ class RedisDriver implements DriverInterface
         }
         $this->connect();
     }
+
     /**
      * @param $config
      *
-     * @throws ManageAggregateIndexException
+     * @throws MalformedDriverConfigException
      */
     private function setConfig($config)
     {
@@ -74,13 +76,13 @@ class RedisDriver implements DriverInterface
             if (is_array($server)) {
                 foreach (array_keys($server) as $key) {
                     if (!in_array($key, $allowedConfigKeys)) {
-                        throw new ManageAggregateIndexException('Redis Driver: malformed config parameters');
+                        throw new MalformedDriverConfigException('Redis Driver: malformed config parameters');
                     }
                 }
             }
 
             if (!is_array($server) && !in_array($param, $allowedConfigKeys)) {
-                throw new ManageAggregateIndexException('Redis Driver: malformed config parameters');
+                throw new MalformedDriverConfigException('Redis Driver: malformed config parameters');
             }
         }
 

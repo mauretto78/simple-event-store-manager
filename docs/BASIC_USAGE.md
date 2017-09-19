@@ -19,6 +19,7 @@ $eventManager = EventManager::build()
 
 Avaliable drivers:
 
+* `dbal` 
 * `in-memory` 
 * `mongo`
 * `pdo` 

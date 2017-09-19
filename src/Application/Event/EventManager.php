@@ -61,6 +61,7 @@ class EventManager
     public function setDriver($driver)
     {
         $allowedDrivers = [
+            'dbal',
             'in-memory',
             'mongo',
             'pdo',

@@ -8,6 +8,7 @@
  * file that was distributed with this source code.
  */
 
+use SimpleEventStoreManager\Infrastructure\Drivers\DbalDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
@@ -21,6 +22,9 @@ class DriverTest extends BaseTestCase
      */
     public function it_should_return_the_correct_driver_instance()
     {
+        $dbal = new DbalDriver($this->dbal_parameters);
+        $this->assertInstanceOf(Doctrine\DBAL\Connection::class, $dbal->instance());
+
         $memory = new InMemoryDriver();
         $this->assertInstanceOf(InMemoryDriver::class, $memory->instance());
 

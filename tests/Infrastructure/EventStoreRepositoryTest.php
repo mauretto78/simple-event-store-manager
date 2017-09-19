@@ -11,10 +11,12 @@
 use SimpleEventStoreManager\Domain\Model\Contracts\EventStoreRepositoryInterface;
 use SimpleEventStoreManager\Domain\Model\Event;
 use SimpleEventStoreManager\Domain\Model\AggregateUuid;
+use SimpleEventStoreManager\Infrastructure\Drivers\DbalDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\InMemoryDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\MongoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 use SimpleEventStoreManager\Infrastructure\Drivers\RedisDriver;
+use SimpleEventStoreManager\Infrastructure\Persistence\DbalEventStoreRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\InMemoryEventStoreRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\MongoEventStoreRepository;
 use SimpleEventStoreManager\Infrastructure\Persistence\PdoEventStoreRepository;
@@ -33,6 +35,7 @@ class EventStoreRepositoryTest extends BaseTestCase
         parent::setUp();
 
         $this->repos = [
+            new DbalEventStoreRepository((new DbalDriver($this->dbal_parameters))->instance()),
             new InMemoryEventStoreRepository((new InMemoryDriver())->instance()),
             new MongoEventStoreRepository((new MongoDriver($this->mongo_parameters))->instance()),
             new PdoEventStoreRepository((new PdoDriver($this->pdo_parameters))->instance()),

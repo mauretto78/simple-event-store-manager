@@ -1,3 +1,10 @@
+dbal:
+  dbname: 'travis'
+  user: 'root'
+  password: 'travis'
+  host: '127.0.0.1'
+  driver: 'pdo_mysql'
+
 elastic:
   host: 'localhost'
   port: '9200'

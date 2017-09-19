@@ -10,16 +10,25 @@
 
 namespace SimpleEventStoreManager\Tests;
 
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DriverManager;
 use Elasticsearch\Client;
 use Elasticsearch\ClientBuilder;
 use MongoDB\Client as MongoClient;
 use MongoDB\Database;
 use PHPUnit\Framework\TestCase;
 use Predis\Client as RedisClient;
+use Redis;
 use SimpleEventStoreManager\Infrastructure\Drivers\PdoDriver;
 
 abstract class BaseTestCase extends TestCase
 {
+    /**
+     * @var null|Connection
+     */
+    private static $dbal = null;
+
     /**
      * @var null|\PDO
      */
@@ -39,6 +48,11 @@ abstract class BaseTestCase extends TestCase
      * @var null|Client
      */
     private static $elastic = null;
+
+    /**
+     * @var array
+     */
+    protected $dbal_parameters;
 
     /**
      * @var array
@@ -67,6 +81,7 @@ abstract class BaseTestCase extends TestCase
     {
         $config = require __DIR__.'/../app/bootstrap.php';
 
+        $this->dbal_parameters = $config['dbal'];
         $this->mongo_parameters = $config['mongo'];
         $this->pdo_parameters = $config['pdo'];
         $this->redis_parameters = $config['redis'];
@@ -80,6 +95,15 @@ abstract class BaseTestCase extends TestCase
      */
     final public function createConnections()
     {
+        // Dbal connection
+        if (self::$dbal == null) {
+            try {
+                self::$dbal = DriverManager::getConnection($this->dbal_parameters);
+            } catch (\Exception $e) {
+                die('Dbal Error: ' . $e->getMessage());
+            }
+        }
+
         // Pdo connection
         if (self::$pdo == null) {
             try {

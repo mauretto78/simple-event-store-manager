@@ -10,26 +10,28 @@
 
 namespace SimpleEventStoreManager\Infrastructure\Drivers;
 
+use Doctrine\DBAL\Configuration;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\DriverManager;
 use SimpleEventStoreManager\Infrastructure\Drivers\Contracts\DriverInterface;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\MalformedDriverConfigException;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\NotInstalledDriverCheckException;
 
-class PdoDriver implements DriverInterface
+class DbalDriver implements DriverInterface
 {
-    const EVENTSTORE_TABLE_NAME = 'eventstore';
-
     /**
      * @var
      */
     private $config;
 
     /**
-     * @var \PDO
+     * @var Connection
      */
     private $instance;
 
     /**
-     * PdoDriver constructor.
+     * DbalDriver constructor.
      *
      * @codeCoverageIgnore
      *
@@ -39,60 +41,38 @@ class PdoDriver implements DriverInterface
      */
     public function __construct(array $config = [])
     {
-        $this->setConfig($config);
+        $this->config = $config;
+
         if (!$this->check()) {
-            throw new NotInstalledDriverCheckException('Pdo is not loaded.');
+            throw new NotInstalledDriverCheckException('Dbal is not loaded.');
         }
 
         $this->connect();
     }
 
     /**
-     * @param $config
-     *
-     * @throws MalformedDriverConfigException
-     */
-    private function setConfig($config)
-    {
-        $allowedConfigKeys = [
-            'database',
-            'driver',
-            'host',
-            'options',
-            'password',
-            'port',
-            'username',
-        ];
-
-        foreach (array_keys($config) as $key) {
-            if (!in_array($key, $allowedConfigKeys)) {
-                throw new MalformedDriverConfigException('Pdo Driver: malformed config parameters');
-            }
-        }
-
-        $this->config = $config;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     *
      * @return bool
      */
     public function check()
     {
-        return class_exists('\PDO');
+        return class_exists('Doctrine\DBAL\Connection');
     }
 
     /**
      * @return bool
+     *
+     * @throws MalformedDriverConfigException
      */
     public function connect()
     {
-        $dsn = $this->config['driver'].':dbname='.$this->config['database'].';host='.$this->config['host'];
-        $this->instance = new \PDO($dsn, $this->config['username'], $this->config['password']);
-        $this->createSchema();
+        try {
+            $this->instance = DriverManager::getConnection($this->config, new Configuration());
+            $this->createSchema();
 
-        return true;
+            return true;
+        } catch (DBALException $e) {
+
+        }
     }
 
     /**
@@ -100,7 +80,7 @@ class PdoDriver implements DriverInterface
      */
     private function createSchema()
     {
-        $query = "CREATE TABLE IF NOT EXISTS `".self::EVENTSTORE_TABLE_NAME."` (
+        $query = "CREATE TABLE IF NOT EXISTS `".PdoDriver::EVENTSTORE_TABLE_NAME."` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `uuid` char(36) COLLATE utf8_unicode_ci NOT NULL COMMENT '(DC2Type:guid)',
           `version` int(10) unsigned NOT NULL,
