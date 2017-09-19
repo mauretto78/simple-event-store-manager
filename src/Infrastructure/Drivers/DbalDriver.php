@@ -15,6 +15,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\DriverManager;
 use SimpleEventStoreManager\Infrastructure\Drivers\Contracts\DriverInterface;
+use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\DriverConnectionException;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\MalformedDriverConfigException;
 use SimpleEventStoreManager\Infrastructure\Drivers\Exceptions\NotInstalledDriverCheckException;
 
@@ -61,7 +62,7 @@ class DbalDriver implements DriverInterface
     /**
      * @return bool
      *
-     * @throws MalformedDriverConfigException
+     * @throws DriverConnectionException
      */
     public function connect()
     {
@@ -71,7 +72,7 @@ class DbalDriver implements DriverInterface
 
             return true;
         } catch (DBALException $e) {
-
+            throw new DriverConnectionException($e->getMessage());
         }
     }
 
