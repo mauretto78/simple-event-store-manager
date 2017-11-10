@@ -1,5 +1,6 @@
 # Simple EventStore Manager
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/mauretto78/simple-event-store-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/mauretto78/simple-event-store-manager/?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/3d6db2b3-db42-4155-97ed-2c28cec1c998/mini.png)](https://insight.sensiolabs.com/projects/3d6db2b3-db42-4155-97ed-2c28cec1c998)
 [![Build Status](https://travis-ci.org/mauretto78/simple-event-store-manager.svg?branch=master)](https://travis-ci.org/mauretto78/simple-event-store-manager)
 [![Coverage Status](https://coveralls.io/repos/github/mauretto78/simple-event-store-manager/badge.svg?branch=master)](https://coveralls.io/github/mauretto78/simple-event-store-manager?branch=master)
